@@ -9,6 +9,7 @@ angular.module('app.controllers', [])
     // Check authentication state and move to the appropriate page
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
+        // TODO: Check if user has a member with required fields filled out
         $state.go('tabscontroller');
       } else {
         $state.go('login');
@@ -28,7 +29,7 @@ angular.module('app.controllers', [])
       firebase.auth().signInWithEmailAndPassword(email, password).then(function (user) {
         // TODO: Fix ionicToast not working
         ionicToast.show('Login successful. Welcome back!', 'bottom', false, 2000);
-        $state.transitionTo('tabscontroller');
+        $state.transitionTo('splash');
 
       }).catch(function (error) {
         ionicToast.show('The credentials entered are invalid.', 'bottom', false);
@@ -41,6 +42,10 @@ angular.module('app.controllers', [])
   })
 
   .controller('signupCtrl', function ($scope) {
+
+  })
+
+  .controller('setupCtrl', function ($scope) {
 
   })
 
