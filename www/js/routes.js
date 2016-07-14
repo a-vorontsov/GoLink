@@ -44,22 +44,12 @@ angular.module('app.routes', [])
         abstract: true
       })
 
-      .state('tabsController.nearMe', {
-        url: '/near-me',
+      .state('tabsController.publicMessages', {
+        url: '/public-messages',
         views: {
-          'tabNearMe': {
-            templateUrl: 'templates/mainTabs/nearMe.html',
-            controller: 'nearMeCtrl'
-          }
-        }
-      })
-
-      .state('tabsController.conversations', {
-        url: '/conversations',
-        views: {
-          'tabMessages': {
-            templateUrl: 'templates/mainTabs/conversations.html',
-            controller: 'conversationsCtrl'
+          'tabPublicMessages': {
+            templateUrl: 'templates/mainTabs/publicMessages.html',
+            controller: 'publicMessagesCtrl'
           }
         }
       })
@@ -92,12 +82,6 @@ angular.module('app.routes', [])
             controller: 'profileCtrl'
           }
         }
-      })
-
-      .state('conversation', {
-        url: '/conversation',
-        templateUrl: 'templates/conversation.html',
-        controller: 'conversationCtrl'
       });
 
     $urlRouterProvider.otherwise('/splash')

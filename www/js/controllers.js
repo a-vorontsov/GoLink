@@ -1,3 +1,4 @@
+// TODO: Check user authentication state
 angular.module('app.controllers', [])
 
   .controller('splashCtrl', function ($scope, $state, $ionicHistory) {
@@ -9,8 +10,18 @@ angular.module('app.controllers', [])
     // Check authentication state and move to the appropriate page
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
-        // TODO: Check if user has a member with required fields filled out
-        $state.go('tabsController.nearMe');
+        // Check whether the user has gone through the setup process
+        firebase.database().ref('/members/' + user.uid).once('value').then(function (snapshot) {
+          if (snapshot.exists() && snapshot.hasChild('display_name') && snapshot.hasChild('team')) {
+            $state.go('tabsController.publicMessages');
+          } else {
+            $state.go('setup');
+          }
+        }, function (error) {
+          // TODO: Toast
+          console.log('asdf');
+          console.log(error);
+        });
       } else {
         $state.go('login');
       }
@@ -69,20 +80,37 @@ angular.module('app.controllers', [])
     };
   })
 
-  .controller('setupCtrl', function ($scope) {
+  .controller('setupCtrl', function ($scope, $state, ionicToast) {
+    $scope.data = {'displayName': '', 'team': 'Instinct'};
+    $scope.sendSetup = function() {
+      var displayName = $scope.data.displayName;
+      var team = $scope.data.team;
 
+      // TODO: Front-end and back-end validation
+      var user = firebase.auth().currentUser;
+      firebase.database().ref('members/' + user.uid).set({
+        'display_name': displayName,
+        'team': team
+      }, function(error) {
+        if (error) {
+          console.log(error);
+          ionicToast.show('Save failed. Try again later.', 'bottom', false);
+        } else {
+          ionicToast.show('Saved!', 'bottom', false);
+          $state.go('tabsController.publicMessages');
+        }
+      });
+    }
   })
 
   .controller('forgotPasswordCtrl', function ($scope) {
 
   })
 
-  .controller('nearMeCtrl', function ($scope) {
-
-  })
-
-  .controller('conversationsCtrl', function ($scope) {
-
+  .controller('publicMessagesCtrl', function ($scope) {
+    $scope.sendMessage = function() {
+      // TODO: Add front-end and back-end authentication
+    }
   })
 
   .controller('friendsCtrl', function ($scope) {
@@ -95,10 +123,10 @@ angular.module('app.controllers', [])
 
   .controller('profileCtrl', function ($scope, $state, ionicToast) {
     $scope.signOut = function () {
-      firebase.auth().signOut().then(function() {
+      firebase.auth().signOut().then(function () {
         ionicToast.show('You have been signed out.', 'bottom', false);
         $state.go('splash');
-      }).catch(function(error) {
+      }).catch(function (error) {
         ionicToast.show('Unable to sign out. Contact support with code: ' + error.code, 'bottom', false);
       })
     }

@@ -1,19 +1,16 @@
-<ion-view title="Tabs Controller" id="page1" class=" ">
-    <ion-tabs class="tabs-positive tabs-icon-only " id="tabsController-tabs1">
-        <ion-tab title="Near Me" icon="ion-location" href="#/tabscontroller/near-me" id="tabsController-tabNearMe" class=" ">
-            <ion-nav-view name="tabNearMe"></ion-nav-view>
-        </ion-tab>
-        <ion-tab title="Messages" icon="ion-chatboxes" href="#/tabscontroller/conversations" id="tabsController-tabMessages" class=" ">
-            <ion-nav-view name="tabMessages"></ion-nav-view>
-        </ion-tab>
-        <ion-tab title="Friends" icon="ion-person-stalker" href="#/tabscontroller/friends" id="tabsController-tabFriends" class=" ">
-            <ion-nav-view name="tabFriends"></ion-nav-view>
-        </ion-tab>
-        <ion-tab title="Pokédex" icon="ion-grid" href="#/tabscontroller/pokedex" id="tabsController-tabPokedex" class=" ">
-            <ion-nav-view name="tabPokedex"></ion-nav-view>
-        </ion-tab>
-        <ion-tab title="Profile" icon="ion-ios-person-outline" href="#/tabscontroller/profile" id="tabsController-tabProfile" class=" ">
-            <ion-nav-view name="tabProfile"></ion-nav-view>
-        </ion-tab>
-    </ion-tabs>
+<ion-view>
+  <ion-tabs class="tabs-positive tabs-icon-only">
+    <ion-tab title="Public Messages" icon="ion-location" href="#/tabscontroller/public-messages" class="">
+      <ion-nav-view name="tabPublicMessages"></ion-nav-view>
+    </ion-tab>
+    <ion-tab title="Friends" icon="ion-person-stalker" href="#/tabscontroller/friends" class="">
+      <ion-nav-view name="tabFriends"></ion-nav-view>
+    </ion-tab>
+    <ion-tab title="Pokédex" icon="ion-grid" href="#/tabscontroller/pokedex" class="">
+      <ion-nav-view name="tabPokedex"></ion-nav-view>
+    </ion-tab>
+    <ion-tab title="Profile" icon="ion-ios-person-outline" href="#/tabscontroller/profile" class="">
+      <ion-nav-view name="tabProfile"></ion-nav-view>
+    </ion-tab>
+  </ion-tabs>
 </ion-view>

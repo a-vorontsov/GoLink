@@ -1,20 +1,20 @@
-<ion-view title="Login" id="login-page">
+<ion-view title="Login">
   <ion-content padding="true" class="has-header">
-    <form id="login-form" class="list">
-      <ion-list id="login-list">
-        <label class="item item-input" id="login-input1">
+    <form class="list">
+      <ion-list>
+        <label class="item item-input">
           <span class="input-label">Email</span>
           <input type="email" placeholder="" ng-model="data.email">
         </label>
-        <label class="item item-input" id="login-input2">
+        <label class="item item-input">
           <span class="input-label">Password</span>
           <input type="password" placeholder="" ng-model="data.password">
         </label>
       </ion-list>
-      <button id="login-button" ng-click="login();" class="button button-balanced button-block">Log in</button>
-      <a href="#" ui-sref="signup" id="create-account-button" style="font-size:14px;border-radius:0px 0px 0px 0px;"
+      <button ng-click="login();" class="button button-balanced button-block">Log in</button>
+      <a href="#" ui-sref="signup" style="font-size:14px;border-radius:0px 0px 0px 0px;"
          class="button button-positive button-small button-block button-clear">Create an account</a>
-      <a href="#" ui-sref="forgotPassword" id="forgot-password-button" style="font-size:14px;border-radius:5px 5px 5px 5px;"
+      <a href="#" ui-sref="forgotPassword" style="font-size:14px;border-radius:5px 5px 5px 5px;"
          class="button button-positive button-small button-block button-clear">Forgot password?</a>
     </form>
   </ion-content>

@@ -1,18 +1,18 @@
-<ion-view title="Signup" id="signup-page" class=" ">
+<ion-view title="Signup">
   <ion-content padding="true" class="has-header">
-    <form id="signup-form" class="list">
-      <ion-list id="signup-list" class="">
-        <label class="item item-input" id="email-input">
+    <form class="list">
+      <ion-list class="">
+        <label class="item item-input">
           <span class="input-label">Email</span>
           <input type="email" placeholder="" ng-model="data.email">
         </label>
-        <label class="item item-input" id="password-input">
+        <label class="item item-input">
           <span class="input-label">Password</span>
           <input type="password" placeholder="" ng-model="data.password">
         </label>
       </ion-list>
-      <button id="signup-button" class=" button button-balanced button-block" ng-click="signUp();">Sign up</button>
-      <a href="#" ui-sref="login" id="create-account-button" style="font-size:14px;border-radius:0px 0px 0px 0px;"
+      <button class="button button-balanced button-block" ng-click="signUp();">Sign up</button>
+      <a href="#" ui-sref="login" style="font-size:14px;border-radius:0px 0px 0px 0px;"
          class="button button-positive button-small button-block button-clear">Sign in to an existing account</a>
     </form>
   </ion-content>

@@ -1,0 +1,23 @@
+<ion-view title="Profile Setup">
+  <ion-content padding="true" class="has-header">
+    <p style="color:#000000;">Let's get you set up! Enter the details below:</p>
+    <p style="color:#000000; text-align:center;">Enter your display name:</p>
+    <form class="list">
+      <label class="item item-input">
+        <input type="text" placeholder="Display name" ng-model="data.displayName">
+      </label>
+    </form>
+    <p style="color:#000000;text-align:center;">What team are you on?</p>
+    <form class="list">
+      <label class="item item-select">
+        <span class="input-label"></span>
+        <select ng-model="data.team">
+          <option value="Instinct">Instinct</option>
+          <option value="Mystic">Mystic</option>
+          <option value="Valor">Valor</option>
+        </select>
+      </label>
+    </form>
+    <button class="button button-balanced button-block" ng-click="sendSetup();">Go</button>
+  </ion-content>
+</ion-view>
