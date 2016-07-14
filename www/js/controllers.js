@@ -82,7 +82,7 @@ angular.module('app.controllers', [])
 
   .controller('setupCtrl', function ($scope, $state, ionicToast) {
     $scope.data = {'displayName': '', 'team': 'Instinct'};
-    $scope.sendSetup = function() {
+    $scope.sendSetup = function () {
       var displayName = $scope.data.displayName;
       var team = $scope.data.team;
 
@@ -91,7 +91,7 @@ angular.module('app.controllers', [])
       firebase.database().ref('members/' + user.uid).set({
         'display_name': displayName,
         'team': team
-      }, function(error) {
+      }, function (error) {
         if (error) {
           console.log(error);
           ionicToast.show('Save failed. Try again later.', 'bottom', false);
@@ -107,9 +107,40 @@ angular.module('app.controllers', [])
 
   })
 
-  .controller('publicMessagesCtrl', function ($scope) {
-    $scope.sendMessage = function() {
-      // TODO: Add front-end and back-end authentication
+  .controller('publicMessagesCtrl', function ($scope, $cordovaGeolocation, ionicToast) {
+    $scope.data = {'message': ''};
+    var user = firebase.auth().currentUser;
+    var lat;
+    var long;
+
+    // Get the initial coordinates
+    var posOptions = {timeout: 10000, enableHighAccuracy: false};
+    $cordovaGeolocation
+      .getCurrentPosition(posOptions)
+      .then(function (position) {
+        var fuzzyAccuracy = 2;
+        lat = +position.coords.latitude.toFixed(2);
+        long = +position.coords.longitude.toFixed(2);
+        console.log(lat, long);
+      }, function (error) {
+        console.log(error);
+        ionicToast.show('Unable to retrieve location. Restart app.', 'bottom', false);
+      });
+
+
+    // TODO: Add loading spinner
+    $scope.sendMessage = function () {
+
+
+
+      // TODO: Add front-end and back-end validation
+      firebase.database().ref('public_messages').push({
+        'user_id': user.uid,
+        'timestamp': Firebase.ServerValue.TIMESTAMP,
+        'message': $scope.data.message,
+
+      })
+
     }
   })
 
