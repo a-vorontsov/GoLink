@@ -191,6 +191,8 @@ angular.module('app.controllers', [])
 
       // Create a message
       var newMessageRef = firebase.database().ref('public_messages').push();
+      sentMessageKeys.push(newMessageRef.key);
+
       var data = {
         'user': {
           'user_id': userDataService.getId(),
@@ -208,7 +210,6 @@ angular.module('app.controllers', [])
         } else {
           // Set the GeoFire instance of the message
           geoFire.set(newMessageRef.key, [userDataService.getFuzzyLatitude(), userDataService.getFuzzyLongitude()]).then(function () {
-            sentMessageKeys.push(newMessageRef.key);
           }, function (error) {
             console.log(error);
           });
