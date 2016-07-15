@@ -120,6 +120,7 @@ angular.module('app.controllers', [])
     $scope.messages = [];
 
     var sentMessageKeys = [];
+    var isIOS = ionic.Platform.isWebView() && ionic.Platform.isIOS();
     var geoFire = new GeoFire(firebase.database().ref('public_message_locations'));
 
     // Get the initial coordinates and start listening for messages
