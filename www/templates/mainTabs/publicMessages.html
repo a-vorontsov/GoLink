@@ -12,7 +12,7 @@
           <span class="message-contents">{{ message.message }}</span>
         </div>
         <div class="message-footer">
-          {{ message.timestamp | timestampFormatter }}<span ng-if="!message.user.is_me"> - {{ message.distance | distanceFormatter }}</span>
+          <span timestamp="{{ message.timestamp }}"></span><span ng-if="!message.user.is_me"> - {{ message.distance | distanceFormatter }}</span>
         </div>
       </div>
     </div>
