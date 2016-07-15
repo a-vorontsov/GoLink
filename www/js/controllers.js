@@ -113,7 +113,7 @@ angular.module('app.controllers', [])
 
   })
 
-  .controller('publicMessagesCtrl', function ($scope, $cordovaGeolocation, ionicToast, userDataService) {
+  .controller('publicMessagesCtrl', function ($scope, $cordovaGeolocation, $ionicScrollDelegate, ionicToast, userDataService) {
     // TODO: Add a loading spinner
 
     $scope.data = {'message': ''};
@@ -157,6 +157,7 @@ angular.module('app.controllers', [])
                     'is_me': messageSnapshot.user.user_id === userDataService.getId()
                   }
                 });
+                $ionicScrollDelegate.scrollBottom(true);
               }
             }, function (error) {
               console.log(error);
@@ -186,6 +187,7 @@ angular.module('app.controllers', [])
           'is_me': true
         }
       });
+      $ionicScrollDelegate.scrollBottom(true);
 
       // Create a message
       var newMessageRef = firebase.database().ref('public_messages').push();
