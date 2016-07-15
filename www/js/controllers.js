@@ -145,6 +145,10 @@ angular.module('app.controllers', [])
                 'key': key,
                 'distance': distance,
                 'timestamp': messageSnapshot.timestamp,
+                'type': typeof(messageSnapshot.longitude) === 'undefined' ? 'message' : 'location',
+                'message': messageSnapshot.message,
+                'longitude': messageSnapshot.longitude,
+                'latitude': messageSnapshot.latitude,
                 'user': {
                   'user_id': messageSnapshot.user.user_id,
                   'display_name': messageSnapshot.user.display_name,
