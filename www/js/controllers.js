@@ -118,6 +118,8 @@ angular.module('app.controllers', [])
 
     $scope.data = {'message': ''};
     $scope.messages = [];
+
+    var sentMessageKeys = [];
     var geoFire = new GeoFire(firebase.database().ref('public_message_locations'));
 
     // Get the initial coordinates and start listening for messages
@@ -134,42 +136,57 @@ angular.module('app.controllers', [])
           radius: userDataService.getRadius()
         });
         geoQuery.on("key_entered", function (key, location, distance) {
-          console.log(key, location, distance);
-
           // Retrieve the message from Firebase
-          firebase.database().ref('/public_messages/' + key).once('value').then(function (snapshot) {
-            if (snapshot.exists() && snapshot.hasChild('timestamp') && snapshot.hasChild('user')) {
-              // Update user data service
-              var messageSnapshot = snapshot.val();
-              $scope.messages.push({
-                'key': key,
-                'distance': distance,
-                'timestamp': messageSnapshot.timestamp,
-                'type': typeof(messageSnapshot.longitude) === 'undefined' ? 'message' : 'location',
-                'message': messageSnapshot.message,
-                'longitude': messageSnapshot.longitude,
-                'latitude': messageSnapshot.latitude,
-                'user': {
-                  'user_id': messageSnapshot.user.user_id,
-                  'display_name': messageSnapshot.user.display_name,
-                  'team': messageSnapshot.user.team,
-                  'is_me': messageSnapshot.user.user_id === userDataService.getId()
-                }
-              });
-              console.log($scope.messages);
-            }
-          }, function (error) {
-            console.log(error);
-          });
+          if (sentMessageKeys.indexOf(key) === -1) {
+            firebase.database().ref('/public_messages/' + key).once('value').then(function (snapshot) {
+              if (snapshot.exists() && snapshot.hasChild('timestamp') && snapshot.hasChild('user')) {
+                // Update user data service
+                var messageSnapshot = snapshot.val();
+                $scope.messages.push({
+                  'key': key,
+                  'distance': distance,
+                  'timestamp': messageSnapshot.timestamp,
+                  'type': typeof(messageSnapshot.longitude) === 'undefined' ? 'message' : 'location',
+                  'message': messageSnapshot.message,
+                  'longitude': messageSnapshot.longitude,
+                  'latitude': messageSnapshot.latitude,
+                  'user': {
+                    'user_id': messageSnapshot.user.user_id,
+                    'display_name': messageSnapshot.user.display_name,
+                    'team': messageSnapshot.user.team,
+                    'is_me': messageSnapshot.user.user_id === userDataService.getId()
+                  }
+                });
+              }
+            }, function (error) {
+              console.log(error);
+            });
+          }
         });
       }, function (error) {
         console.log(error);
         ionicToast.show('Unable to retrieve location. Restart app.', 'bottom', false);
       });
 
-
     $scope.sendMessage = function () {
       // TODO: Add front-end and back-end validation
+
+      $scope.messages.push({
+        'key': '',
+        'distance': 0,
+        'timestamp': Date.now(),
+        'type': 'message',
+        'message': $scope.data.message,
+        'longitude': userDataService.getFuzzyLongitude(),
+        'latitude': userDataService.getFuzzyLatitude(),
+        'user': {
+          'user_id': userDataService.getId(),
+          'display_name': userDataService.getDisplayName(),
+          'team': userDataService.getTeam(),
+          'is_me': true
+        }
+      });
+
       // Create a message
       var newMessageRef = firebase.database().ref('public_messages').push();
       var data = {
@@ -181,17 +198,16 @@ angular.module('app.controllers', [])
         'timestamp': firebase.database.ServerValue.TIMESTAMP,
         'message': $scope.data.message
       };
+
       // Set the message
       newMessageRef.set(data, function (error) {
         if (error) {
           console.log(error);
-          ionicToast.show('Message failed to send. Try again later.', 'bottom', false);
         } else {
           // Set the GeoFire instance of the message
           geoFire.set(newMessageRef.key, [userDataService.getFuzzyLatitude(), userDataService.getFuzzyLongitude()]).then(function () {
-            // Update UI with successful message
+            sentMessageKeys.push(newMessageRef.key);
           }, function (error) {
-            // TODO: Toast
             console.log(error);
           });
         }

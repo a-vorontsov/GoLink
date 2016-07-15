@@ -7,6 +7,7 @@
   "dependencies": {
     "ionic-toast": "master",
     "angularfire": "^2.0.1",
-    "geofire": "^4.1.1"
+    "geofire": "^4.1.1",
+    "moment": "^2.14.1"
   }
 }
