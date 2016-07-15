@@ -113,7 +113,7 @@ angular.module('app.controllers', [])
 
   })
 
-  .controller('publicMessagesCtrl', function ($scope, $cordovaGeolocation, $ionicScrollDelegate, ionicToast, userDataService) {
+  .controller('publicMessagesCtrl', function ($scope, $timeout, $cordovaGeolocation, $ionicScrollDelegate, ionicToast, userDataService) {
     // TODO: Add a loading spinner
 
     $scope.data = {'message': ''};
