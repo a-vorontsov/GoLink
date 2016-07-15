@@ -1,7 +1,7 @@
 // TODO: Check user authentication state
 angular.module('app.controllers', [])
 
-  .controller('splashCtrl', function ($scope, $state, $ionicHistory) {
+  .controller('splashCtrl', function ($scope, $state, $ionicHistory, userDataService) {
     // Disable animation on transition
     $ionicHistory.nextViewOptions({
       disableAnimate: true
@@ -10,16 +10,22 @@ angular.module('app.controllers', [])
     // Check authentication state and move to the appropriate page
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
+        // Update user data service
+        userDataService.setId(user.uid);
         // Check whether the user has gone through the setup process
         firebase.database().ref('/members/' + user.uid).once('value').then(function (snapshot) {
           if (snapshot.exists() && snapshot.hasChild('display_name') && snapshot.hasChild('team')) {
+            // Update user data service
+            var memberSnapshot = snapshot.val();
+            userDataService.setDisplayName(memberSnapshot.display_name);
+            userDataService.setTeam(memberSnapshot.team);
+            // Navigate to the main tab view
             $state.go('tabsController.publicMessages');
           } else {
             $state.go('setup');
           }
         }, function (error) {
           // TODO: Toast
-          console.log('asdf');
           console.log(error);
         });
       } else {
@@ -107,39 +113,85 @@ angular.module('app.controllers', [])
 
   })
 
-  .controller('publicMessagesCtrl', function ($scope, $cordovaGeolocation, ionicToast) {
-    $scope.data = {'message': ''};
-    var user = firebase.auth().currentUser;
-    var lat;
-    var long;
+  .controller('publicMessagesCtrl', function ($scope, $cordovaGeolocation, ionicToast, userDataService) {
+    // TODO: Add a loading spinner
 
-    // Get the initial coordinates
+    $scope.data = {'message': ''};
+    $scope.messages = [];
+    var geoFire = new GeoFire(firebase.database().ref('public_message_locations'));
+
+    // Get the initial coordinates and start listening for messages
     var posOptions = {timeout: 10000, enableHighAccuracy: false};
     $cordovaGeolocation
       .getCurrentPosition(posOptions)
       .then(function (position) {
-        var fuzzyAccuracy = 2;
-        lat = +position.coords.latitude.toFixed(2);
-        long = +position.coords.longitude.toFixed(2);
-        console.log(lat, long);
+        // Set coordinates
+        userDataService.setCoordinates([position.coords.latitude, position.coords.longitude]);
+
+        // Listen for messages
+        var geoQuery = geoFire.query({
+          center: [userDataService.getLatitude(), userDataService.getLongitude()],
+          radius: userDataService.getRadius()
+        });
+        geoQuery.on("key_entered", function (key, location, distance) {
+          console.log(key, location, distance);
+
+          // Retrieve the message from Firebase
+          firebase.database().ref('/public_messages/' + key).once('value').then(function (snapshot) {
+            if (snapshot.exists() && snapshot.hasChild('timestamp') && snapshot.hasChild('user')) {
+              // Update user data service
+              var messageSnapshot = snapshot.val();
+              $scope.messages.push({
+                'key': key,
+                'distance': distance,
+                'timestamp': messageSnapshot.timestamp,
+                'user': {
+                  'user_id': messageSnapshot.user.user_id,
+                  'display_name': messageSnapshot.user.display_name,
+                  'team': messageSnapshot.user.team,
+                  'is_me': messageSnapshot.user.user_id === userDataService.getId()
+                }
+              });
+              console.log($scope.messages);
+            }
+          }, function (error) {
+            console.log(error);
+          });
+        });
       }, function (error) {
         console.log(error);
         ionicToast.show('Unable to retrieve location. Restart app.', 'bottom', false);
       });
 
 
-    // TODO: Add loading spinner
     $scope.sendMessage = function () {
-
-
-
       // TODO: Add front-end and back-end validation
-      firebase.database().ref('public_messages').push({
-        'user_id': user.uid,
-        'timestamp': Firebase.ServerValue.TIMESTAMP,
-        'message': $scope.data.message,
-
-      })
+      // Create a message
+      var newMessageRef = firebase.database().ref('public_messages').push();
+      var data = {
+        'user': {
+          'user_id': userDataService.getId(),
+          'display_name': userDataService.getDisplayName(),
+          'team': userDataService.getTeam()
+        },
+        'timestamp': firebase.database.ServerValue.TIMESTAMP,
+        'message': $scope.data.message
+      };
+      // Set the message
+      newMessageRef.set(data, function (error) {
+        if (error) {
+          console.log(error);
+          ionicToast.show('Message failed to send. Try again later.', 'bottom', false);
+        } else {
+          // Set the GeoFire instance of the message
+          geoFire.set(newMessageRef.key, [userDataService.getFuzzyLatitude(), userDataService.getFuzzyLongitude()]).then(function () {
+            // Update UI with successful message
+          }, function (error) {
+            // TODO: Toast
+            console.log(error);
+          });
+        }
+      });
 
     }
   })
