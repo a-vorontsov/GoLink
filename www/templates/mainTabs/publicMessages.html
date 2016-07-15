@@ -22,9 +22,9 @@
     <label class="item-input-wrapper">
       <input chat-input type="text" placeholder="Type your message" on-return="sendMessage();" ng-model="data.message" on-focus="inputUp()" on-blur="inputDown()" />
     </label>
-    <button class="button button-clear" ng-click="sendMessage()">
+    <button class="button button-clear" ng-click="sendMessage();">
       Send
     </button>
-    <button class="ion-location"></button>
+    <button class="ion-location" ng-click="showSendLocationPopup();"></button>
   </ion-footer-bar>
 </ion-view>
