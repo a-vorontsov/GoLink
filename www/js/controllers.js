@@ -169,6 +169,19 @@ angular.module('app.controllers', [])
         ionicToast.show('Unable to retrieve location. Restart app.', 'bottom', false);
       });
 
+    $scope.inputUp = function () {
+      if (isIOS) $scope.data.keyboardHeight = 216;
+      $timeout(function () {
+        $ionicScrollDelegate.scrollBottom(true);
+      }, 300);
+
+    };
+
+    $scope.inputDown = function () {
+      if (isIOS) $scope.data.keyboardHeight = 0;
+      $ionicScrollDelegate.resize();
+    };
+
     $scope.sendMessage = function () {
       // TODO: Add front-end and back-end validation
 
