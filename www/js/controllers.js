@@ -185,12 +185,15 @@ angular.module('app.controllers', [])
     $scope.sendMessage = function () {
       // TODO: Add front-end and back-end validation
 
+      var message = $scope.data.message;
+      $scope.data.message = '';
+
       $scope.messages.push({
         'key': '',
         'distance': 0,
         'timestamp': Date.now(),
         'type': 'message',
-        'message': $scope.data.message,
+        'message': message,
         'longitude': userDataService.getFuzzyLongitude(),
         'latitude': userDataService.getFuzzyLatitude(),
         'user': {
@@ -213,7 +216,7 @@ angular.module('app.controllers', [])
           'team': userDataService.getTeam()
         },
         'timestamp': firebase.database.ServerValue.TIMESTAMP,
-        'message': $scope.data.message
+        'message': message
       };
 
       // Set the message
