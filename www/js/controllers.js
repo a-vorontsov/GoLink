@@ -158,10 +158,12 @@ angular.module('app.controllers', [])
                     'is_me': messageSnapshot.user.user_id === userDataService.getId()
                   }
                 });
+                // Sort by timestamp
+                $scope.messages.sort(function(x, y) {
+                  return x.timestamp - y.timestamp;
+                });
                 $ionicScrollDelegate.scrollBottom(true);
               }
-            }, function (error) {
-              console.log(error);
             });
           }
         });
