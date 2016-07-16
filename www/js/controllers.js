@@ -170,7 +170,10 @@ angular.module('app.controllers', [])
   })
 
   .controller('publicMessagesCtrl', function ($scope, $timeout, $cordovaGeolocation, $ionicScrollDelegate, $ionicPopup, ionicToast, userDataService) {
-    // TODO: Add a loading spinner
+    $scope.isLoading = true;
+    $timeout(function() {
+      $scope.isLoading = false;
+    }, 2000);
 
     $scope.data = {'message': ''};
     $scope.messages = [];

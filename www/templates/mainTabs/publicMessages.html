@@ -1,10 +1,14 @@
 <ion-view title="Messages Near Me">
-  <ion-content class="content-stable"
-               on-swipe-left="hideTime = false"
-               on-swipe-right="hideTime = true">
+  <ion-content class="content-stable">
 
-    <div collection-repeat="message in messages" class="messages">
-      <message data="message"></message>
+    <div ng-show="isLoading">
+      <ion-spinner></ion-spinner>
+      <p>Loading messages</p>
+    </div>
+    <div ng-hide="isLoading">
+      <div ng-repeat="message in messages" class="messages">
+        <message data="message"></message>
+      </div>
     </div>
 
   </ion-content>

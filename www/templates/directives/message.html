@@ -1,24 +1,24 @@
 <div class="message">
   <div ng-if="data.type === 'message'">
     <div class="message-header">
-      <span class="message-display-name">{{ data.user.display_name }}</span> - <span class="message-team">{{ data.user.team }}</span>
+      <span class="message-display-name">{{::data.user.display_name}}</span> - <span class="message-team">{{::data.user.team}}</span>
     </div>
     <div class="message-body">
-      <span class="message-contents">{{ data.message }}</span>
+      <span class="message-contents">{{::data.message}}</span>
     </div>
     <div class="message-footer">
-      <span timestamp="{{ data.timestamp }}"></span><span ng-if="!data.user.is_me"> - {{ data.distance | distanceFormatter }}</span>
+      <span timestamp="{{::data.timestamp}}"></span><span ng-if="!data.user.is_me"> - {{::data.distance | distanceFormatter}}</span>
     </div>
   </div>
   <div ng-if="data.type === 'location'">
     <div class="message-header">
-      <span class="message-display-name">{{ data.user.display_name }}</span> - <span class="message-team">{{ data.user.team }}</span>
+      <span class="message-display-name">{{::data.user.display_name}}</span> - <span class="message-team">{{::data.user.team}}</span>
     </div>
     <div class="message-body">
-      <span class="message-contents">{{ data.latitude }}, {{ data.longitude }}</span>
+      <span class="message-contents">{{::data.latitude}}, {{::data.longitude}}</span>
     </div>
     <div class="message-footer">
-      <span timestamp="{{ data.timestamp }}"></span><span ng-if="!data.user.is_me"> - {{ data.distance | distanceFormatter }}</span>
+      <span timestamp="{{::data.timestamp}}"></span><span ng-if="!data.user.is_me"> - {{::data.distance | distanceFormatter}}</span>
     </div>
   </div>
 </div>
