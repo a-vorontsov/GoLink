@@ -20,4 +20,11 @@ angular.module('app', ['ionic', 'ngCordova', 'app.controllers', 'app.routes', 'a
         StatusBar.styleDefault();
       }
     });
+  })
+
+  .constant('CONFIG_VARS', {
+    'FRIEND_CODE_LENGTH': 12,
+    'MAX_FRIEND_CODE_GENERATION_ATTEMPTS': 10,
+    'MAX_DISPLAY_NAME_LENGTH': 16,
+    'MAX_MESSAGE_LENGTH': 1000
   });
