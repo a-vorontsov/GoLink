@@ -5,14 +5,27 @@
 
     <div collection-repeat="message in messages" class="messages">
       <div class="message">
-        <div class="message-header">
-          <span class="message-display-name">{{ message.user.display_name }}</span> - <span class="message-team">{{ message.user.team }}</span>
+        <div ng-if="message.type === 'message'">
+          <div class="message-header">
+            <span class="message-display-name">{{ message.user.display_name }}</span> - <span class="message-team">{{ message.user.team }}</span>
+          </div>
+          <div class="message-body">
+            <span class="message-contents">{{ message.message }}</span>
+          </div>
+          <div class="message-footer">
+            <span timestamp="{{ message.timestamp }}"></span><span ng-if="!message.user.is_me"> - {{ message.distance | distanceFormatter }}</span>
+          </div>
         </div>
-        <div class="message-body">
-          <span class="message-contents">{{ message.message }}</span>
-        </div>
-        <div class="message-footer">
-          <span timestamp="{{ message.timestamp }}"></span><span ng-if="!message.user.is_me"> - {{ message.distance | distanceFormatter }}</span>
+        <div ng-if="message.type === 'location'">
+          <div class="message-header">
+            <span class="message-display-name">{{ message.user.display_name }}</span> - <span class="message-team">{{ message.user.team }}</span>
+          </div>
+          <div class="message-body">
+            <span class="message-contents">{{ message.latitude }}, {{ message.longitude }}</span>
+          </div>
+          <div class="message-footer">
+            <span timestamp="{{ message.timestamp }}"></span><span ng-if="!message.user.is_me"> - {{ message.distance | distanceFormatter }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -20,7 +33,7 @@
   </ion-content>
   <ion-footer-bar keyboard-attach class="bar-stable item-input-inset">
     <label class="item-input-wrapper">
-      <input chat-input type="text" placeholder="Type your message" on-return="sendMessage();" ng-model="data.message" on-focus="inputUp()" on-blur="inputDown()" />
+      <input chat-input type="text" placeholder="Type your message" on-return="sendMessage();" ng-model="data.message" on-focus="inputUp()" on-blur="inputDown()"/>
     </label>
     <button class="button button-clear" ng-click="sendMessage();">
       Send
