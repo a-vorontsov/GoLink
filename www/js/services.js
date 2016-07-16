@@ -66,7 +66,7 @@ angular.module('app.services', [])
     };
 
     this.getLongitude = function () {
-      return +data.coordinates.longitude(EXACT_PRECISION);
+      return +data.coordinates.longitude.toFixed(EXACT_PRECISION);
     };
 
     this.getFuzzyLatitude = function() {
