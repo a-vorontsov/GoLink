@@ -98,6 +98,7 @@ angular.module('app.controllers', [])
 
       var email = $scope.data.email;
       var password = $scope.data.password;
+      $scope.error = "asdf";
 
       firebase.auth().signInWithEmailAndPassword(email, password).then(function (user) {
         // TODO: Fix ionicToast not working
@@ -106,6 +107,7 @@ angular.module('app.controllers', [])
 
       }).catch(function (error) {
         var errorCode = error.code;
+        $scope.error = JSON.stringify(error);
         if (errorCode === "user/disabled") {
           ionicToast.show('Your account has been disabled. Contact support for more info.', 'bottom', false);
         } else {

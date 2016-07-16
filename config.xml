@@ -2,11 +2,11 @@
 <widget id="com.ionicframework.goLink650044" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>GOLink</name>
     <description>
-        Link up with other Pokemon GO trainers
-    </description>
+    Link up with other Pokemon GO trainers
+  </description>
     <author email="golink@iamkelv.in" href="http://iamkelv.in/">
-      Kelvin Zhang
-    </author>
+    Kelvin Zhang
+  </author>
     <content src="index.html" />
     <access origin="*" />
     <preference name="webviewbounce" value="false" />
@@ -23,4 +23,14 @@
         <variable name="API_KEY_FOR_ANDROID" value="AIzaSyA4mR6vCOgt_V_KwUbwzPFuz52b18gXYhQ" />
         <variable name="API_KEY_FOR_IOS" value="AIzaSyCMXT9vzqnQZrmU4AsOshiNqvJjRItMfO8" />
     </plugin>
+    <allow-intent href="*.firebaseio.com" />
+    <allow-intent href="auth.firebase.com" />
+    <allow-intent href="*.googleapis.com" />
+    <access origin="*.firebaseio.com" />
+    <access origin="auth.firebase.com" />
+    <access origin="*.googleapis.com" />
+    <preference name="xwalkVersion" value="19+" />
+    <preference name="xwalkCommandLine" value="--disable-pull-to-refresh-effect" />
+    <preference name="xwalkMode" value="embedded" />
+    <preference name="xwalkMultipleApk" value="true" />
 </widget>
