@@ -123,6 +123,10 @@ angular.module('app.controllers', [])
     var isIOS = ionic.Platform.isWebView() && ionic.Platform.isIOS();
     var geoFire = new GeoFire(firebase.database().ref('public_message_locations'));
 
+    /*
+     * Helper Functions
+     */
+
     function transferGeoQueryResultFromFirebaseToScope(key, location, distance) {
       firebase.database().ref('/public_messages/' + key).once('value').then(function (snapshot) {
         if (snapshot.exists() && snapshot.hasChild('timestamp') && snapshot.hasChild('user')) {
@@ -183,17 +187,28 @@ angular.module('app.controllers', [])
       });
     }
 
-    // Get the initial coordinates and start listening for messages
-    $cordovaGeolocation
-      .getCurrentPosition({timeout: 10000, enableHighAccuracy: false})
-      .then(function (position) {
-        // Set coordinates
-        userDataService.setCoordinates([position.coords.latitude, position.coords.longitude]);
-        listenForGeoQueryMessages();
-      }, function (error) {
-        console.log(error);
-        ionicToast.show('Unable to retrieve location. Restart app.', 'bottom', false);
+    function addLocalMessageToScope(data) {
+      $scope.messages.push({
+        'key': '',
+        'distance': 0,
+        'timestamp': Date.now(),
+        'type': data.type,
+        'message': data.message,
+        'latitude': userDataService.getLatitude(),
+        'longitude': userDataService.getLongitude(),
+        'user': {
+          'user_id': userDataService.getId(),
+          'display_name': userDataService.getDisplayName(),
+          'team': userDataService.getTeam(),
+          'is_me': true
+        }
       });
+      $ionicScrollDelegate.scrollBottom(true);
+    }
+
+    /*
+     * Scope Functions
+     */
 
     $scope.inputUp = function () {
       if (isIOS) $scope.data.keyboardHeight = 216;
@@ -214,22 +229,10 @@ angular.module('app.controllers', [])
       var message = $scope.data.message;
       $scope.data.message = '';
 
-      $scope.messages.push({
-        'key': '',
-        'distance': 0,
-        'timestamp': Date.now(),
+      addLocalMessageToScope({
         'type': 'message',
-        'message': message,
-        'longitude': userDataService.getFuzzyLongitude(),
-        'latitude': userDataService.getFuzzyLatitude(),
-        'user': {
-          'user_id': userDataService.getId(),
-          'display_name': userDataService.getDisplayName(),
-          'team': userDataService.getTeam(),
-          'is_me': true
-        }
+        'message': message
       });
-      $ionicScrollDelegate.scrollBottom(true);
 
       var data = {
         'user': {
@@ -243,31 +246,6 @@ angular.module('app.controllers', [])
       sendPublicMessageWithData(data);
     };
 
-    function sendPreciseLocation() {
-      $cordovaGeolocation
-        .getCurrentPosition({timeout: 10000, enableHighAccuracy: true})
-        .then(function (position) {
-          // Set coordinates
-          userDataService.setCoordinates([position.coords.latitude, position.coords.longitude]);
-
-          var data = {
-            'user': {
-              'user_id': userDataService.getId(),
-              'display_name': userDataService.getDisplayName(),
-              'team': userDataService.getTeam()
-            },
-            'timestamp': firebase.database.ServerValue.TIMESTAMP,
-            'latitude': userDataService.getLatitude(),
-            'longitude': userDataService.getLongitude()
-          };
-          sendPublicMessageWithData(data);
-        }, function (error) {
-          console.log(error);
-          ionicToast.show('Unable to retrieve location. Your message was not sent. Ensure location retrieval is enabled and try again.', 'bottom', false, 4000);
-        });
-
-    }
-
     $scope.showSendLocationPopup = function () {
       var popup = $ionicPopup.confirm({
         title: 'Show Location',
@@ -276,10 +254,49 @@ angular.module('app.controllers', [])
 
       popup.then(function (confirmed) {
         if (confirmed) {
-          sendPreciseLocation();
+          $cordovaGeolocation
+            .getCurrentPosition({timeout: 10000, enableHighAccuracy: true})
+            .then(function (position) {
+              // Set coordinates
+              userDataService.setCoordinates([position.coords.latitude, position.coords.longitude]);
+
+              addLocalMessageToScope({'type': 'location'});
+
+              var data = {
+                'user': {
+                  'user_id': userDataService.getId(),
+                  'display_name': userDataService.getDisplayName(),
+                  'team': userDataService.getTeam()
+                },
+                'timestamp': firebase.database.ServerValue.TIMESTAMP,
+                'latitude': userDataService.getLatitude(),
+                'longitude': userDataService.getLongitude()
+              };
+              sendPublicMessageWithData(data);
+
+            }, function (error) {
+              console.log(error);
+              ionicToast.show('Unable to retrieve location. Your message was not sent. Ensure location retrieval is enabled and try again.', 'bottom', false, 4000);
+            });
         }
       });
-    }
+    };
+
+    /*
+     * Runtime Functions
+     */
+
+    // Get the initial coordinates and start listening for messages
+    $cordovaGeolocation
+      .getCurrentPosition({timeout: 10000, enableHighAccuracy: false})
+      .then(function (position) {
+        // Set coordinates
+        userDataService.setCoordinates([position.coords.latitude, position.coords.longitude]);
+        listenForGeoQueryMessages();
+      }, function (error) {
+        console.log(error);
+        ionicToast.show('Unable to retrieve location. Restart app.', 'bottom', false);
+      });
   })
 
   .controller('friendsCtrl', function ($scope) {
