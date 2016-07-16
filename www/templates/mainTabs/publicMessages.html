@@ -4,30 +4,7 @@
                on-swipe-right="hideTime = true">
 
     <div collection-repeat="message in messages" class="messages">
-      <div class="message">
-        <div ng-if="message.type === 'message'">
-          <div class="message-header">
-            <span class="message-display-name">{{ message.user.display_name }}</span> - <span class="message-team">{{ message.user.team }}</span>
-          </div>
-          <div class="message-body">
-            <span class="message-contents">{{ message.message }}</span>
-          </div>
-          <div class="message-footer">
-            <span timestamp="{{ message.timestamp }}"></span><span ng-if="!message.user.is_me"> - {{ message.distance | distanceFormatter }}</span>
-          </div>
-        </div>
-        <div ng-if="message.type === 'location'">
-          <div class="message-header">
-            <span class="message-display-name">{{ message.user.display_name }}</span> - <span class="message-team">{{ message.user.team }}</span>
-          </div>
-          <div class="message-body">
-            <span class="message-contents">{{ message.latitude }}, {{ message.longitude }}</span>
-          </div>
-          <div class="message-footer">
-            <span timestamp="{{ message.timestamp }}"></span><span ng-if="!message.user.is_me"> - {{ message.distance | distanceFormatter }}</span>
-          </div>
-        </div>
-      </div>
+      <message data="message"></message>
     </div>
 
   </ion-content>
