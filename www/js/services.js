@@ -2,6 +2,7 @@ angular.module('app.services', [])
 
   .service('userDataService', function () {
     var DEFAULT_RADIUS = 15;
+    var EXACT_PRECISION = 7;
     var FUZZY_PRECISION = 2;
 
     var data = {
@@ -60,19 +61,12 @@ angular.module('app.services', [])
       return data.radius === null ? DEFAULT_RADIUS : Number(data.radius);
     };
 
-    this.getCoordinates = function() {
-      return {
-        'latitude': Number(data.coordinates.latitude),
-        'longitude': Number(data.coordinates.longitude)
-      };
-    };
-
     this.getLatitude = function () {
-      return Number(data.coordinates.latitude);
+      return +data.coordinates.latitude.toFixed(EXACT_PRECISION);
     };
 
     this.getLongitude = function () {
-      return Number(data.coordinates.longitude);
+      return +data.coordinates.longitude(EXACT_PRECISION);
     };
 
     this.getFuzzyLatitude = function() {
