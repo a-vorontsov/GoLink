@@ -175,8 +175,32 @@ angular.module('app.controllers', [])
     }
   })
 
-  .controller('forgotPasswordCtrl', function ($scope) {
+  .controller('forgotPasswordCtrl', function ($scope, $ionicPopup, ionicToast) {
+    // TODO: Add validation
+    $scope.data = {email: ''};
 
+    $scope.sendResetInstructions = function () {
+      var auth = firebase.auth();
+      var emailAddress = $scope.data.email;
+
+      auth.sendPasswordResetEmail(emailAddress).then(function () {
+        $ionicPopup.alert({
+          title: 'Email sent',
+          template: 'Check your email address for the password reset email and follow the instructions from there.'
+        });
+        $scope.data.email = '';
+      }, function (error) {
+        var errorCode = error.code;
+        $scope.error = JSON.stringify(error);
+        if (errorCode === "auth/invalid-email" || errorCode === "auth/user-not-found") {
+          ionicToast.show('The email you entered is not tied to a user.', 'bottom', false);
+        } else if (errorCode === "auth/network-request-failed") {
+          ionicToast.show('Unable to connect to the server. Check your internet connection and try again.', 'bottom', false);
+        } else {
+          ionicToast.show('Password reset failed.', 'bottom', false);
+        }
+      });
+    }
   })
 
   .controller('publicMessagesCtrl', function ($scope, $timeout, $cordovaGeolocation, $ionicScrollDelegate, $ionicPopup, ionicToast, userDataService) {
