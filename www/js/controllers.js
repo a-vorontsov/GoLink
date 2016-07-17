@@ -1,11 +1,12 @@
 // TODO: Check user authentication state
 angular.module('app.controllers', [])
 
-  .controller('splashCtrl', function ($scope, $state, $window, $ionicHistory, CONFIG_VARS, userDataService, ionicToast) {
+  .controller('splashCtrl', function ($scope, $state, $window, $ionicHistory, $ionicNavBarDelegate, CONFIG_VARS, userDataService, ionicToast) {
     // Disable animation on transition
     $ionicHistory.nextViewOptions({
       disableAnimate: true
     });
+    $ionicNavBarDelegate.showBackButton(false);
 
     // Check authentication state and move to the appropriate page
     function checkUser() {
@@ -371,7 +372,12 @@ angular.module('app.controllers', [])
       });
   })
 
-  .controller('friendsCtrl', function ($scope, $ionicPopup, $ionicLoading, $sanitize, $timeout, ERROR_TYPE, userDataService, helperService, ionicToast) {
+  .controller('friendsCtrl', function ($scope, $ionicPopup, $ionicLoading, $ionicHistory, $ionicNavBarDelegate, $sanitize, $timeout, ERROR_TYPE, userDataService, helperService, ionicToast) {
+    $ionicHistory.nextViewOptions({
+      disableAnimate: false
+    });
+    $ionicNavBarDelegate.showBackButton(true);
+
     // TODO: Timeout for last messaged
     $scope.isLoading = true;
     $scope.data = {
@@ -627,10 +633,8 @@ angular.module('app.controllers', [])
     }
   })
 
-  .controller('friendMessagesCtrl', function ($scope, $stateParams, $timeout, ERROR_TYPE, ionicToast, userDataService, helperService) {
-    var friendId = $stateParams.friendId;
-    var conversationId = helperService.getConversationId(userDataService.getId(), friendId);
-    var sentMessageIds = [];
+  .controller('friendMessagesCtrl', function ($scope, $stateParams, $ionicScrollDelegate, $ionicNavBarDelegate, $ionicPopup, $cordovaGeolocation, $timeout, ERROR_TYPE, ionicToast, userDataService, helperService) {
+    $ionicNavBarDelegate.showBackButton(true);
     $scope.data = {
       'messages': [],
       'friend': {
@@ -638,19 +642,121 @@ angular.module('app.controllers', [])
         'added_at': null
       }
     };
+    var friendId = $stateParams.friendId;
+    var conversationId = helperService.getConversationId(userDataService.getId(), friendId);
+    var isIOS = ionic.Platform.isWebView() && ionic.Platform.isIOS();
+    var sentMessageKeys = [];
     $scope.isLoading = true;
     $scope.isInFriendsList = false;
     $scope.isConnectedToFriend = true;
+
+    function sendConversationMessageWithData(data) {
+      // Create a message
+      var newMessageRef = firebase.database().ref('friend_conversations/' + conversationId + '/messages').push();
+      sentMessageKeys.push(newMessageRef.key);
+
+      // Set the message
+      var updatedMessageData = {};
+      updatedMessageData[conversationId + '/messages/' + newMessageRef.key] = data;
+      updatedMessageData[conversationId + '/last_messaged'] = firebase.database.ServerValue.TIMESTAMP;
+      firebase.database().ref('friend_conversations').update(updatedMessageData);
+    }
+
+    function addLocalMessageToScope(data) {
+      $scope.data.messages.push({
+        'key': '',
+        'distance': 0,
+        'timestamp': Date.now(),
+        'type': data.type,
+        'message': data.message,
+        'latitude': userDataService.getLatitude(),
+        'longitude': userDataService.getLongitude(),
+        'is_me': true
+      });
+      $ionicScrollDelegate.scrollBottom(true);
+    }
+
+    /*
+     * Scope Functions
+     */
+
+    $scope.inputUp = function () {
+      if (isIOS) $scope.data.keyboardHeight = 216;
+      $timeout(function () {
+        $ionicScrollDelegate.scrollBottom(true);
+      }, 300);
+
+    };
+
+    $scope.inputDown = function () {
+      if (isIOS) $scope.data.keyboardHeight = 0;
+      $ionicScrollDelegate.resize();
+    };
+
+    $scope.sendMessage = function () {
+      // TODO: Add front-end and back-end validation
+
+      var message = $scope.data.message;
+      $scope.data.message = '';
+
+      addLocalMessageToScope({
+        'type': 'message',
+        'message': message
+      });
+
+      var data = {
+        'user_id': userDataService.getId(),
+        'timestamp': firebase.database.ServerValue.TIMESTAMP,
+        'message': message
+      };
+      sendConversationMessageWithData(data);
+    };
+
+    $scope.showSendLocationPopup = function () {
+      var popup = $ionicPopup.confirm({
+        title: 'Show Location',
+        template: 'Are you sure you want to share your location? Your precise location will be sent to all chat participants.'
+      });
+
+      popup.then(function (confirmed) {
+        if (confirmed) {
+          $cordovaGeolocation
+            .getCurrentPosition({timeout: 10000, enableHighAccuracy: true})
+            .then(function (position) {
+              // Set coordinates
+              userDataService.setCoordinates([position.coords.latitude, position.coords.longitude]);
+
+              addLocalMessageToScope({'type': 'location'});
+
+              var data = {
+                'user_id': userDataService.getId(),
+                'timestamp': firebase.database.ServerValue.TIMESTAMP,
+                'latitude': userDataService.getLatitude(),
+                'longitude': userDataService.getLongitude()
+              };
+              sendConversationMessageWithData(data);
+
+            }, function (error) {
+              console.log(error);
+              ionicToast.show('Unable to retrieve location. Your message was not sent. Ensure location retrieval is enabled and try again.', 'bottom', false, 4000);
+            });
+        }
+      });
+    };
 
     /*
      * Runtime
      */
 
     function listenForNewMessages() {
-      firebase.database().ref('friend_conversations/' + conversationId + '/messages')
-        .orderByKey().startAt($scope.data.messages[$scope.data.messages.length - 1].key).on("child_added").then(function (snapshot) {
+      var promise;
+      if ($scope.data.messages.length > 0) {
+        promise = firebase.database().ref('friend_conversations/' + conversationId + '/messages').orderByKey().startAt($scope.data.messages[$scope.data.messages.length - 1].key);
+      } else {
+        promise = firebase.database().ref('friend_conversations/' + conversationId + '/messages').orderByKey();
+      }
+      promise.on("child_added", function (snapshot) {
         var message = snapshot.val();
-
       });
     }
 
@@ -681,15 +787,26 @@ angular.module('app.controllers', [])
       return firebase.database().ref('friend_conversations/' + conversationId + '/messages').once('value');
     }).then(function (snapshot) {
       // Populate the list of messages
+      var messages = snapshot.val();
+      var userId = userDataService.getId();
+      for (var key in messages) {
+        var message = messages[key];
+        message.type = $scope.data.messages.push({
+          'key': key,
+          'timestamp': message.timestamp,
+          'type': typeof(message.longitude) === 'undefined' ? 'message' : 'location',
+          'message': message.message,
+          'longitude': message.longitude,
+          'latitude': message.latitude,
+          'user_id': message.user_id,
+          'is_me': message.user_id === userId
+        });
+      }
+      listenForNewMessages();
       $timeout(function () {
-        var messages = snapshot.val();
-        for (var key in messages) {
-          messages[key].key = key;
-          $scope.data.messages.push(messages[key]);
-        }
         $scope.isLoading = false;
       });
-      listenForNewMessages();
+      console.log($scope.data.messages);
     }, function (error) {
       return Promise.reject(error);
     }).catch(function (error) {

@@ -1,14 +1,20 @@
-<ion-view title="{{ data.friend.display_name }}">
+<ion-view title="{{data.friend.display_name}} - {{::data.friend.team}}">
   <ion-content class="content-stable">
 
     <div ng-show="isLoading">
       <ion-spinner></ion-spinner>
       <p>Loading messages</p>
     </div>
-    <div ng-hide="isLoading">
-      <div ng-repeat="message in messages" class="messages">
-        <message data="message"></message>
+    <div ng-hide="isLoading || !isInFriendsList || !isConnectedToFriend">
+      <div ng-repeat="message in data.messages" class="messages">
+        <friend-message data="message"></friend-message>
       </div>
+    </div>
+    <div ng-show="!isLoading && !isInFriendsList">
+      This person is not in your friends list. You must exchange your friend code with this person in order to chat with them.
+    </div>
+    <div ng-show="!isLoading && isInFriendsList && !isConnectedToFriend">
+      <b>{{data.friend.display_name}}</b> needs to add you to their friends list before you can chat with them. Share your friend code with them!
     </div>
 
   </ion-content>

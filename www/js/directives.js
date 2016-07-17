@@ -97,5 +97,15 @@ angular.module('app.directives', [])
       },
       templateUrl: 'templates/directives/message.html'
     }
+  })
+
+  .directive('friendMessage', function () {
+    return {
+      restrict: 'E',
+      scope: {
+        data: '=data'
+      },
+      templateUrl: 'templates/directives/friendMessage.html'
+    }
   });
 
