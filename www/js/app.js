@@ -31,4 +31,13 @@ angular.module('app', ['ionic', 'ngCordova', 'app.controllers', 'app.routes', 'a
     'MAX_FRIEND_CODE_GENERATION_ATTEMPTS': 10,
     'MAX_DISPLAY_NAME_LENGTH': 16,
     'MAX_MESSAGE_LENGTH': 1000
+  })
+
+  .constant('ERROR_TYPE', {
+    NONE: 0,
+    INET: 1,
+    DB_INTEGRITY: 2,
+    USER_NOT_AUTHENTICATED: 3,
+    USER_NOT_FOUND: 4,
+    FRIEND_ALREADY_ADDED: 5
   });

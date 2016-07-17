@@ -1,0 +1,24 @@
+<ion-view title="Messages Near Me">
+  <ion-content class="content-stable">
+
+    <div ng-show="isLoading">
+      <ion-spinner></ion-spinner>
+      <p>Loading messages</p>
+    </div>
+    <div ng-hide="isLoading">
+      <div ng-repeat="message in messages" class="messages">
+        <message data="message"></message>
+      </div>
+    </div>
+
+  </ion-content>
+  <ion-footer-bar keyboard-attach class="bar-stable item-input-inset">
+    <label class="item-input-wrapper">
+      <input chat-input type="text" placeholder="Type your message" on-return="sendMessage();" ng-model="data.message" on-focus="inputUp()" on-blur="inputDown()"/>
+    </label>
+    <button class="button button-clear" ng-click="sendMessage();">
+      Send
+    </button>
+    <button class="ion-location" ng-click="showSendLocationPopup();"></button>
+  </ion-footer-bar>
+</ion-view>

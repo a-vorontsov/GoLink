@@ -2,8 +2,12 @@ angular.module('app.filters', [])
 
   .filter('timestampFormatter', function () {
     return function (timestamp) {
-      return moment(timestamp).fromNow();
-    };
+      if (typeof timestamp === 'undefined' || timestamp === null) {
+        return 'never';
+      } else {
+        return moment(timestamp).fromNow();
+      }
+    }
   })
 
   .filter('distanceFormatter', function () {
@@ -12,6 +16,16 @@ angular.module('app.filters', [])
         return "<1km away";
       } else {
         return Math.round(distance) + "km away";
+      }
+    }
+  })
+
+  .filter('friendCodeFormatter', function () {
+    return function (friendCode) {
+      if (typeof friendCode === 'undefined' || friendCode === null) {
+        return 'N/A (Contact Support)';
+      } else {
+        return friendCode.substring(0, 4) + '-' + friendCode.substring(4, 8) + '-' + friendCode.substring(8, 12);
       }
     }
   });

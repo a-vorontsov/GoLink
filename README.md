@@ -9,4 +9,5 @@
 
 ## Testing
 - Run `ionic serve` in order to test aspects which do not require platform dependencies (i.e., Google Maps) in your browser. Displaying locations using the Google Maps API will be broken. 
-- If you wish to test features such  as the Google Maps API implementation, plug in an Android device, accept USB debugging and run `ionic run android`
+- If you wish to test features such  as 
+the Google Maps API implementation, plug in an Android device, accept USB debugging and run `ionic run android`

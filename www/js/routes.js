@@ -82,6 +82,12 @@ angular.module('app.routes', [])
             controller: 'profileCtrl'
           }
         }
+      })
+
+      .state('friendMessages', {
+        url: 'friends/{friendId}',
+        templateUrl: 'templates/friendMessages.html',
+        controller: 'friendMessagesCtrl'
       });
 
     $urlRouterProvider.otherwise('/splash')
