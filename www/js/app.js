@@ -22,10 +22,6 @@ angular.module('app', ['ionic', 'ngCordova', 'app.controllers', 'app.routes', 'a
     });
   })
 
-  .config(function ($ionicConfigProvider) {
-    $ionicConfigProvider.scrolling.jsScrolling(false);
-  })
-
   .constant('CONFIG_VARS', {
     'FRIEND_CODE_LENGTH': 12,
     'MAX_FRIEND_CODE_GENERATION_ATTEMPTS': 10,

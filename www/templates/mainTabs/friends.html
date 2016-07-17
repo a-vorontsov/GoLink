@@ -15,7 +15,7 @@
         <div class="spacer" style="width: 300px; height: 10px;"></div>
       </ion-list>
       <ion-list>
-        <ion-item ng-repeat="friend in data.friends" ng-click="">
+        <ion-item ng-repeat="friend in data.friends" ui-sref="friendMessages({friendId: friend.user_id})">
           {{::friend.display_name}} - {{::friend.team}}<br/>
           <small>Last messaged: {{::friend.last_messaged | timestampFormatter}}</small>
         </ion-item>
