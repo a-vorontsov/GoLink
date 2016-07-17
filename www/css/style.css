@@ -78,17 +78,27 @@
   position:absolute;
   left: 0;
   right: 0;
+  top: 10%;
   margin:auto;
 }
 
 .loading-spinner {
   margin: auto;
   position: absolute;
-  top: 200px;
+  top: 45%;
   left: 0;
   bottom: 0;
   right: 0;
   height: 0;
   text-align: center;
   stroke: #fff !important;
+}
+
+.no-translate
+{
+    -webkit-transform: none !important;
+    -moz-transform: none !important;
+    -ms-transform: none !important;
+    -o-transform: none !important;
+    transform: none !important;
 }
