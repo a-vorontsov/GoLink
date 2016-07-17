@@ -104,6 +104,8 @@ angular.module('app.controllers', [])
 
       firebase.auth().signInWithEmailAndPassword(email, password).then(function (user) {
         // TODO: Fix ionicToast not working
+        $scope.data.email = '';
+        $scope.data.password = '';
         ionicToast.show('Login successful. Welcome back!', 'bottom', false, 2000);
         $state.go('splash');
 
@@ -131,6 +133,8 @@ angular.module('app.controllers', [])
       var password = $scope.data.password;
 
       firebase.auth().createUserWithEmailAndPassword(email, password).then(function (user) {
+        $scope.data.email = '';
+        $scope.data.password = '';
         ionicToast.show('Registration successful.', 'bottom', false, 2000);
         $state.go('splash');
       }).catch(function (error) {
