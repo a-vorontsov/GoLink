@@ -47,7 +47,6 @@ angular.module('app.controllers', [])
                 var friendCode = generateFriendCode();
                 firebase.database().ref('friend_codes/' + friendCode).set({'user_id': userDataService.getId()}, function (error) {
                   if (error) {
-                    console.log(error);
                     attemptCounter++;
                     if (attemptCounter < CONFIG_VARS.MAX_FRIEND_CODE_GENERATION_ATTEMPTS) {
                       insertFriendCode();
@@ -57,7 +56,6 @@ angular.module('app.controllers', [])
                   } else {
                     firebase.database().ref('members/' + userDataService.getId() + '/friend_code').set(friendCode, function (error) {
                       if (error) {
-                        console.log(error);
                         attemptCounter++;
                         if (attemptCounter < CONFIG_VARS.MAX_FRIEND_CODE_GENERATION_ATTEMPTS) {
                           insertFriendCode();
@@ -168,7 +166,6 @@ angular.module('app.controllers', [])
         'team': team
       }, function (error) {
         if (error) {
-          console.log(error);
           ionicToast.show('Save failed. Try again later.', 'bottom', false);
         } else {
           ionicToast.show('Saved!', 'bottom', false);
@@ -349,7 +346,6 @@ angular.module('app.controllers', [])
               sendPublicMessageWithData(data);
 
             }, function (error) {
-              console.log(error);
               ionicToast.show('Unable to retrieve location. Your message was not sent. Ensure location retrieval is enabled and try again.', 'bottom', false, 4000);
             });
         }
@@ -737,7 +733,6 @@ angular.module('app.controllers', [])
               sendConversationMessageWithData(data);
 
             }, function (error) {
-              console.log(error);
               ionicToast.show('Unable to retrieve location. Your message was not sent. Ensure location retrieval is enabled and try again.', 'bottom', false, 4000);
             });
         }
@@ -806,7 +801,6 @@ angular.module('app.controllers', [])
       $timeout(function () {
         $scope.isLoading = false;
       });
-      console.log($scope.data.messages);
     }, function (error) {
       return Promise.reject(error);
     }).catch(function (error) {
