@@ -433,11 +433,12 @@ angular.module('app.controllers', [])
           return Promise.reject(ERROR_TYPE.DB_INTEGRITY);
         }
 
-        $scope.data.friends.forEach(function (friend) {
-          if (friendUserId === friend.user_id) {
+        for (var i = 0; i < $scope.data.friends.length; i++) {
+          var friend = $scope.data.friends[i];
+          if (friendUserId == friend.user_id) {
             return Promise.reject(ERROR_TYPE.FRIEND_ALREADY_ADDED);
           }
-        });
+        }
 
         return firebase.database().ref('/members/' + friendUserId).once('value');
 
