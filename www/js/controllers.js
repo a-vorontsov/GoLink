@@ -185,6 +185,7 @@ angular.module('app.controllers', [])
     $scope.isLoading = true;
     $timeout(function () {
       $scope.isLoading = false;
+      $ionicScrollDelegate.scrollBottom(true);
     }, 2000);
 
     $scope.data = {'message': ''};
@@ -219,8 +220,10 @@ angular.module('app.controllers', [])
             }
           });
           // Sort by timestamp
-          $scope.messages.sort(function (x, y) {
-            return x.timestamp - y.timestamp;
+          $timeout(function () {
+            $scope.messages.sort(function (x, y) {
+              return x.timestamp - y.timestamp;
+            });
           });
           $ionicScrollDelegate.scrollBottom(true);
         }
@@ -368,7 +371,8 @@ angular.module('app.controllers', [])
       });
   })
 
-  .controller('friendsCtrl', function ($scope, $ionicPopup, $ionicLoading, $sanitize, ERROR_TYPE, userDataService, helperService, ionicToast) {
+  .controller('friendsCtrl', function ($scope, $ionicPopup, $ionicLoading, $sanitize, $timeout, ERROR_TYPE, userDataService, helperService, ionicToast) {
+    // TODO: Timeout for last messaged
     $scope.isLoading = true;
     $scope.data = {
       'friendCode': userDataService.getFriendCode(),
@@ -592,7 +596,10 @@ angular.module('app.controllers', [])
             }
           }
         });
-        $scope.isLoading = false;
+        $timeout(function () {
+          userDataService.setFriends($scope.data.friends);
+          $scope.isLoading = false;
+        });
       }, function (error) {
         ionicToast.show('Error: unable to retrieve friends. Check your internet connection and restart the app.', 'bottom', false, 4000);
       });
@@ -620,6 +627,81 @@ angular.module('app.controllers', [])
     }
   })
 
-  .controller('friendMessagesCtrl', function ($scope, $stateParams) {
+  .controller('friendMessagesCtrl', function ($scope, $stateParams, $timeout, ERROR_TYPE, ionicToast, userDataService, helperService) {
+    var friendId = $stateParams.friendId;
+    var conversationId = helperService.getConversationId(userDataService.getId(), friendId);
+    var sentMessageIds = [];
+    $scope.data = {
+      'messages': [],
+      'friend': {
+        'user_id': friendId,
+        'added_at': null
+      }
+    };
+    $scope.isLoading = true;
+    $scope.isInFriendsList = false;
+    $scope.isConnectedToFriend = true;
+
+    /*
+     * Runtime
+     */
+
+    function listenForNewMessages() {
+      firebase.database().ref('friend_conversations/' + conversationId + '/messages')
+        .orderByKey().startAt($scope.data.messages[$scope.data.messages.length - 1].key).on("child_added").then(function (snapshot) {
+        var message = snapshot.val();
+
+      });
+    }
+
+    // Check whether the friend is in the friends list
+    var friends = userDataService.getFriends();
+    for (var i = 0; i < friends.length; i++) {
+      var friend = friends[i];
+      if (friendId == friend.user_id) {
+        $scope.isInFriendsList = true;
+        $scope.data.friend.display_name = friend.display_name;
+        $scope.data.friend.team = friend.team;
+        break;
+      }
+    }
+
+    if (!$scope.isInFriendsList) {
+      $scope.isLoading = false;
+      return;
+    }
+
+    // Check whether the friend is connected to the user
+    firebase.database().ref('members/' + friendId + '/friends/' + userDataService.getId()).once('value').then(function (snapshot) {
+      if (!(snapshot.exists() && snapshot.hasChild('added_at'))) {
+        return Promise.reject(ERROR_TYPE.FRIEND_NOT_ADDED);
+      }
+      $scope.data.friend.added_at = snapshot.child('added_at').val();
+
+      return firebase.database().ref('friend_conversations/' + conversationId + '/messages').once('value');
+    }).then(function (snapshot) {
+      // Populate the list of messages
+      $timeout(function () {
+        var messages = snapshot.val();
+        for (var key in messages) {
+          messages[key].key = key;
+          $scope.data.messages.push(messages[key]);
+        }
+        $scope.isLoading = false;
+      });
+      listenForNewMessages();
+    }, function (error) {
+      return Promise.reject(error);
+    }).catch(function (error) {
+      $timeout(function () {
+        if (error === ERROR_TYPE.FRIEND_NOT_ADDED) {
+          $scope.isConnectedToFriend = false;
+          $scope.isLoading = false;
+          $scope.$apply();
+        } else {
+          ionicToast.show('Unable to retrieve messages. Check your internet connection and restart the app.', 'bottom', false, 4000);
+        }
+      })
+    });
 
   });

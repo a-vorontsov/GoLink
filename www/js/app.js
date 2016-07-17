@@ -35,5 +35,6 @@ angular.module('app', ['ionic', 'ngCordova', 'app.controllers', 'app.routes', 'a
     DB_INTEGRITY: 2,
     USER_NOT_AUTHENTICATED: 3,
     USER_NOT_FOUND: 4,
-    FRIEND_ALREADY_ADDED: 5
+    FRIEND_ALREADY_ADDED: 5,
+    FRIEND_NOT_ADDED: 6
   });
