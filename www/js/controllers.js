@@ -225,7 +225,7 @@ angular.module('app.controllers', [])
           $ionicScrollDelegate.scrollBottom(true);
         }
       }, function (error) {
-        if (!error.indexOf("permission_denied") > -1) {
+        if (!error.message.indexOf('permission_denied') > 1) {
           throw error;
         }
       });
