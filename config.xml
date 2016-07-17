@@ -19,10 +19,6 @@
     <feature name="StatusBar">
         <param name="ios-package" onload="true" value="CDVStatusBar" />
     </feature>
-    <plugin name="plugin.google.maps" spec="~1.3.9">
-        <variable name="API_KEY_FOR_ANDROID" value="AIzaSyA4mR6vCOgt_V_KwUbwzPFuz52b18gXYhQ" />
-        <variable name="API_KEY_FOR_IOS" value="AIzaSyCMXT9vzqnQZrmU4AsOshiNqvJjRItMfO8" />
-    </plugin>
     <allow-intent href="*.firebaseio.com" />
     <allow-intent href="auth.firebase.com" />
     <allow-intent href="*.googleapis.com" />
