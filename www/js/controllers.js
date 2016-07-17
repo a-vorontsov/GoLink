@@ -611,6 +611,6 @@ angular.module('app.controllers', [])
     }
   })
 
-  .controller('conversationCtrl', function ($scope) {
+  .controller('friendMessagesCtrl', function ($scope, $stateParams) {
 
   });
