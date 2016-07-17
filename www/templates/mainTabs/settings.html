@@ -1,9 +1,9 @@
-<ion-view title="Profile">
+<ion-view title="Settings">
   <ion-content padding="true" class="has-header">
     <div class="list card ">
-      <ion-item class="item-avatar">
-        <h2>ThePurpleK</h2>
-        <p>Team Valor</p>
+      <ion-item>
+        <h2>{{::data.display_name}}</h2>
+        <p>{{::data.team}}</p>
       </ion-item>
       <button style="text-align:left;border-radius:10px 10px 10px 10px;" class="button button-dark button-block button-clear icon-left ion-log-out" ng-click="signOut();">Sign Out
       </button>

@@ -74,12 +74,12 @@ angular.module('app.routes', [])
         }
       })
 
-      .state('tabsController.profile', {
-        url: '/profile',
+      .state('tabsController.settings', {
+        url: '/settings',
         views: {
-          'tabProfile': {
-            templateUrl: 'templates/mainTabs/profile.html',
-            controller: 'profileCtrl'
+          'tabSettings': {
+            templateUrl: 'templates/mainTabs/settings.html',
+            controller: 'settingsCtrl'
           }
         }
       })

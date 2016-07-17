@@ -618,7 +618,11 @@ angular.module('app.controllers', [])
 
   })
 
-  .controller('profileCtrl', function ($scope, $state, ionicToast) {
+  .controller('settingsCtrl', function ($scope, $state, ionicToast, userDataService) {
+    $scope.data = {
+      'display_name': userDataService.getDisplayName(),
+      'team': userDataService.getTeam()
+    };
     $scope.signOut = function () {
       firebase.auth().signOut().then(function () {
         ionicToast.show('You have been signed out.', 'bottom', false);
