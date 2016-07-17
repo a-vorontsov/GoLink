@@ -80,7 +80,6 @@ angular.module('app.controllers', [])
 
           }, function (error) {
             // TODO: Toast
-            console.log(error);
           });
 
         } else {
@@ -111,8 +110,10 @@ angular.module('app.controllers', [])
       }).catch(function (error) {
         var errorCode = error.code;
         $scope.error = JSON.stringify(error);
-        if (errorCode === "user/disabled") {
+        if (errorCode === "auth/user-disabled") {
           ionicToast.show('Your account has been disabled. Contact support for more info.', 'bottom', false);
+        } else if (errorCode === "auth/network-request-failed") {
+          ionicToast.show('Unable to connect to the server. Check your internet connection and try again.', 'bottom', false);
         } else {
           ionicToast.show('The credentials you entered are invalid.', 'bottom', false);
         }
@@ -140,6 +141,8 @@ angular.module('app.controllers', [])
           ionicToast.show('Signup failed. The email you entered is not in a valid format.', 'bottom', false);
         } else if (errorCode === "auth/weak-password") {
           ionicToast.show('Signup failed. Your password is not strong enough.', 'bottom', false);
+        } else if (errorCode === "auth/network-request-failed") {
+          ionicToast.show('Unable to connect to the server. Check your internet connection and try again.', 'bottom', false);
         } else {
           ionicToast.show('Signup failed. Contact support with the error code: ' + errorCode, 'bottom', false);
         }
@@ -239,14 +242,9 @@ angular.module('app.controllers', [])
 
       // Set the message
       newMessageRef.set(data, function (error) {
-        if (error) {
-          console.log(error);
-        } else {
+        if (!error) {
           // Set the GeoFire instance of the message
-          geoFire.set(newMessageRef.key, [userDataService.getFuzzyLatitude(), userDataService.getFuzzyLongitude()]).then(function () {
-          }, function (error) {
-            console.log(error);
-          });
+          geoFire.set(newMessageRef.key, [userDataService.getFuzzyLatitude(), userDataService.getFuzzyLongitude()]).then();
         }
       });
     }
@@ -358,12 +356,12 @@ angular.module('app.controllers', [])
         userDataService.setCoordinates([position.coords.latitude, position.coords.longitude]);
         listenForGeoQueryMessages();
       }, function (error) {
-        console.log(error);
         ionicToast.show('Unable to retrieve location. Restart app.', 'bottom', false);
       });
   })
 
-  .controller('friendsCtrl', function ($scope, $ionicPopup, $ionicLoading, $sanitize, ERROR_TYPE, userDataService, ionicToast) {
+  .controller('friendsCtrl', function ($scope, $ionicPopup, $ionicLoading, $sanitize, ERROR_TYPE, userDataService, helperService, ionicToast) {
+    $scope.isLoading = true;
     $scope.data = {
       'friendCode': userDataService.getFriendCode(),
       'targetFriendCode': '',
@@ -371,12 +369,14 @@ angular.module('app.controllers', [])
     };
 
     /*
-     * Helper
+     * General helper functions
      */
 
-    // Temporary variables
-    var friendUserId;
-    var friendMemberObject;
+    function showIonicLoading() {
+      return $ionicLoading.show({
+        template: '<ion-spinner></ion-spinner><br />Loading...'
+      });
+    }
 
     function sortScopeDataFriends() {
       $scope.data.friends.sort(function (x, y) {
@@ -387,12 +387,6 @@ angular.module('app.controllers', [])
         } else {
           return 0;
         }
-      });
-    }
-
-    function showIonicLoading() {
-      return $ionicLoading.show({
-        template: '<ion-spinner></ion-spinner><br />Loading...'
       });
     }
 
@@ -408,6 +402,14 @@ angular.module('app.controllers', [])
     function hideIonicLoadingWithInternetError() {
       hideIonicLoadingWithTitleTemplate('Error', 'An error occurred. Check your internet connection and try again.');
     }
+
+    /*
+     * Adding friends
+     */
+
+    // Temporary variables
+    var friendUserId;
+    var friendMemberObject;
 
     function addFriendByFriendCode(targetFriendCode) {
       // Show loading screen
@@ -427,9 +429,11 @@ angular.module('app.controllers', [])
           return Promise.reject(ERROR_TYPE.DB_INTEGRITY);
         }
 
-        if (friendUserId in $scope.data.friends) {
-          return Promise.reject(ERROR_TYPE.FRIEND_ALREADY_ADDED);
-        }
+        $scope.data.friends.forEach(function (friend) {
+          if (friendUserId === friend.user_id) {
+            return Promise.reject(ERROR_TYPE.FRIEND_ALREADY_ADDED);
+          }
+        });
 
         return firebase.database().ref('/members/' + friendUserId).once('value');
 
@@ -459,7 +463,7 @@ angular.module('app.controllers', [])
 
       }).then(function onIonicLoadingShown() {
         return firebase.database().ref('members/' + userDataService.getId() + '/friends/' + friendUserId).set({'added_at': firebase.database.ServerValue.TIMESTAMP});
-      }).then(function on(error) {
+      }).then(function onGetFriendInfo(error) {
         if (error) {
           return Promise.reject(ERROR_TYPE.INET);
         }
@@ -487,10 +491,6 @@ angular.module('app.controllers', [])
         }
       });
     }
-
-    /*
-     * Scope
-     */
 
     $scope.showAddFriendPopup = function () {
       $ionicPopup.show({
@@ -525,31 +525,74 @@ angular.module('app.controllers', [])
     };
 
     /*
-     * Runtime
+     * Getting list of friends
      */
-    /*
-     showIonicLoading().then(function () {
-     firebase.database().ref('members/' + userDataService.getId() + '/friends').once('value').then(function (snapshot) {
-     // Add initial list of friends to array
-     var friends = snapshot.val();
-     for (var friendUserId in friends) {
-     $scope.data.friends.push({'user_id': friendUserId, 'added_at': friends[friendUserId]['added_at']});
-     }
 
-     // Get further details about each friend
-     var friends = $scope.data.friends;
-     var promises = [];
-     for (var friend in friends) {
+    function getFriendObjectPromise(friendId) {
+      return firebase.database().ref('members/' + friendId).once('value').then(function (snapshot) {
+        var friend = snapshot.val();
+        friend.user_id = friendId;
+        return friend;
+      });
+    }
 
-     }
+    function getLastMessagedSnapshotPromise(conversationId) {
+      return firebase.database().ref('friend_conversations/' + conversationId + '/last_messaged').once('value').then(function (snapshot) {
+        return snapshot;
+      });
+    }
 
-     }, function (error) {
-     if (error) {
-     ionicToast.show('Error: unable to retrieve friends. Check your internet connection and restart the app.', 'bottom', false);
-     }
-     });
-     });
-     */
+    firebase.database().ref('members/' + userDataService.getId() + '/friends').once('value').then(function (snapshot) {
+      // Add initial list of friends to array and get further information about each friend
+      var friends = snapshot.val();
+      var getFriendObjectPromises = [];
+      var getLastMessagedPromises = [];
+      for (var friendUserId in friends) {
+        var friend = friends[friendUserId];
+        $scope.data.friends.push({'user_id': friendUserId, 'added_at': friend.added_at});
+        getFriendObjectPromises.push(getFriendObjectPromise(friendUserId));
+        getLastMessagedPromises.push(getLastMessagedSnapshotPromise(helperService.getConversationId(userDataService.getId(), friendUserId)));
+      }
+
+      // Execute all promises
+      Promise.all(getFriendObjectPromises).then(function onGetFriendObjectPromisesComplete(results) {
+        results.forEach(function (result) {
+          for (var i = 0; i < $scope.data.friends.length; i++) {
+            if ($scope.data.friends[i].user_id === result.user_id) {
+              $scope.data.friends[i].display_name = result.display_name;
+              $scope.data.friends[i].friend_code = result.friend_code;
+              $scope.data.friends[i].team = result.team;
+              break;
+            }
+          }
+        });
+
+        return Promise.all(getLastMessagedPromises);
+      }).then(function onGetLastMessagedPromisesComplete(results) {
+        results.forEach(function (result) {
+          var friendId = helperService.getFriendUserIdFromConversationId(userDataService.getId(), result.ref.parent.key);
+          var lastMessaged = result.val();
+          for (var i = 0; i < $scope.data.friends.length; i++) {
+            if ($scope.data.friends[i].user_id === friendId) {
+              if (typeof(lastMessaged) === undefined || lastMessaged === null) {
+                $scope.data.friends[i].last_messaged = null;
+              } else {
+                $scope.data.friends[i].last_messaged = lastMessaged;
+              }
+              break;
+            }
+          }
+        });
+        $scope.isLoading = false;
+      }, function (error) {
+        ionicToast.show('Error: unable to retrieve friends. Check your internet connection and restart the app.', 'bottom', false, 4000);
+      });
+
+    }, function (error) {
+      if (error) {
+        ionicToast.show('Error: unable to retrieve friends. Check your internet connection and restart the app.', 'bottom', false, 4000);
+      }
+    });
 
   })
 
@@ -563,7 +606,7 @@ angular.module('app.controllers', [])
         ionicToast.show('You have been signed out.', 'bottom', false);
         $state.go('splash');
       }).catch(function (error) {
-        ionicToast.show('Unable to sign out. Contact support with code: ' + error.code, 'bottom', false);
+        ionicToast.show('Unable to sign out. Try again later or clear app data/reinstall the app.', 'bottom', false);
       })
     }
   })

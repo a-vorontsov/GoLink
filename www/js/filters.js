@@ -2,7 +2,11 @@ angular.module('app.filters', [])
 
   .filter('timestampFormatter', function () {
     return function (timestamp) {
-      return moment(timestamp).fromNow();
+      if (typeof timestamp === 'undefined' || timestamp === null) {
+        return 'never';
+      } else {
+        return moment(timestamp).fromNow();
+      }
     }
   })
 
@@ -16,8 +20,8 @@ angular.module('app.filters', [])
     }
   })
 
-  .filter('friendCodeFormatter', function() {
-    return function(friendCode) {
+  .filter('friendCodeFormatter', function () {
+    return function (friendCode) {
       if (typeof friendCode === 'undefined' || friendCode === null) {
         return 'N/A (Contact Support)';
       } else {

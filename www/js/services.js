@@ -1,6 +1,6 @@
 angular.module('app.services', [])
 
-  .service('userDataService', function () {
+  .service('userDataService', function ($window) {
     var DEFAULT_RADIUS = 15;
     var EXACT_PRECISION = 7;
     var FUZZY_PRECISION = 2;
@@ -19,6 +19,7 @@ angular.module('app.services', [])
 
     this.setId = function (id) {
       data.id = id;
+      $window.localStorage.setItem('user-id', id);
     };
 
     this.setDisplayName = function (displayName) {
@@ -33,11 +34,11 @@ angular.module('app.services', [])
       data.friend_code = friendCode;
     };
 
-    this.setRadius = function(radius) {
+    this.setRadius = function (radius) {
       data.radius = Number(radius);
     };
 
-    this.setCoordinates = function(coordinates) {
+    this.setCoordinates = function (coordinates) {
       data.coordinates.latitude = coordinates[0];
       data.coordinates.longitude = coordinates[1];
     };
@@ -51,6 +52,9 @@ angular.module('app.services', [])
     };
 
     this.getId = function () {
+      if (data.id === null && $window.localStorage.getItem('user-id') !== null) {
+        return $window.localStorage.getItem('user-id');
+      }
       return data.id;
     };
 
@@ -66,7 +70,7 @@ angular.module('app.services', [])
       return data.friend_code;
     };
 
-    this.getRadius = function() {
+    this.getRadius = function () {
       return data.radius === null ? DEFAULT_RADIUS : Number(data.radius);
     };
 
@@ -78,11 +82,25 @@ angular.module('app.services', [])
       return +data.coordinates.longitude.toFixed(EXACT_PRECISION);
     };
 
-    this.getFuzzyLatitude = function() {
+    this.getFuzzyLatitude = function () {
       return +data.coordinates.latitude.toFixed(FUZZY_PRECISION);
     };
 
-    this.getFuzzyLongitude = function() {
+    this.getFuzzyLongitude = function () {
       return +data.coordinates.longitude.toFixed(FUZZY_PRECISION);
+    };
+  })
+
+  .service('helperService', function () {
+    this.getConversationId = function (userId, friendUserId) {
+      if (userId < friendUserId) {
+        return userId + '_' + friendUserId;
+      } else {
+        return friendUserId + '_' + userId;
+      }
+    };
+
+    this.getFriendUserIdFromConversationId = function (userId, conversationId) {
+      return conversationId.replace(userId, '').replace('_', '');
     };
   });
