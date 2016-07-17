@@ -9,6 +9,7 @@ angular.module('app.services', [])
       'id': null,
       'display_name': null,
       'team': null,
+      'friend_code': null,
       'radius': null,
       'coordinates': {
         'latitude': null,
@@ -26,6 +27,10 @@ angular.module('app.services', [])
 
     this.setTeam = function (team) {
       data.team = team;
+    };
+
+    this.setFriendCode = function (friendCode) {
+      data.friend_code = friendCode;
     };
 
     this.setRadius = function(radius) {
@@ -55,6 +60,10 @@ angular.module('app.services', [])
 
     this.getTeam = function () {
       return data.team;
+    };
+
+    this.getFriendCode = function () {
+      return data.friend_code;
     };
 
     this.getRadius = function() {

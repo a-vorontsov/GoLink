@@ -25,6 +25,7 @@ angular.module('app.controllers', [])
               var memberSnapshot = snapshot.val();
               userDataService.setDisplayName(memberSnapshot.display_name);
               userDataService.setTeam(memberSnapshot.team);
+              userDataService.setFriendCode(memberSnapshot.friend_code);
 
               // Navigate to the main tab view
               $state.go('tabsController.publicMessages');
@@ -87,6 +88,7 @@ angular.module('app.controllers', [])
         }
       });
     }
+
     checkUser();
   })
 
@@ -98,6 +100,7 @@ angular.module('app.controllers', [])
 
       var email = $scope.data.email;
       var password = $scope.data.password;
+      // TODO: Remove this error message
       $scope.error = "asdf";
 
       firebase.auth().signInWithEmailAndPassword(email, password).then(function (user) {
@@ -173,7 +176,7 @@ angular.module('app.controllers', [])
 
   .controller('publicMessagesCtrl', function ($scope, $timeout, $cordovaGeolocation, $ionicScrollDelegate, $ionicPopup, ionicToast, userDataService) {
     $scope.isLoading = true;
-    $timeout(function() {
+    $timeout(function () {
       $scope.isLoading = false;
     }, 2000);
 
@@ -360,7 +363,193 @@ angular.module('app.controllers', [])
       });
   })
 
-  .controller('friendsCtrl', function ($scope) {
+  .controller('friendsCtrl', function ($scope, $ionicPopup, $ionicLoading, $sanitize, ERROR_TYPE, userDataService, ionicToast) {
+    $scope.data = {
+      'friendCode': userDataService.getFriendCode(),
+      'targetFriendCode': '',
+      'friends': []
+    };
+
+    /*
+     * Helper
+     */
+
+    // Temporary variables
+    var friendUserId;
+    var friendMemberObject;
+
+    function sortScopeDataFriends() {
+      $scope.data.friends.sort(function (x, y) {
+        if (x < y) {
+          return -1;
+        } else if (x > y) {
+          return 1;
+        } else {
+          return 0;
+        }
+      });
+    }
+
+    function showIonicLoading() {
+      return $ionicLoading.show({
+        template: '<ion-spinner></ion-spinner><br />Loading...'
+      });
+    }
+
+    function hideIonicLoadingWithTitleTemplate(title, template) {
+      $ionicLoading.hide().then(function () {
+        $ionicPopup.alert({
+          title: title,
+          template: template
+        });
+      });
+    }
+
+    function hideIonicLoadingWithInternetError() {
+      hideIonicLoadingWithTitleTemplate('Error', 'An error occurred. Check your internet connection and try again.');
+    }
+
+    function addFriendByFriendCode(targetFriendCode) {
+      // Show loading screen
+      showIonicLoading().then(function onLoadingScreenShow() {
+        // Retrieve the user ID of the friend code
+        return firebase.database().ref('/friend_codes/' + targetFriendCode).once('value');
+
+      }).then(function getMemberDetailsFromFriendCodeSnapshot(snapshot) {
+        // Check whether the user ID for this snapshot exists
+        if (!(snapshot.exists() && snapshot.hasChild('user_id'))) {
+          return Promise.reject(ERROR_TYPE.USER_NOT_FOUND);
+        }
+
+        // Retrieve the member details for the user ID
+        friendUserId = snapshot.child('user_id').val();
+        if (friendUserId == userDataService.getId()) {
+          return Promise.reject(ERROR_TYPE.DB_INTEGRITY);
+        }
+
+        if (friendUserId in $scope.data.friends) {
+          return Promise.reject(ERROR_TYPE.FRIEND_ALREADY_ADDED);
+        }
+
+        return firebase.database().ref('/members/' + friendUserId).once('value');
+
+      }).then(function getFriendMemberSnapshot(snapshot) {
+        // Check whether the display name exists for this snapshot
+        if (!(snapshot.exists() && snapshot.hasChild('display_name'))) {
+          return Promise.reject(ERROR_TYPE.DB_INTEGRITY);
+        }
+
+        friendMemberObject = snapshot.val();
+        return $ionicLoading.hide();
+
+      }).then(function displayConfirmationScreen() {
+        return $ionicPopup.confirm({
+          title: 'Add friend?',
+          template: 'Do you want to add <b>' + $sanitize(friendMemberObject.display_name) + '</b> as a friend?',
+          cancelText: 'No',
+          okText: 'Yes'
+        });
+
+      }).then(function onConfirmationScreenResult(result) {
+        if (!result) {
+          return Promise.reject(ERROR_TYPE.NONE);
+        }
+
+        return showIonicLoading();
+
+      }).then(function onIonicLoadingShown() {
+        return firebase.database().ref('members/' + userDataService.getId() + '/friends/' + friendUserId).set({'added_at': firebase.database.ServerValue.TIMESTAMP});
+      }).then(function on(error) {
+        if (error) {
+          return Promise.reject(ERROR_TYPE.INET);
+        }
+        $scope.data.friends.push({
+          'user_id': friendUserId,
+          'display_name': friendMemberObject.display_name,
+          'team': friendMemberObject.team,
+          'last_messaged': null,
+          'added_at': Date.now()
+        });
+        sortScopeDataFriends();
+        hideIonicLoadingWithTitleTemplate('Success!', '<b>' + $sanitize(friendMemberObject.display_name) + '</b> has been added to your friends list.');
+      }, function (error) {
+        if (error === ERROR_TYPE.NONE) {
+        } else if (error === ERROR_TYPE.INET) {
+          hideIonicLoadingWithInternetError();
+        } else if (error === ERROR_TYPE.DB_INTEGRITY) {
+          hideIonicLoadingWithTitleTemplate('Database integrity error', 'This shouldn\'t happen. Please email us with the friend code you entered ASAP!')
+        } else if (error === ERROR_TYPE.USER_NOT_FOUND) {
+          hideIonicLoadingWithTitleTemplate('User not found', 'The friend code you entered is not tied to a user.');
+        } else if (error === ERROR_TYPE.FRIEND_ALREADY_ADDED) {
+          hideIonicLoadingWithTitleTemplate('Friend already added', 'This person is already in your friends list.');
+        } else {
+          hideIonicLoadingWithInternetError();
+        }
+      });
+    }
+
+    /*
+     * Scope
+     */
+
+    $scope.showAddFriendPopup = function () {
+      $ionicPopup.show({
+        template: '<input type="text" ng-model="data.targetFriendCode">',
+        title: 'Enter friend code',
+        subTitle: 'Enter a 12-digit friend code without hyphens (-) below.',
+        scope: $scope,
+        buttons: [
+          {text: 'Cancel'},
+          {
+            text: '<b>Save</b>',
+            type: 'button-positive',
+            onTap: function (e) {
+              if (!$scope.data.targetFriendCode
+                || $scope.data.targetFriendCode.length !== 12
+                || !$scope.data.targetFriendCode.match(/^[0-9]+$/)) {
+                ionicToast.show('Enter a valid 12-digit friend code.', 'bottom', false, 2500);
+                e.preventDefault();
+              } else if (userDataService.getFriendCode() === $scope.data.targetFriendCode) {
+                ionicToast.show('You can\'t add yourself, you numpty.', 'bottom', false, 2500);
+                e.preventDefault();
+              } else {
+                // Code passes validation check
+                addFriendByFriendCode($scope.data.targetFriendCode);
+                $scope.data.targetFriendCode = '';
+
+              }
+            }
+          }
+        ]
+      });
+    };
+
+    /*
+     * Runtime
+     */
+    /*
+     showIonicLoading().then(function () {
+     firebase.database().ref('members/' + userDataService.getId() + '/friends').once('value').then(function (snapshot) {
+     // Add initial list of friends to array
+     var friends = snapshot.val();
+     for (var friendUserId in friends) {
+     $scope.data.friends.push({'user_id': friendUserId, 'added_at': friends[friendUserId]['added_at']});
+     }
+
+     // Get further details about each friend
+     var friends = $scope.data.friends;
+     var promises = [];
+     for (var friend in friends) {
+
+     }
+
+     }, function (error) {
+     if (error) {
+     ionicToast.show('Error: unable to retrieve friends. Check your internet connection and restart the app.', 'bottom', false);
+     }
+     });
+     });
+     */
 
   })
 

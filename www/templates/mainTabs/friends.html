@@ -1,5 +1,19 @@
 <ion-view title="Friends">
+
   <ion-content padding="true" class="has-header">
-    <p style="color:#000000;">Coming soon!</p>
+    <ion-list>
+      <!--<ion-item>Your friend code is: {{::data.friendCode | friendCodeFormatter}}</ion-item>-->
+      <ion-item class="item-icon-left item" ng-click="showAddFriendPopup();">
+        <i class="icon ion-person-add"></i>Add a friend
+      </ion-item>
+      <ion-item>Your friend code is: <b>{{::data.friendCode | friendCodeFormatter}}</b></ion-item>
+    </ion-list>
+    <div class="spacer" style="width: 300px; height: 10px;"></div>
+    <ion-list>
+      <!--<ion-item ng-click="">-->
+        <!--ThePurpleK - Valor<br />-->
+        <!--<small>Last messaged: Never</small>-->
+      <!--</ion-item>-->
+    </ion-list>
   </ion-content>
 </ion-view>

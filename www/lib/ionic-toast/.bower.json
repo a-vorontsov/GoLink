@@ -1,5 +1,6 @@
 {
   "name": "ionic-toast",
+  "version": "0.4.0",
   "authors": [
     "rajeshwarpatlolla <rajeshwar.patlolla@gmail.com>"
   ],
@@ -26,14 +27,14 @@
   "dependencies": {
     "ionic": ">=0.9.27"
   },
-  "_release": "0221e24dec",
+  "_release": "0.4.0",
   "_resolution": {
-    "type": "branch",
-    "branch": "master",
-    "commit": "0221e24decd362795641d3fe3bf57fe22ce0cb2d"
+    "type": "version",
+    "tag": "v0.4.0",
+    "commit": "c7e32338b5c7b9586e9ebf9d0bbdc2f8985f863b"
   },
   "_source": "https://github.com/rajeshwarpatlolla/ionic-toast.git",
-  "_target": "master",
+  "_target": "^0.4.0",
   "_originalSource": "ionic-toast",
   "_direct": true
 }
