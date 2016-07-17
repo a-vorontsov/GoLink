@@ -1,22 +1,29 @@
 <ion-view title="Login">
   <ion-content padding="true" class="has-header">
     <p>{{error}}</p>
+    <p class="welcome-text">Welcome to GoLink.</p>
+    <p class="welcome-text">Log in to link up with trainers around you.</p>
     <form class="list">
       <ion-list>
-        <label class="item item-input">
-          <span class="input-label">Email</span>
-          <input type="email" placeholder="" ng-model="data.email">
+        <label class="item-input input-box">
+          <input type="email" placeholder="Email address" ng-model="data.email" class="text-input">
         </label>
-        <label class="item item-input">
-          <span class="input-label">Password</span>
-          <input type="password" placeholder="" ng-model="data.password">
+        <label class="item-input input-box">
+          <input type="password" placeholder="Password" ng-model="data.password" class="text-input">
         </label>
       </ion-list>
-      <button ng-click="login();" class="button button-balanced button-block">Log in</button>
-      <a href="#" ui-sref="signup" style="font-size:14px;border-radius:0px 0px 0px 0px;"
-         class="button button-positive button-small button-block button-clear">Create an account</a>
-      <a href="#" ui-sref="forgotPassword" style="font-size:14px;border-radius:5px 5px 5px 5px;"
-         class="button button-positive button-small button-block button-clear">Forgot password?</a>
+      <button ng-click="login();" class="button button-balanced button-block generic-button">Log in</button>
+      <div class="row" style="horizontal-align:center">
+        <div class="col">
+          <a href="#" ui-sref="signup" style="font-size:14px;border-radius:0px 0px 0px 0px;"
+             class="button button-positive button-small button-block button-clear misc-button">Create an account</a>
+        </div>
+        <div class="col">
+          <a href="#" ui-sref="forgotPassword" style="font-size:14px;border-radius:5px 5px 5px 5px;"
+             class="button button-positive button-small button-block button-clear misc-button">Forgot password?</a>
+        </div>
+      </div>
+
     </form>
   </ion-content>
 </ion-view>

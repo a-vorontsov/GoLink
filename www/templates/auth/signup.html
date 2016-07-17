@@ -1,19 +1,18 @@
 <ion-view title="Signup">
   <ion-content padding="true" class="has-header">
+    <p class="welcome-text">Sign up to chat with local trainers, add trainers as friends and more!</p>
     <form class="list">
       <ion-list>
-        <label class="item item-input">
-          <span class="input-label">Email</span>
-          <input type="email" placeholder="" ng-model="data.email">
+          <label class="item-input input-box">
+          <input type="email" placeholder="Email address" ng-model="data.email">
         </label>
-        <label class="item item-input">
-          <span class="input-label">Password</span>
-          <input type="password" placeholder="" ng-model="data.password">
+          <label class="item-input input-box">
+          <input type="password" placeholder="Password" ng-model="data.password">
         </label>
       </ion-list>
-      <button class="button button-balanced button-block" ng-click="signUp();">Sign up</button>
+      <button class="button button-balanced button-block generic-button" ng-click="signUp();">Sign up</button>
       <a href="#" ui-sref="login" style="font-size:14px;border-radius:0px 0px 0px 0px;"
-         class="button button-positive button-small button-block button-clear">Sign in to an existing account</a>
+         class="button button-positive button-small button-block button-clear misc-button">Sign in to an existing account</a>
     </form>
   </ion-content>
 </ion-view>
