@@ -228,7 +228,7 @@ angular.module('app.controllers')
                   if (typeof(lastMessaged) === undefined || lastMessaged === null) {
                     $scope.data.friends[i].last_messaged = null;
                   } else {
-                    $scope.data.friends[i].last_messaged = lastMessaged;
+                    $scope.data.friends[i].last_messaged = (lastMessaged >= Date.now()) ? Date.now() - 1 : lastMessaged;
                   }
                 });
                 break;
