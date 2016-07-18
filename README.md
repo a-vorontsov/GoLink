@@ -10,7 +10,8 @@
 If you have the [LiveReload Chrome extension](https://chrome.google.com/webstore/detail/livereload/jnihajbhpnppcggbcgedagnkighmdlei) or its equivalent for your browser, your page will refresh automatically when you make changes, so long as you use `gulp watch`.
 
 1. Run `gulp build && gulp watch` (`build` creates the dist files while `watch` updates them with any changes automatically)
-2. Once you see `Starting 'watch'...`, in a separate terminal window, run `ionic serve --nolivereload` (livereload is handled by gulp)  
+2. Once you see `Starting 'watch'...`, in a separate terminal window, run `ionic serve --nolivereload` (LiveReload is handled by gulp)
+3. On Chrome, click the LiveReload icon to make sure that the dot in the centre is filled (i.e., connected)
 
 ## Testing on Android
 1. Run `gulp build && gulp watch`
