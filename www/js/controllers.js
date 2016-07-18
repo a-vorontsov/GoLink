@@ -1,7 +1,7 @@
 // TODO: Check user authentication state
 angular.module('app.controllers', [])
 
-  .controller('splashCtrl', function ($scope, $state, $window, $ionicHistory, $ionicNavBarDelegate, CONFIG_VARS, userDataService, ionicToast) {
+  .controller('splashCtrl', function ($scope, $state, $window, $ionicHistory, $ionicNavBarDelegate, $ionicPopup, CONFIG_VARS, userDataService) {
     // Disable animation on transition
     $ionicHistory.nextViewOptions({
       disableAnimate: true
@@ -51,7 +51,7 @@ angular.module('app.controllers', [])
                     if (attemptCounter < CONFIG_VARS.MAX_FRIEND_CODE_GENERATION_ATTEMPTS) {
                       insertFriendCode();
                     } else {
-                      ionicToast.show('Unable to retrieve your friend code. Check your internet connection and restart the app.', 'bottom', false);
+                      $ionicPopup.alert({title: "Error", template: "Unable to retrieve your friend code. Check your internet connection and restart the app."});
                     }
                   } else {
                     firebase.database().ref('members/' + userDataService.getId() + '/friend_code').set(friendCode, function (error) {
@@ -60,7 +60,7 @@ angular.module('app.controllers', [])
                         if (attemptCounter < CONFIG_VARS.MAX_FRIEND_CODE_GENERATION_ATTEMPTS) {
                           insertFriendCode();
                         } else {
-                          ionicToast.show('Unable to retrieve your friend code. Check your internet connection and restart the app.', 'bottom', false);
+                          $ionicPopup.alert({title: "Error", template: "Unable to retrieve your friend code. Check your internet connection and restart the app."});
                         }
                       } else {
                         checkUser();
@@ -78,7 +78,7 @@ angular.module('app.controllers', [])
             }
 
           }, function (error) {
-            // TODO: Toast
+            $ionicPopup.alert({title: "Error", template: "Unable to retrieve your user details. Check your internet connection and restart the app."});
           });
 
         } else {
@@ -90,7 +90,7 @@ angular.module('app.controllers', [])
     checkUser();
   })
 
-  .controller('loginCtrl', function ($scope, $state, ionicToast) {
+  .controller('loginCtrl', function ($scope, $state, $ionicPopup) {
     $scope.data = {};
 
     $scope.login = function () {
@@ -98,31 +98,27 @@ angular.module('app.controllers', [])
 
       var email = $scope.data.email;
       var password = $scope.data.password;
-      // TODO: Remove this error message
-      $scope.error = "asdf";
 
       firebase.auth().signInWithEmailAndPassword(email, password).then(function (user) {
-        // TODO: Fix ionicToast not working
         $scope.data.email = '';
         $scope.data.password = '';
-        ionicToast.show('Login successful. Welcome back!', 'bottom', false, 2000);
         $state.go('splash');
 
       }).catch(function (error) {
         var errorCode = error.code;
         $scope.error = JSON.stringify(error);
         if (errorCode === "auth/user-disabled") {
-          ionicToast.show('Your account has been disabled. Contact support for more info.', 'bottom', false);
+          $ionicPopup.alert({title: "Login failed", template: "Your account has been disabled. Contact support for more info."});
         } else if (errorCode === "auth/network-request-failed") {
-          ionicToast.show('Unable to connect to the server. Check your internet connection and try again.', 'bottom', false);
+          $ionicPopup.alert({title: "Login failed", template: "Unable to connect to the server. Check your internet connection and try again."});
         } else {
-          ionicToast.show('The credentials you entered are invalid.', 'bottom', false);
+          $ionicPopup.alert({title: "Login failed", template: "The credentials you entered are invalid."});
         }
       });
     }
   })
 
-  .controller('signupCtrl', function ($scope, $state, ionicToast) {
+  .controller('signupCtrl', function ($scope, $state, $ionicPopup) {
     $scope.data = {};
 
     $scope.signUp = function () {
@@ -134,26 +130,25 @@ angular.module('app.controllers', [])
       firebase.auth().createUserWithEmailAndPassword(email, password).then(function (user) {
         $scope.data.email = '';
         $scope.data.password = '';
-        ionicToast.show('Registration successful.', 'bottom', false, 2000);
         $state.go('splash');
       }).catch(function (error) {
         var errorCode = error.code;
         if (errorCode === "auth/email-already-in-use") {
-          ionicToast.show('Signup failed. The email you entered is already in use.', 'bottom', false);
+          $ionicPopup.alert({title: 'Registration failed', template: 'The email you entered is already in use.'});
         } else if (errorCode === "auth/invalid-email") {
-          ionicToast.show('Signup failed. The email you entered is not in a valid format.', 'bottom', false);
+          $ionicPopup.alert({title: 'Registration failed', template: 'The email you entered is not in a valid format.'});
         } else if (errorCode === "auth/weak-password") {
-          ionicToast.show('Signup failed. Your password is not strong enough.', 'bottom', false);
+          $ionicPopup.alert({title: 'Registration failed', template: 'Your password is not strong enough.'});
         } else if (errorCode === "auth/network-request-failed") {
-          ionicToast.show('Unable to connect to the server. Check your internet connection and try again.', 'bottom', false);
+          $ionicPopup.alert({title: 'Registration failed', template: 'Failed to connect to the server. Check your internet connection and try again.'});
         } else {
-          ionicToast.show('Signup failed. Contact support with the error code: ' + errorCode, 'bottom', false);
+          $ionicPopup.alert('Registration failed', 'Contact support with the error code: ' + errorCode);
         }
       });
     };
   })
 
-  .controller('setupCtrl', function ($scope, $state, ionicToast) {
+  .controller('setupCtrl', function ($scope, $state, $ionicPopup) {
     $scope.data = {'displayName': '', 'team': 'Instinct'};
     $scope.sendSetup = function () {
       var displayName = $scope.data.displayName;
@@ -166,16 +161,15 @@ angular.module('app.controllers', [])
         'team': team
       }, function (error) {
         if (error) {
-          ionicToast.show('Save failed. Try again later.', 'bottom', false);
+          $ionicPopup.alert({title: 'Error', template: 'Save failed. Try again later.'});
         } else {
-          ionicToast.show('Saved!', 'bottom', false);
           $state.go('splash');
         }
       });
     }
   })
 
-  .controller('forgotPasswordCtrl', function ($scope, $ionicPopup, ionicToast) {
+  .controller('forgotPasswordCtrl', function ($scope, $ionicPopup) {
     // TODO: Add validation
     $scope.data = {email: ''};
 
@@ -184,26 +178,23 @@ angular.module('app.controllers', [])
       var emailAddress = $scope.data.email;
 
       auth.sendPasswordResetEmail(emailAddress).then(function () {
-        $ionicPopup.alert({
-          title: 'Email sent',
-          template: 'Check your email address for the password reset email and follow the instructions from there.'
-        });
+        $ionicPopup.alert({title: 'Email sent', template: 'Check your email address for the password reset email and follow the instructions from there.'});
         $scope.data.email = '';
       }, function (error) {
         var errorCode = error.code;
         $scope.error = JSON.stringify(error);
         if (errorCode === "auth/invalid-email" || errorCode === "auth/user-not-found") {
-          ionicToast.show('The email you entered is not tied to a user.', 'bottom', false);
+          $ionicPopup.alert({title: 'Password reset failed', template: 'The email you entered is not tied to a user.'});
         } else if (errorCode === "auth/network-request-failed") {
-          ionicToast.show('Unable to connect to the server. Check your internet connection and try again.', 'bottom', false);
+          $ionicPopup.alert({title: 'Password reset failed', template: 'Unable to connect to the server. Check your internet connection and try again.'});
         } else {
-          ionicToast.show('Password reset failed.', 'bottom', false);
+          $ionicPopup.alert({title: 'Password reset failed', template: 'Password reset failed.'});
         }
       });
     }
   })
 
-  .controller('publicMessagesCtrl', function ($scope, $timeout, $cordovaGeolocation, $ionicScrollDelegate, $ionicPopup, ionicToast, userDataService) {
+  .controller('publicMessagesCtrl', function ($scope, $timeout, $cordovaGeolocation, $ionicScrollDelegate, $ionicPopup, userDataService) {
     $scope.isLoading = true;
     $timeout(function () {
       $scope.isLoading = false;
@@ -342,10 +333,7 @@ angular.module('app.controllers', [])
     };
 
     $scope.showSendLocationPopup = function () {
-      var popup = $ionicPopup.confirm({
-        title: 'Show Location',
-        template: 'Are you sure you want to share your location? Your precise location will be sent to all chat participants.'
-      });
+      var popup = $ionicPopup.confirm({title: 'Show Location', template: 'Are you sure you want to share your location? Your precise location will be sent to all chat participants.'});
 
       popup.then(function (confirmed) {
         if (confirmed) {
@@ -370,7 +358,7 @@ angular.module('app.controllers', [])
               sendPublicMessageWithData(data);
 
             }, function (error) {
-              ionicToast.show('Unable to retrieve location. Your message was not sent. Ensure location retrieval is enabled and try again.', 'bottom', false, 4000);
+              $ionicPopup.alert('Unable to retrieve location', 'Your message was not sent. Ensure location services are enabled and try again.', 4000);
             });
         }
       });
@@ -388,11 +376,11 @@ angular.module('app.controllers', [])
         userDataService.setCoordinates([position.coords.latitude, position.coords.longitude]);
         listenForGeoQueryMessages();
       }, function (error) {
-        ionicToast.show('Unable to retrieve location. Restart app.', 'bottom', false);
+        $ionicPopup.alert({title: 'Error', template: 'Unable to retrieve location. Ensure location services are enabled and restart app.'});
       });
   })
 
-  .controller('friendsCtrl', function ($scope, $ionicPopup, $ionicLoading, $ionicHistory, $ionicNavBarDelegate, $sanitize, $timeout, ERROR_TYPE, userDataService, helperService, ionicToast) {
+  .controller('friendsCtrl', function ($scope, $ionicPopup, $ionicLoading, $ionicHistory, $ionicNavBarDelegate, $sanitize, $timeout, ERROR_TYPE, userDataService, helperService) {
     $ionicHistory.nextViewOptions({
       disableAnimate: false
     });
@@ -546,10 +534,10 @@ angular.module('app.controllers', [])
               if (!$scope.data.targetFriendCode
                 || $scope.data.targetFriendCode.length !== 12
                 || !$scope.data.targetFriendCode.match(/^[0-9]+$/)) {
-                ionicToast.show('Enter a valid 12-digit friend code.', 'bottom', false, 2500);
+                $ionicPopup.alert({title: 'Error', template: 'Enter a valid 12-digit friend code.'});
                 e.preventDefault();
               } else if (userDataService.getFriendCode() === $scope.data.targetFriendCode) {
-                ionicToast.show('You can\'t add yourself, you numpty.', 'bottom', false, 2500);
+                $ionicPopup.alert({title: 'Error', template: 'You can\'t add yourself, you numpty.'});
                 e.preventDefault();
               } else {
                 // Code passes validation check
@@ -627,12 +615,12 @@ angular.module('app.controllers', [])
           $scope.isLoading = false;
         });
       }, function (error) {
-        ionicToast.show('Error: unable to retrieve friends. Check your internet connection and restart the app.', 'bottom', false, 4000);
+        $ionicPopup.alert('Error', 'Unable to retrieve friends. Check your internet connection and restart the app.');
       });
 
     }, function (error) {
       if (error) {
-        ionicToast.show('Error: unable to retrieve friends. Check your internet connection and restart the app.', 'bottom', false, 4000);
+        $ionicPopup.alert({title: 'Error', template: 'Unable to retrieve friends. Check your internet connection and restart the app.'});
       }
     });
 
@@ -642,22 +630,21 @@ angular.module('app.controllers', [])
 
   })
 
-  .controller('settingsCtrl', function ($scope, $state, ionicToast, userDataService) {
+  .controller('settingsCtrl', function ($scope, $state, $ionicPopup, userDataService) {
     $scope.data = {
       'display_name': userDataService.getDisplayName(),
       'team': userDataService.getTeam()
     };
     $scope.signOut = function () {
       firebase.auth().signOut().then(function () {
-        ionicToast.show('You have been signed out.', 'bottom', false);
         $state.go('splash');
       }).catch(function (error) {
-        ionicToast.show('Unable to sign out. Try again later or clear app data/reinstall the app.', 'bottom', false);
+        $ionicPopup.alert({title: 'Error', template: 'Unable to sign out. Try again later or clear app data/reinstall the app.'});
       })
     }
   })
 
-  .controller('friendMessagesCtrl', function ($scope, $stateParams, $ionicScrollDelegate, $ionicNavBarDelegate, $ionicPopup, $cordovaGeolocation, $timeout, ERROR_TYPE, ionicToast, userDataService, helperService) {
+  .controller('friendMessagesCtrl', function ($scope, $stateParams, $ionicScrollDelegate, $ionicNavBarDelegate, $ionicPopup, $cordovaGeolocation, $timeout, ERROR_TYPE, userDataService, helperService) {
     $ionicNavBarDelegate.showBackButton(true);
     $scope.data = {
       'messages': [],
@@ -761,7 +748,7 @@ angular.module('app.controllers', [])
               sendConversationMessageWithData(data);
 
             }, function (error) {
-              ionicToast.show('Unable to retrieve location. Your message was not sent. Ensure location retrieval is enabled and try again.', 'bottom', false, 4000);
+              $ionicPopup.alert({title: 'Error', template: 'Unable to retrieve location. Your message was not sent. Ensure location retrieval is enabled and try again.'});
             });
         }
       });
@@ -838,7 +825,7 @@ angular.module('app.controllers', [])
           $scope.isLoading = false;
           $scope.$apply();
         } else {
-          ionicToast.show('Unable to retrieve messages. Check your internet connection and restart the app.', 'bottom', false, 4000);
+          $ionicPopup.alert({title: 'Error', template: 'Unable to retrieve messages. Check your internet connection and restart the app.'});
         }
       })
     });
