@@ -3,10 +3,13 @@ angular.module('app.controllers')
     $scope.data = {};
 
     $scope.signUp = function () {
-      // TODO: Validation on both front-end and back-end
-
       var email = $scope.data.email;
       var password = $scope.data.password;
+
+      if (typeof(email) === 'undefined' || (email.length < 1 || password.length < 1)) {
+        $ionicPopup.alert({title: "Registration failed", template: "The credentials you entered are in an invalid format."});
+        return;
+      }
 
       $ionicLoading.show();
       firebase.auth().createUserWithEmailAndPassword(email, password).then(function (user) {

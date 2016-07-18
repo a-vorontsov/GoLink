@@ -3,7 +3,6 @@ angular.module('app.controllers')
     $scope.data = {};
 
     $scope.login = function () {
-      // TODO: Validation on both front-end and back-end
       var email = $scope.data.email;
       var password = $scope.data.password;
 

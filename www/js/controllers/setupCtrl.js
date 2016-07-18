@@ -1,11 +1,16 @@
 angular.module('app.controllers')
   .controller('setupCtrl', function ($scope, $state, $ionicPopup, $ionicLoading) {
+    var teams = ['Instinct', 'Mystic', 'Valor'];
+
     $scope.data = {'displayName': '', 'team': 'Instinct'};
     $scope.sendSetup = function () {
       var displayName = $scope.data.displayName;
       var team = $scope.data.team;
 
-      // TODO: Front-end and back-end validation
+      if (displayName.length < 1 || teams.indexOf(team) === -1) {
+        $ionicPopup.alert({title: "Validation failed", template: "Enter a valid display name/select a team and try again."});
+        return;
+      }
 
       $ionicLoading.show();
       var user = firebase.auth().currentUser;
@@ -21,4 +26,4 @@ angular.module('app.controllers')
         }
       });
     }
-  })
+  });

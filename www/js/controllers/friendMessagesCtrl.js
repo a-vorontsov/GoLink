@@ -1,6 +1,10 @@
 angular.module('app.controllers')
-  .controller('friendMessagesCtrl', function ($scope, $stateParams, $ionicScrollDelegate, $ionicNavBarDelegate, $ionicPopup, $cordovaGeolocation, $timeout, ERROR_TYPE, userDataService, helperService) {
-    $ionicNavBarDelegate.showBackButton(true);
+  .controller('friendMessagesCtrl', function ($scope, $stateParams, $ionicScrollDelegate, $ionicPopup, $cordovaGeolocation, $timeout, ERROR_TYPE, userDataService, helperService) {
+
+    $scope.$on('$ionicView.beforeEnter', function (event, viewData) {
+      viewData.enableBack = true;
+    });
+
     $scope.data = {
       'messages': [],
       'friend': {

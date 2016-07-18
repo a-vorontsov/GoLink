@@ -16,9 +16,11 @@
     <label class="item-input-wrapper">
       <textarea chat-input="" type="text" placeholder="Type your message" on-return="sendMessage();" ng-model="data.message" on-focus="inputUp()" on-blur="inputDown()"></textarea>
     </label>
-    <button class="button button-clear" ng-click="sendMessage();">
-      Send
+    <button ng-show="data.message.length !== 0" class="button button-ion button-clear" ng-click="sendMessage();">
+      <i class="ion-android-send"></i>
     </button>
-    <button class="ion-location" ng-click="showSendLocationPopup();"></button>
+    <button ng-show="data.message.length === 0" class="button button-ion button-clear" ng-click="showSendLocationPopup();">
+      <i class="ion-location"></i>
+    </button>
   </ion-footer-bar>
 </ion-view>

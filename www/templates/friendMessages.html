@@ -1,4 +1,11 @@
 <ion-view title="{{data.friend.display_name}} - {{::data.friend.team}}">
+
+  <ion-nav-buttons side="right">
+    <button class="button button-icon button-clear" ui-sref="">
+      <i class=ion-ios-information-outline"></i>
+    </button>
+  </ion-nav-buttons>
+
   <ion-content lazy-scroll class="content-stable">
 
     <div ng-show="isLoading">

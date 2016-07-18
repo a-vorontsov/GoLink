@@ -3,9 +3,7 @@ angular.module('app.controllers')
     $ionicHistory.nextViewOptions({
       disableAnimate: false
     });
-    $ionicNavBarDelegate.showBackButton(true);
 
-    // TODO: Timeout for last messaged
     $scope.isLoading = true;
     $scope.data = {
       'friendCode': userDataService.getFriendCode(),
