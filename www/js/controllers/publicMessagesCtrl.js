@@ -1,4 +1,4 @@
-angular.module('app.controllers', [])
+angular.module('app.controllers')
   .controller('publicMessagesCtrl', function ($scope, $timeout, $cordovaGeolocation, $ionicScrollDelegate, $ionicPopup, userDataService) {
     $scope.isLoading = true;
     $timeout(function () {

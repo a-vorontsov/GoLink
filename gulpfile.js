@@ -1,18 +1,24 @@
-var gulp = require('gulp');
-var gutil = require('gulp-util');
-var htmlReplace = require('gulp-html-replace');
 var bower = require('bower');
 var concat = require('gulp-concat');
-var sass = require('gulp-sass');
+var clean = require('gulp-clean');
+var gulp = require('gulp');
+var gutil = require('gulp-util');
 var imageMin = require('gulp-imagemin');
+var livereload = require('gulp-livereload');
 var minifyCss = require('gulp-minify-css');
+var ngAnnotate = require('gulp-ng-annotate');
 var rename = require('gulp-rename');
+var sass = require('gulp-sass');
 var sh = require('shelljs');
+var templateCache = require('gulp-angular-templatecache');
+var uglify = require("gulp-uglify");
 
 var paths = {
   css: ['./www/css/**/*.min.css'],
+  dist: ['./www/dist/'],
   html: ['./www/index.html'],
   ionicBundle: ['./www/lib/ionic/js/ionic.bundle.min.js'],
+  ionicFonts: ['./www/lib/ionic/fonts/*'],
   images: ['./www/img/**/*'],
   lib: [
     './www/lib/firebase/firebase.js',
@@ -24,17 +30,15 @@ var paths = {
   ],
   sass: ['./scss/**/*.scss'],
   scripts: ['./www/js/**/*.js', '!./www/js/app.bundle.min.js'],
-  templates: ['./www/templates/**/*.html']
+  templates: ['./www/templates/**/*.html'],
+  unminifiedCss: ['./www/css/**/*.css', '!./www/css/**/*.min.css']
 };
 
 var files = {
-  jsBundle: 'app.bundle.min.js',
-  appCss: 'app.css'
+  jsBundle: 'app.bundle.min.js'
 };
 
-gulp.task('default', ['build']);
-
-gulp.task('build', ['sass', 'scripts', 'styles', 'imageMin', 'index', 'copy']);
+gulp.task('build', ['sass', 'scripts', 'styles', 'imageMin', 'copy']);
 
 gulp.task('clean', function () {
   return gulp.src(paths.dist, {
@@ -43,94 +47,20 @@ gulp.task('clean', function () {
     .pipe(clean());
 });
 
-gulp.task('scripts', ['clean', 'templateCache'], function() {
-  gulp.src(paths.scripts)
-  //.pipe(jshint())
-  //.pipe(jshint.reporter('default'))
-    .pipe(ngAnnotate({
-      remove: true,
-      add: true,
-      single_quotes: true
-    }))
-    .pipe(uglify())
-    .pipe(concat(files.jsbundle))
-    .pipe(gulp.dest(paths.dist + 'js'));
-});
-
-gulp.task('index', ['clean'], function () {
-  gulp.src(paths.html)
-    .pipe(htmlReplace({
-      'css': 'css/app.min.css',
-      'js': 'js/app.bundle.min.js'
-    }))
-    .pipe(gulp.dest(paths.dist + '.'));
-});
-
-gulp.task('templateCache', ['clean'], function() {
-  return gulp.src(paths.templates)
-    .pipe(templateCache({
-      'filename': 'templates.js',
-      'root': 'templates/',
-      'module': 'app'
-    }))
-    .pipe(gulp.dest('./www/js'));
-});
-
-gulp.task('copy', ['clean'], function() {
+gulp.task('copy', ['clean'], function () {
   // Copy ionic bundle file
   gulp.src(paths.ionicBundle)
     .pipe(gulp.dest(paths.dist + 'lib/ionic/js/.'));
+
+  gulp.src(paths.ionicFonts)
+    .pipe(gulp.dest(paths.dist + 'lib/ionic/fonts'));
 
   // Copy lib scripts
   gulp.src(paths.lib)
     .pipe(gulp.dest(paths.dist + 'lib'));
 });
 
-gulp.task('minAppCss', function() {
-  return gulp.src('./www/css/' + files.appcss)
-    .pipe(minifyCss())
-    .pipe(rename({
-      extname: '.min.css'
-    }))
-    .pipe(gulp.dest('./www/css/'));
-});
-
-gulp.task('styles', ['clean', 'minAppCss'], function() {
-  gulp.src(paths.css)
-    .pipe(gulp.dest(paths.dist + 'css'));
-});
-
-gulp.task('imageMin', ['clean'], function() {
-  gulp.src(paths.images)
-    .pipe(imageMin())
-    .pipe(gulp.dest(paths.dist + 'img'));
-});
-
-gulp.task('sass', function (done) {
-  gulp.src('./scss/ionic.app.scss')
-    .pipe(sass())
-    .on('error', sass.logError)
-    .pipe(gulp.dest('./www/css/'))
-    .pipe(minifyCss({
-      keepSpecialComments: 0
-    }))
-    .pipe(rename({extname: '.min.css'}))
-    .pipe(gulp.dest('./www/css/'))
-    .on('end', done);
-});
-
-gulp.task('watch', function () {
-  gulp.watch(paths.sass, ['sass']);
-  gulp.watch(paths.css, ['minAppCss']);
-  gulp.watch(paths.scripts, ['scripts'])
-});
-
-gulp.task('install', ['git-check'], function () {
-  return bower.commands.install()
-    .on('log', function (data) {
-      gutil.log('bower', gutil.colors.cyan(data.id), data.message);
-    });
-});
+gulp.task('default', ['build']);
 
 gulp.task('git-check', function (done) {
   if (!sh.which('git')) {
@@ -144,3 +74,91 @@ gulp.task('git-check', function (done) {
   }
   done();
 });
+
+var imageMinTask = function () {
+  return gulp.src(paths.images)
+    .pipe(imageMin())
+    .pipe(gulp.dest(paths.dist + 'img'))
+    .pipe(livereload());
+};
+gulp.task('imageMin', ['clean'], imageMinTask);
+gulp.task('imageMin-watch', [], imageMinTask);
+
+gulp.task('install', ['git-check'], function () {
+  return bower.commands.install()
+    .on('log', function (data) {
+      gutil.log('bower', gutil.colors.cyan(data.id), data.message);
+    });
+});
+
+gulp.task('minifyCss', function () {
+  return gulp.src(paths.unminifiedCss)
+    .pipe(minifyCss())
+    .pipe(rename({
+      extname: '.min.css'
+    }))
+    .pipe(gulp.dest('./www/css/'))
+    .pipe(livereload());
+});
+
+gulp.task('sass', function (done) {
+  gulp.src('./scss/ionic.app.scss')
+    .pipe(sass())
+    .on('error', sass.logError)
+    .pipe(gulp.dest('./www/css/'))
+    .pipe(minifyCss({
+      keepSpecialComments: 0
+    }))
+    .pipe(rename({extname: '.min.css'}))
+    .pipe(gulp.dest('./www/css/'))
+    .pipe(livereload())
+    .on('end', done);
+});
+
+var scriptsTask = function () {
+  return gulp.src(paths.scripts)
+    .pipe(ngAnnotate({
+      remove: true,
+      add: true,
+      single_quotes: true
+    }))
+    .pipe(uglify())
+    .pipe(concat(files.jsBundle))
+    .pipe(gulp.dest(paths.dist + 'js'))
+    .pipe(livereload());
+};
+gulp.task('scripts', ['clean', 'templateCache'], scriptsTask);
+gulp.task('scripts-watch', ['templateCache-watch'], scriptsTask);
+
+var stylesTask = function () {
+  return gulp.src(paths.css)
+    .pipe(gulp.dest(paths.dist + 'css'))
+    .pipe(livereload());
+};
+gulp.task('styles', ['clean', 'minifyCss'], stylesTask);
+gulp.task('styles-watch', ['minifyCss'], stylesTask);
+
+var templateCacheTask = function () {
+  return gulp.src(paths.templates)
+    .pipe(templateCache({
+      'filename': 'templates.js',
+      'root': 'templates/',
+      'module': 'app'
+    }))
+    .pipe(gulp.dest('./www/js'))
+    .pipe(livereload());
+};
+gulp.task('templateCache', ['clean'], templateCacheTask);
+gulp.task('templateCache-watch', templateCacheTask);
+
+gulp.task('watch', function () {
+  livereload.listen();
+  gulp.watch(paths.html, ['templateCache-watch']);
+  gulp.watch(paths.sass, ['sass']);
+  gulp.watch(paths.css, ['styles-watch']);
+  gulp.watch(paths.scripts, ['scripts-watch']);
+  gulp.watch(paths.templates, ['templateCache-watch']);
+  gulp.watch(paths.images, ['imageMin-watch']);
+});
+
+

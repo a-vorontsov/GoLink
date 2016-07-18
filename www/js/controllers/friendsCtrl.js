@@ -1,4 +1,4 @@
-angular.module('app.controllers', [])
+angular.module('app.controllers')
   .controller('friendsCtrl', function ($scope, $ionicPopup, $ionicLoading, $ionicHistory, $ionicNavBarDelegate, $sanitize, $timeout, ERROR_TYPE, userDataService, helperService) {
     $ionicHistory.nextViewOptions({
       disableAnimate: false

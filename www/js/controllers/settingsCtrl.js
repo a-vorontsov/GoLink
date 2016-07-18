@@ -1,4 +1,4 @@
-angular.module('app.controllers', [])
+angular.module('app.controllers')
   .controller('settingsCtrl', function ($scope, $state, $ionicPopup, userDataService) {
     $scope.data = {
       'display_name': userDataService.getDisplayName(),

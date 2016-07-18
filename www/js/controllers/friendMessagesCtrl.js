@@ -1,4 +1,4 @@
-angular.module('app.controllers', [])
+angular.module('app.controllers')
   .controller('friendMessagesCtrl', function ($scope, $stateParams, $ionicScrollDelegate, $ionicNavBarDelegate, $ionicPopup, $cordovaGeolocation, $timeout, ERROR_TYPE, userDataService, helperService) {
     $ionicNavBarDelegate.showBackButton(true);
     $scope.data = {

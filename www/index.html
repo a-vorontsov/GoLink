@@ -12,17 +12,15 @@
   <script src="cordova.js"></script>
 
   <!-- Firebase -->
-  <script src="lib/firebase/firebase.js"></script>
+  <script src="dist/lib/firebase.js"></script>
   <!-- AngularFire -->
-  <script src="lib/angularfire/dist/angularfire.js"></script>
+  <script src="dist/lib/angularfire.js"></script>
   <!-- GeoFire -->
-  <script src="lib/geofire/dist/geofire.min.js"></script>
+  <script src="dist/lib/geofire.min.js"></script>
   <!-- ngCordova -->
-  <script src="lib/ngCordova/dist/ng-cordova.min.js"></script>
-  <!-- ionicToast -->
-  <script src="lib/ionic-toast/dist/ionic-toast.bundle.min.js"></script>
+  <script src="dist/lib/ng-cordova.min.js"></script>
   <!-- moment.js -->
-  <script src="lib/moment/min/moment.min.js"></script>
+  <script src="dist/lib/moment.min.js"></script>
   <script>
     // Initialize the Firebase SDK
     var config = {
@@ -34,10 +32,7 @@
     firebase.initializeApp(config);
   </script>
 
-  <!-- IF using Sass (run gulp sass first), then uncomment below and remove the CSS includes above
-  <link href="css/ionic.app.css" rel="stylesheet">
-  -->
-  <link href="lib/ionic/css/ionic.css" rel="stylesheet">
+  <link href="dist/css/ionic.app.min.css" rel="stylesheet">
   <style type="text/css">
     .platform-ios .manual-ios-statusbar-padding {
       padding-top: 20px;
@@ -62,18 +57,10 @@
       border-right: 0px;
     }
   </style>
-  <link href="css/style.css" rel="stylesheet">
+  <link href="dist/css/style.min.css" rel="stylesheet">
+  <script src="dist/js/app.bundle.min.js"></script>
 
-  <script src="js/app.js"></script>
-  <script src="js/services.js"></script>
-  <script src="js/controllers.js"></script>
-  <script src="js/routes.js"></script>
-  <script src="js/directives.js"></script>
-  <script src="js/filters.js"></script>
-
-  <!-- Only required for Tab projects w/ pages in multiple tabs
   <script src="lib/ionicuirouter/ionicUIRouter.js"></script>
-  -->
 
 </head>
 <body ng-app="app" animation="slide-left-right-ios7">

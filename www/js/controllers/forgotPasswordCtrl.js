@@ -1,4 +1,4 @@
-angular.module('app.controllers', [])
+angular.module('app.controllers')
   .controller('forgotPasswordCtrl', function ($scope, $ionicPopup, $ionicLoading) {
     // TODO: Add validation
     $scope.data = {email: ''};

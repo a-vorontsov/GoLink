@@ -1,4 +1,4 @@
-angular.module('app.controllers', [])
+angular.module('app.controllers')
   .controller('setupCtrl', function ($scope, $state, $ionicPopup, $ionicLoading) {
     $scope.data = {'displayName': '', 'team': 'Instinct'};
     $scope.sendSetup = function () {
