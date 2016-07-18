@@ -122,7 +122,7 @@ var scriptsTask = function () {
       add: true,
       single_quotes: true
     }))
-    .pipe(uglify())
+    .pipe(uglify().on('error', gutil.log))
     .pipe(concat(files.jsBundle))
     .pipe(gulp.dest(paths.dist + 'js'))
     .pipe(livereload());

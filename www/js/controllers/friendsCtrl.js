@@ -55,6 +55,7 @@ angular.module('app.controllers')
     // Temporary variables
     var friendUserId;
     var friendMemberObject;
+    var lastMessagedListenerPromises = [];
 
     function addFriendByFriendCode(targetFriendCode) {
       // Show loading screen
@@ -198,6 +199,7 @@ angular.module('app.controllers')
         $scope.data.friends.push({'user_id': friendUserId, 'added_at': friend.added_at});
         getFriendObjectPromises.push(getFriendObjectPromise(friendUserId));
         getLastMessagedPromises.push(getLastMessagedSnapshotPromise(helperService.getConversationId(userDataService.getId(), friendUserId)));
+        // lastMessagedListenerPromises.push(getFriendTimestampListenerPromise(helperService.getConversationId(userDataService.getId(), friendUserId)))
       }
 
       // Execute all promises
@@ -216,19 +218,25 @@ angular.module('app.controllers')
         return Promise.all(getLastMessagedPromises);
       }).then(function onGetLastMessagedPromisesComplete(results) {
         results.forEach(function (result) {
-          var friendId = helperService.getFriendUserIdFromConversationId(userDataService.getId(), result.ref.parent.key);
-          var lastMessaged = result.val();
-          for (var i = 0; i < $scope.data.friends.length; i++) {
-            if ($scope.data.friends[i].user_id === friendId) {
-              if (typeof(lastMessaged) === undefined || lastMessaged === null) {
-                $scope.data.friends[i].last_messaged = null;
-              } else {
-                $scope.data.friends[i].last_messaged = lastMessaged;
+          // Listen for timestamp updates
+          firebase.database().ref('friend_conversations/' + result.ref.parent.key + '/last_messaged').on('value', function (snapshot) {
+            var friendId = helperService.getFriendUserIdFromConversationId(userDataService.getId(), snapshot.ref.parent.key);
+            var lastMessaged = snapshot.val();
+            for (var i = 0; i < $scope.data.friends.length; i++) {
+              if ($scope.data.friends[i].user_id === friendId) {
+                $timeout(function () {
+                  if (typeof(lastMessaged) === undefined || lastMessaged === null) {
+                    $scope.data.friends[i].last_messaged = null;
+                  } else {
+                    $scope.data.friends[i].last_messaged = lastMessaged;
+                  }
+                });
+                break;
               }
-              break;
             }
-          }
+          });
         });
+
         $timeout(function () {
           userDataService.setFriends($scope.data.friends);
           $scope.isLoading = false;
@@ -243,4 +251,4 @@ angular.module('app.controllers')
       }
     });
 
-  })
+  });
