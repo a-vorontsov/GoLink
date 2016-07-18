@@ -123,10 +123,11 @@ angular.module('app.controllers')
       }
       promise.on("child_added", function (snapshot) {
         var message = snapshot.val();
-        if (sentMessageKeys.indexOf(message.key) === -1) {
-          $timeout(function() {
+        console.log(sentMessageKeys);
+        if (sentMessageKeys.indexOf(snapshot.key) === -1) {
+          $timeout(function () {
             $scope.data.messages.push({
-              'key': message.key,
+              'key': snapshot.key,
               'timestamp': message.timestamp,
               'type': typeof(message.longitude) === 'undefined' ? 'message' : 'location',
               'message': message.message,

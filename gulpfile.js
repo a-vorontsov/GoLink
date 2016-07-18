@@ -21,12 +21,12 @@ var paths = {
   ionicFonts: ['./www/lib/ionic/fonts/*'],
   images: ['./www/img/**/*'],
   lib: [
-    './www/lib/firebase/firebase.js',
     './www/lib/angularfire/dist/angularfire.js',
+    './www/lib/firebase/firebase.js',
     './www/lib/geofire/dist/geofire.min.js',
-    './www/lib/ngCordova/dist/ng-cordova.min.js',
-    './www/lib/ionic-toast/dist/ionic-toast.bundle.min.js',
-    './www/lib/moment/min/moment.min.js'
+    './www/lib/ionic-image-lazy-load/ionic-image-lazy-load.js',
+    './www/lib/moment/min/moment.min.js',
+    './www/lib/ngCordova/dist/ng-cordova.min.js'
   ],
   sass: ['./scss/**/*.scss'],
   scripts: ['./www/js/**/*.js', '!./www/js/app.bundle.min.js'],
