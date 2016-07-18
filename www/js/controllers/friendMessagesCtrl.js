@@ -12,6 +12,7 @@ angular.module('app.controllers')
     var conversationId = helperService.getConversationId(userDataService.getId(), friendId);
     var isIOS = ionic.Platform.isWebView() && ionic.Platform.isIOS();
     var sentMessageKeys = [];
+    var userId = userDataService.getId();
     $scope.isLoading = true;
     $scope.isInFriendsList = false;
     $scope.isConnectedToFriend = true;
@@ -122,6 +123,21 @@ angular.module('app.controllers')
       }
       promise.on("child_added", function (snapshot) {
         var message = snapshot.val();
+        if (sentMessageKeys.indexOf(message.key) === -1) {
+          $timeout(function() {
+            $scope.data.messages.push({
+              'key': message.key,
+              'timestamp': message.timestamp,
+              'type': typeof(message.longitude) === 'undefined' ? 'message' : 'location',
+              'message': message.message,
+              'longitude': message.longitude,
+              'latitude': message.latitude,
+              'user_id': message.user_id,
+              'is_me': message.user_id === userId
+            });
+            $ionicScrollDelegate.resize();
+          });
+        }
       });
     }
 
@@ -153,10 +169,9 @@ angular.module('app.controllers')
     }).then(function (snapshot) {
       // Populate the list of messages
       var messages = snapshot.val();
-      var userId = userDataService.getId();
       for (var key in messages) {
         var message = messages[key];
-        message.type = $scope.data.messages.push({
+        $scope.data.messages.push({
           'key': key,
           'timestamp': message.timestamp,
           'type': typeof(message.longitude) === 'undefined' ? 'message' : 'location',
@@ -167,10 +182,13 @@ angular.module('app.controllers')
           'is_me': message.user_id === userId
         });
       }
-      listenForNewMessages();
       $timeout(function () {
+        $ionicScrollDelegate.resize();
         $scope.isLoading = false;
+        $ionicScrollDelegate.scrollBottom(true);
       });
+      listenForNewMessages();
+
     }, function (error) {
       return Promise.reject(error);
     }).catch(function (error) {

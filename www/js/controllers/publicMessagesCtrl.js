@@ -42,8 +42,9 @@ angular.module('app.controllers')
             $scope.messages.sort(function (x, y) {
               return x.timestamp - y.timestamp;
             });
+            $ionicScrollDelegate.resize();
+            $ionicScrollDelegate.scrollBottom(true);
           });
-          $ionicScrollDelegate.scrollBottom(true);
         }
       }, function (error) {
         if (!error.message.indexOf('permission_denied') > 1) {
@@ -94,7 +95,10 @@ angular.module('app.controllers')
           'is_me': true
         }
       });
-      $ionicScrollDelegate.scrollBottom(true);
+      $timeout(function () {
+        $ionicScrollDelegate.resize();
+        $ionicScrollDelegate.scrollBottom(true);
+      });
     }
 
     /*
