@@ -90,7 +90,7 @@ angular.module('app.controllers', [])
     checkUser();
   })
 
-  .controller('loginCtrl', function ($scope, $state, $ionicPopup) {
+  .controller('loginCtrl', function ($scope, $state, $ionicPopup, $ionicLoading) {
     $scope.data = {};
 
     $scope.login = function () {
@@ -99,14 +99,16 @@ angular.module('app.controllers', [])
       var email = $scope.data.email;
       var password = $scope.data.password;
 
+      $ionicLoading.show();
       firebase.auth().signInWithEmailAndPassword(email, password).then(function (user) {
         $scope.data.email = '';
         $scope.data.password = '';
+        $ionicLoading.hide();
         $state.go('splash');
 
       }).catch(function (error) {
+        $ionicLoading.hide();
         var errorCode = error.code;
-        $scope.error = JSON.stringify(error);
         if (errorCode === "auth/user-disabled") {
           $ionicPopup.alert({title: "Login failed", template: "Your account has been disabled. Contact support for more info."});
         } else if (errorCode === "auth/network-request-failed") {
@@ -118,7 +120,7 @@ angular.module('app.controllers', [])
     }
   })
 
-  .controller('signupCtrl', function ($scope, $state, $ionicPopup) {
+  .controller('signupCtrl', function ($scope, $state, $ionicPopup, $ionicLoading) {
     $scope.data = {};
 
     $scope.signUp = function () {
@@ -127,11 +129,14 @@ angular.module('app.controllers', [])
       var email = $scope.data.email;
       var password = $scope.data.password;
 
+      $ionicLoading.show();
       firebase.auth().createUserWithEmailAndPassword(email, password).then(function (user) {
         $scope.data.email = '';
         $scope.data.password = '';
+        $ionicLoading.hide();
         $state.go('splash');
       }).catch(function (error) {
+        $ionicLoading.hide();
         var errorCode = error.code;
         if (errorCode === "auth/email-already-in-use") {
           $ionicPopup.alert({title: 'Registration failed', template: 'The email you entered is already in use.'});
@@ -148,18 +153,21 @@ angular.module('app.controllers', [])
     };
   })
 
-  .controller('setupCtrl', function ($scope, $state, $ionicPopup) {
+  .controller('setupCtrl', function ($scope, $state, $ionicPopup, $ionicLoading) {
     $scope.data = {'displayName': '', 'team': 'Instinct'};
     $scope.sendSetup = function () {
       var displayName = $scope.data.displayName;
       var team = $scope.data.team;
 
       // TODO: Front-end and back-end validation
+
+      $ionicLoading.show();
       var user = firebase.auth().currentUser;
       firebase.database().ref('members/' + user.uid).set({
         'display_name': displayName,
         'team': team
       }, function (error) {
+        $ionicLoading.hide();
         if (error) {
           $ionicPopup.alert({title: 'Error', template: 'Save failed. Try again later.'});
         } else {
@@ -169,7 +177,7 @@ angular.module('app.controllers', [])
     }
   })
 
-  .controller('forgotPasswordCtrl', function ($scope, $ionicPopup) {
+  .controller('forgotPasswordCtrl', function ($scope, $ionicPopup, $ionicLoading) {
     // TODO: Add validation
     $scope.data = {email: ''};
 
@@ -177,10 +185,14 @@ angular.module('app.controllers', [])
       var auth = firebase.auth();
       var emailAddress = $scope.data.email;
 
+      $ionicLoading.show();
+
       auth.sendPasswordResetEmail(emailAddress).then(function () {
+        $ionicLoading.hide();
         $ionicPopup.alert({title: 'Email sent', template: 'Check your email address for the password reset email and follow the instructions from there.'});
         $scope.data.email = '';
       }, function (error) {
+        $ionicLoading.hide();
         var errorCode = error.code;
         $scope.error = JSON.stringify(error);
         if (errorCode === "auth/invalid-email" || errorCode === "auth/user-not-found") {
