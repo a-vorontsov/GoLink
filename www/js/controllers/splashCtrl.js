@@ -1,9 +1,6 @@
 angular.module('app.controllers')
   .controller('splashCtrl', function ($scope, $state, $window, $ionicHistory, $ionicNavBarDelegate, $ionicPopup, CONFIG_VARS, userDataService) {
     // Disable animation on transition
-    $ionicHistory.nextViewOptions({
-      disableAnimate: true
-    });
     $ionicNavBarDelegate.showBackButton(false);
 
     // Check authentication state and move to the appropriate page

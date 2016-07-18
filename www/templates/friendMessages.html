@@ -1,12 +1,12 @@
 <ion-view title="{{data.friend.display_name}} - {{::data.friend.team}}">
-
   <ion-nav-buttons side="right">
-    <button class="button button-icon button-clear" ui-sref="">
+    <button class="button button-icon button-clear">
       <i class=ion-ios-information-outline"></i>
     </button>
   </ion-nav-buttons>
 
-  <ion-content lazy-scroll class="content-stable">
+
+  <ion-content lazy-scroll class="content-stable has-header">
 
     <div ng-show="isLoading">
       <ion-spinner></ion-spinner>
@@ -27,7 +27,7 @@
   </ion-content>
   <ion-footer-bar keyboard-attach class="bar-stable item-input-inset">
     <label class="item-input-wrapper">
-      <input chat-input type="text" placeholder="Type your message" on-return="sendMessage();" ng-model="data.message" on-focus="inputUp()" on-blur="inputDown()"/>
+      <input chat-input="" type="text" placeholder="Type your message" on-return="sendMessage();" ng-model="data.message" on-focus="inputUp()" on-blur="inputDown()"/>
     </label>
     <button class="button button-clear" ng-click="sendMessage();">
       Send

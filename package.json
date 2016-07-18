@@ -28,7 +28,11 @@
     "cordova-plugin-whitelist",
     "cordova-plugin-splashscreen",
     "cordova-plugin-statusbar",
-    "ionic-plugin-keyboard"
+    "ionic-plugin-keyboard",
+    {
+      "locator": "https://github.com/Telerik-Verified-Plugins/NativePageTransitions#0.6.5",
+      "id": "com.telerik.plugins.nativepagetransitions"
+    }
   ],
   "cordovaPlatforms": []
 }

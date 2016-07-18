@@ -1,5 +1,5 @@
 angular.module('app.controllers')
-  .controller('loginCtrl', function ($scope, $state, $ionicPopup, $ionicLoading) {
+  .controller('loginCtrl', function ($scope, $state, $ionicPopup, $timeout, $ionicNavBarDelegate, $ionicLoading) {
     $scope.data = {};
 
     $scope.login = function () {

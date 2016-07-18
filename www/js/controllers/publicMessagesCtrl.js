@@ -126,7 +126,7 @@ angular.module('app.controllers')
     };
 
     $scope.sendMessage = function () {
-      // TODO: Add front-end and back-end validation
+      // TODO: Add front-end and back-end validation+
 
       var message = $scope.data.message;
       $scope.data.message = '';
