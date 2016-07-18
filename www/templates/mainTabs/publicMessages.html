@@ -14,7 +14,7 @@
   </ion-content>
   <ion-footer-bar keyboard-attach class="bar-stable item-input-inset">
     <label class="item-input-wrapper">
-      <input chat-input type="text" placeholder="Type your message" on-return="sendMessage();" ng-model="data.message" on-focus="inputUp()" on-blur="inputDown()"/>
+      <textarea chat-input="" type="text" placeholder="Type your message" on-return="sendMessage();" ng-model="data.message" on-focus="inputUp()" on-blur="inputDown()"></textarea>
     </label>
     <button class="button button-clear" ng-click="sendMessage();">
       Send

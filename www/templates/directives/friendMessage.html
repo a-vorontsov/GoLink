@@ -1,7 +1,7 @@
 <div class="message">
   <div ng-if="data.type === 'message'">
     <div class="message-body">
-      <span class="message-contents">{{::data.message}}</span>
+      <span class="message-contents" style="white-space: pre-line;">{{::data.message}}</span>
     </div>
     <div class="message-footer">
       <span timestamp="{{::data.timestamp}}"></span>

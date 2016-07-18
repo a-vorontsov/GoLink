@@ -24,16 +24,6 @@ angular.module('app.directives')
             });
           }
         });
-        element.bind('keydown', function (e) {
-          if (e.which == 13) {
-            if (scope.returnClose) element[0].blur();
-            if (scope.onReturn) {
-              $timeout(function () {
-                scope.onReturn();
-              });
-            }
-          }
-        });
       }
     }
   });

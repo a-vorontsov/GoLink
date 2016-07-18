@@ -194,4 +194,4 @@ angular.module('app.controllers')
       }, function (error) {
         $ionicPopup.alert({title: 'Error', template: 'Unable to retrieve location. Ensure location services are enabled and restart app.'});
       });
-  })
+  });

@@ -4,9 +4,13 @@ angular.module('app.controllers')
 
     $scope.login = function () {
       // TODO: Validation on both front-end and back-end
-
       var email = $scope.data.email;
       var password = $scope.data.password;
+
+      if (typeof(email) === 'undefined' || (email.length < 1 || password.length < 1)) {
+        $ionicPopup.alert({title: "Login failed", template: "The credentials you entered are invalid."});
+        return;
+      }
 
       $ionicLoading.show();
       firebase.auth().signInWithEmailAndPassword(email, password).then(function (user) {
