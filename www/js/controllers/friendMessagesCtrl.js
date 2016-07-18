@@ -123,7 +123,6 @@ angular.module('app.controllers')
       }
       promise.on("child_added", function (snapshot) {
         var message = snapshot.val();
-        console.log(sentMessageKeys);
         if (sentMessageKeys.indexOf(snapshot.key) === -1) {
           $timeout(function () {
             $scope.data.messages.push({
