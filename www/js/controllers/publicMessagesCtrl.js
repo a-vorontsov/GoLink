@@ -105,6 +105,13 @@ angular.module('app.controllers')
      * Scope Functions
      */
 
+    $scope.$on('$ionicView.afterEnter', function() {
+      $timeout(function() {
+        $ionicScrollDelegate.resize();
+        $ionicScrollDelegate.scrollBottom(true);
+      });
+    });
+
     $scope.inputUp = function () {
       if (isIOS) $scope.data.keyboardHeight = 216;
       $timeout(function () {
