@@ -1,5 +1,5 @@
 <div class="message">
-  <div ng-if="data.type === 'message'">
+  <div ng-if="data.type === 'message'" ng-class="data.user.is_me ? 'isMe' : 'isOther'">
     <div class="message-header">
       <span class="message-display-name">{{::data.user.display_name}}</span> <span class="message-team">{{::data.user.team}}</span>
     </div>
@@ -12,11 +12,11 @@
       </div>
     </div>
   </div>
-  <div ng-if="data.type === 'location'">
+  <div ng-if="data.type === 'location'" ng-class="data.user.is_me ? 'isMeLocation' : 'isOtherLocation'">
     <div class="message-header">
       <span class="message-display-name">{{::data.user.display_name}}</span> <span class="message-team">{{::data.user.team}}</span>
     </div>
-    <div class="message-body">
+    <div class="message-body-location">
       <div class="message-main-text">
         <span class="message-contents">{{::data.latitude}}, {{::data.longitude}}</span>
       </div>
