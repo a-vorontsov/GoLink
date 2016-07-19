@@ -39,7 +39,7 @@ var files = {
   jsBundle: 'app.bundle.min.js'
 };
 
-gulp.task('build', ['sass', 'scripts', 'styles', 'imageMin', 'copy']);
+gulp.task('build', ['sass', 'scripts', 'styles', 'copy']);
 
 gulp.task('clean', function () {
   return gulp.src(paths.dist, {
