@@ -1,3 +1,4 @@
+// TODO: Test this part of the app
 angular.module('app.controllers')
   .controller('setupCtrl', function ($scope, $state, $ionicPopup, $ionicLoading) {
     var teams = ['Instinct', 'Mystic', 'Valor'];
@@ -7,8 +8,14 @@ angular.module('app.controllers')
       var displayName = $scope.data.displayName;
       var team = $scope.data.team;
 
-      if (displayName.length < 1 || teams.indexOf(team) === -1) {
-        $ionicPopup.alert({title: "Validation failed", template: "Enter a valid display name/select a team and try again."});
+      if (displayName.length < 1) {
+        $ionicPopup.alert({title: "Validation failed", template: "Enter a display name."});
+        return;
+      } else if (displayName.length > 16) {
+        $ionicPopup.alert({title: "Validation failed", template: "Your display name cannot be greater than 16 characters."});
+        return;
+      } else if (teams.indexOf(team) === -1) {
+        $ionicPopup.alert({title: "Validation failed", template: "Select a valid team."});
         return;
       }
 
