@@ -1,23 +1,27 @@
 <div class="message">
-  <div ng-if="data.type === 'message'">
+  <div ng-if="data.type === 'message'" ng-class="data.is_me ? 'isMe' : 'isOther'">
     <div class="message-body">
-      <span class="message-contents" style="white-space: pre-line;">{{::data.message}}</span>
-    </div>
-    <div class="message-footer">
-      <span timestamp="{{::data.timestamp}}"></span>
+      <div class="message-main-text">
+        <span class="message-contents" style="white-space: pre-line;">{{::data.message}}</span>
+      </div>
+      <div class="message-misc-text">
+        <span timestamp="{{::data.timestamp}}"></span>
+      </div>
     </div>
   </div>
-  <div ng-if="data.type === 'location'">
-    <div class="message-body">
-      <span class="message-contents">
-        <img
-          image-lazy-src="http://maps.googleapis.com/maps/api/staticmap?center={{::data.latitude}},{{::data.longitude}}&zoom=16&scale=2&size=400x200&maptype=roadmap&format=png&markers=size:mid|color:0xff0000|label:|{{::data.latitude}},{{::data.longitude}}&style=element:geometry.stroke|visibility:off&style=feature:landscape|element:geometry|saturation:-100&style=feature:water|saturation:-100|invert_lightness:true_"
-          image-lazy-loader="lines"
-          width="90%"/>
-      </span>
-    </div>
-    <div class="message-footer">
-      <span timestamp="{{::data.timestamp}}"></span>
+  <div ng-if="data.type === 'location'" ng-class="data.is_me ? 'isMeLocation' : 'isOtherLocation'">
+    <div class="message-body-location">
+      <div class="message-main-text">
+        <span class="message-contents">
+            <img
+              image-lazy-src="http://maps.googleapis.com/maps/api/staticmap?center={{::data.latitude}},{{::data.longitude}}&zoom=16&scale=2&size=400x200&maptype=roadmap&format=png&markers=size:mid|color:0xff0000|label:|{{::data.latitude}},{{::data.longitude}}&style=element:geometry.stroke|visibility:off&style=feature:landscape|element:geometry|saturation:-100&style=feature:water|saturation:-100|invert_lightness:true_"
+              image-lazy-loader="lines"
+              width="90%"/>
+        </span>
+      </div>
+      <div class="message-misc-text">
+        <span timestamp="{{::data.timestamp}}"></span>
+      </div>
     </div>
   </div>
 </div>
