@@ -25,7 +25,7 @@ angular.module('app.controllers')
               userDataService.setFriendCode(memberSnapshot.friend_code);
 
               // Navigate to the main tab view
-              $state.go('tabsController.publicMessages');
+              $state.go('tabsController.publicConversation');
 
             } else if (snapshot.exists() && snapshot.hasChild('display_name') && snapshot.hasChild('radius') && snapshot.hasChild('team')) {
               // User is configured but does not have a friend code

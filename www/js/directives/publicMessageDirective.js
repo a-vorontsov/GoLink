@@ -1,11 +1,11 @@
 angular.module('app.directives')
 
-  .directive('message', function () {
+  .directive('publicMessage', function () {
     return {
       restrict: 'E',
       scope: {
         data: '=data'
       },
-      templateUrl: 'templates/directives/message.html'
+      templateUrl: 'templates/directives/publicMessage.html'
     }
   });

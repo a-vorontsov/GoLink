@@ -1,5 +1,5 @@
 angular.module('app.controllers')
-  .controller('publicMessagesCtrl', function ($scope, $timeout, $cordovaGeolocation, $ionicActionSheet, $ionicScrollDelegate, $ionicPopup, userDataService) {
+  .controller('publicConversationCtrl', function ($scope, $timeout, $cordovaGeolocation, $ionicActionSheet, $ionicScrollDelegate, $ionicPopup, userDataService) {
     $scope.isLoading = true;
     $timeout(function () {
       $scope.isLoading = false;

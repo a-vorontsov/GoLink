@@ -44,12 +44,12 @@ angular.module('app.routes', [])
         abstract: true
       })
 
-      .state('tabsController.publicMessages', {
+      .state('tabsController.publicConversation', {
         url: '/public-messages',
         views: {
-          'tabPublicMessages': {
-            templateUrl: 'templates/mainTabs/publicMessages.html',
-            controller: 'publicMessagesCtrl'
+          'tabpublicConversation': {
+            templateUrl: 'templates/mainTabs/publicConversation.html',
+            controller: 'publicConversationCtrl'
           }
         }
       })
@@ -84,10 +84,10 @@ angular.module('app.routes', [])
         }
       })
 
-      .state('friendMessages', {
+      .state('friendConversation', {
         url: 'friends/{friendId}',
-        templateUrl: 'templates/friendMessages.html',
-        controller: 'friendMessagesCtrl'
+        templateUrl: 'templates/friendConversation.html',
+        controller: 'friendConversationCtrl'
       });
 
     $urlRouterProvider.otherwise('/splash')
