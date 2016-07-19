@@ -1,5 +1,5 @@
 angular.module('app.controllers')
-  .controller('publicMessagesCtrl', function ($scope, $timeout, $cordovaGeolocation, $ionicScrollDelegate, $ionicPopup, userDataService) {
+  .controller('publicMessagesCtrl', function ($scope, $timeout, $cordovaGeolocation, $ionicActionSheet, $ionicScrollDelegate, $ionicPopup, userDataService) {
     $scope.isLoading = true;
     $timeout(function () {
       $scope.isLoading = false;
@@ -9,6 +9,7 @@ angular.module('app.controllers')
     $scope.data = {'message': ''};
     $scope.messages = [];
 
+    var geoQueryKeyEnteredListener; // TODO
     var sentMessageKeys = [];
     var isIOS = ionic.Platform.isWebView() && ionic.Platform.isIOS();
     var geoFire = new GeoFire(firebase.database().ref('public_message_locations'));
@@ -58,7 +59,7 @@ angular.module('app.controllers')
         center: [userDataService.getLatitude(), userDataService.getLongitude()],
         radius: userDataService.getRadius()
       });
-      geoQuery.on("key_entered", function (key, location, distance) {
+      geoQueryKeyEnteredListener = geoQuery.on("key_entered", function (key, location, distance) {
         if (sentMessageKeys.indexOf(key) === -1) {
           transferGeoQueryResultFromFirebaseToScope(key, location, distance);
         }
@@ -105,8 +106,8 @@ angular.module('app.controllers')
      * Scope Functions
      */
 
-    $scope.$on('$ionicView.afterEnter', function() {
-      $timeout(function() {
+    $scope.$on('$ionicView.afterEnter', function () {
+      $timeout(function () {
         $ionicScrollDelegate.resize();
         $ionicScrollDelegate.scrollBottom(true);
       });
@@ -179,6 +180,42 @@ angular.module('app.controllers')
         }
       });
     };
+
+    $scope.onMessageClicked = function (message, isMe) {
+      // TODO: Solve the issue where a message sent by the user does not have a key
+      if (isMe) {
+        $ionicActionSheet.show({
+          destructiveText: 'Delete',
+          destructiveButtonClicked: function () {
+            if (typeof(message.key) === 'undefined' || message.key === null) {
+              $ionicPopup.show({title: 'Unable to delete', template: 'The message cannot be deleted at this time as it is still being sent to the server.'})
+            } else {
+              firebase.database().ref('public_messages/' + message.key).remove();
+              // TODO: Create a separate directive for message contains, which, when deleted, fades to class = hide
+            }
+            return true;
+          }
+        });
+      } else {
+        $ionicActionSheet.show({
+          destructiveText: 'Block',
+          destructiveButtonClicked: function () {
+            $ionicPopup.confirm({title: 'Block user?', template: 'Are you sure you want to block the user? You can unblock them on your settings page.'})
+              .then(function (confirmed) {
+                if (!confirmed) {
+                  return true;
+                }
+
+                // TODO: Add user to block list
+                // Loop through all messages, hiding where the user ID is on the block list
+
+                return true;
+              });
+          }
+        });
+      }
+
+    }
 
     /*
      * Runtime Functions

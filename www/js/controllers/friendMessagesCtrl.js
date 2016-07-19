@@ -1,5 +1,5 @@
 angular.module('app.controllers')
-  .controller('friendMessagesCtrl', function ($scope, $stateParams, $ionicScrollDelegate, $ionicNavBarDelegate, $ionicPopup, $cordovaGeolocation, $timeout, ERROR_TYPE, userDataService, helperService) {
+  .controller('friendMessagesCtrl', function ($scope, $stateParams, $ionicScrollDelegate, $ionicActionSheet, $ionicNavBarDelegate, $ionicPopup, $cordovaGeolocation, $timeout, ERROR_TYPE, userDataService, helperService) {
 
     $scope.$on('$ionicView.beforeEnter', function (event, viewData) {
       viewData.enableBack = true;
@@ -51,8 +51,8 @@ angular.module('app.controllers')
      * Scope Functions
      */
 
-    $scope.$on('$ionicView.afterEnter', function() {
-      $timeout(function() {
+    $scope.$on('$ionicView.afterEnter', function () {
+      $timeout(function () {
         $ionicScrollDelegate.resize();
         $ionicScrollDelegate.scrollBottom(true);
       });
@@ -120,6 +120,64 @@ angular.module('app.controllers')
         }
       });
     };
+
+    $scope.onMessageClicked = function (message, isMe) {
+      // TODO: Solve the issue where a message sent by the user does not have a key
+      if (isMe) {
+        $ionicActionSheet.show({
+          destructiveText: 'Delete',
+          destructiveButtonClicked: function () {
+            if (typeof(message.key) === 'undefined' || message.key === null) {
+              $ionicPopup.show({title: 'Unable to delete', template: 'The message cannot be deleted at this time as it is still being sent to the server.'})
+            } else {
+              firebase.database().ref('friend_conversations/' + conversationId + '/messages/' + message.key).remove();
+              // TODO: Create a separate directive for message contains, which, when deleted, fades to class = hide
+            }
+            return true;
+          }
+        });
+      } else {
+        $ionicActionSheet.show({
+          destructiveText: 'Block',
+          destructiveButtonClicked: function () {
+            $ionicPopup.confirm({title: 'Block user?', template: 'Are you sure you want to block the user? You can unblock them on your settings page.'})
+              .then(function (confirmed) {
+                if (!confirmed) {
+                  return true;
+                }
+
+                // TODO: Add user to block list
+                // Loop through all messages, hiding where the user ID is on the block list
+
+                return true;
+              });
+          }
+        });
+      }
+
+    };
+
+    $scope.onSideButtonClicked = function () {
+      // TODO: Handle race condition where friend ID is not populated yet
+      $ionicActionSheet.show({
+        titleText: '{{data.friend.display_name}} - Team Valor<br />Added on ', // TODO: Timestamp
+        destructiveText: 'Remove',
+        destructiveButtonClicked: function () {
+          $ionicPopup.confirm({title: 'Remove friend?', template: 'Are you sure you want to remove this friend? You will need their friend code in order to add them again.'})
+            .then(function (confirmed) {
+              if (!confirmed) {
+                return true;
+              }
+
+              firebase.database().ref('members/' + userDataService.getId() + '/friends/' + friendId).remove();
+              // TODO: Create a function handler where, on error, shows a popup
+              // If completed successfully, tell the user that their friend has been removed from their friends list and $state.go('friends'), removing the friend from the back stack
+
+              return true;
+            });
+        }
+      });
+    }
 
     /*
      * Runtime

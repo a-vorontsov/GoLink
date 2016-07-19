@@ -39,7 +39,7 @@ angular.module('app.services')
     };
 
     this.setRadius = function (radius) {
-      data.radius = Number(radius);
+      data.radius = parseInt(radius, 10);
       $window.localStorage.setItem('radius', radius);
     };
 
@@ -92,7 +92,7 @@ angular.module('app.services')
 
     this.getRadius = function () {
       if (data.radius === null && $window.localStorage.getItem('radius') !== null) {
-        return $window.localStorage.getItem('radius');
+        return parseInt($window.localStorage.getItem('radius'), 10);
       }
       return data.radius === null ? DEFAULT_RADIUS : Number(data.radius);
     };

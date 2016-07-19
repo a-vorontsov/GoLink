@@ -13,7 +13,7 @@ angular.module('app.controllers')
 
           // Check whether the user has gone through the setup process
           firebase.database().ref('/members/' + user.uid).once('value').then(function (snapshot) {
-            if (snapshot.exists() && snapshot.hasChild('display_name') && snapshot.hasChild('team')
+            if (snapshot.exists() && snapshot.hasChild('display_name') && snapshot.hasChild('radius') && snapshot.hasChild('team')
               && snapshot.hasChild('friend_code') && snapshot.child('friend_code').val().length === CONFIG_VARS.FRIEND_CODE_LENGTH) {
               // User is configured
 
@@ -21,12 +21,13 @@ angular.module('app.controllers')
               var memberSnapshot = snapshot.val();
               userDataService.setDisplayName(memberSnapshot.display_name);
               userDataService.setTeam(memberSnapshot.team);
+              userDataService.setRadius(memberSnapshot.radius);
               userDataService.setFriendCode(memberSnapshot.friend_code);
 
               // Navigate to the main tab view
               $state.go('tabsController.publicMessages');
 
-            } else if (snapshot.exists() && snapshot.hasChild('display_name') && snapshot.hasChild('team')) {
+            } else if (snapshot.exists() && snapshot.hasChild('display_name') && snapshot.hasChild('radius') && snapshot.hasChild('team')) {
               // User is configured but does not have a friend code
               var attemptCounter = 0;
 
@@ -37,7 +38,6 @@ angular.module('app.controllers')
                 }
                 return friendCode;
               }
-
               function insertFriendCode() {
                 var friendCode = generateFriendCode();
                 firebase.database().ref('friend_codes/' + friendCode).set({'user_id': userDataService.getId()}, function (error) {
@@ -74,6 +74,7 @@ angular.module('app.controllers')
 
           }, function (error) {
             $ionicPopup.alert({title: "Error", template: "Unable to retrieve your user details. Check your internet connection and restart the app."});
+            $ionicPopup.alert({title: "Error", template: "Unable to retrieve your user details. Check your internet connection and restart the app."});
           });
 
         } else {
@@ -83,4 +84,4 @@ angular.module('app.controllers')
     }
 
     checkUser();
-  })
+  });
