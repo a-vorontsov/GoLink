@@ -47,7 +47,7 @@ angular.module('app.routes', [])
       .state('tabsController.publicConversation', {
         url: '/public-messages',
         views: {
-          'tabpublicConversation': {
+          'tabPublicConversation': {
             templateUrl: 'templates/mainTabs/publicConversation.html',
             controller: 'publicConversationCtrl'
           }
