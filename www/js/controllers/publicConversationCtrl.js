@@ -1,15 +1,22 @@
 angular.module('app.controllers')
   .controller('publicConversationCtrl', function ($scope, $timeout, $cordovaGeolocation, $ionicActionSheet, $ionicScrollDelegate, $ionicPopup, userDataService) {
     $scope.isLoading = true;
-    $timeout(function () {
-      $scope.isLoading = false;
-      $ionicScrollDelegate.scrollBottom(true);
-    }, 2000);
+
+    $scope.$on('$ionicView.beforeEnter', function (event, viewData) {
+      // Check whether the radius has been changed in settings
+      if (typeof(currentRadius) !== 'undefined' && (isGeoQueryInitialized && currentRadius !== userDataService.getRadius())) {
+        $scope.isLoading = true;
+        geoQuery.cancel();
+        startGeoQuery();
+      }
+    });
 
     $scope.data = {'message': ''};
     $scope.messages = [];
 
-    var geoQueryKeyEnteredListener; // TODO
+    var geoQuery;
+    var isGeoQueryInitialized = false;
+    var currentRadius;
     var sentMessageKeys = [];
     var isIOS = ionic.Platform.isWebView() && ionic.Platform.isIOS();
     var geoFire = new GeoFire(firebase.database().ref('public_message_locations'));
@@ -17,6 +24,36 @@ angular.module('app.controllers')
     /*
      * Helper Functions
      */
+
+    function startGeoQuery() {
+      currentRadius = userDataService.getRadius();
+      geoQuery = geoFire.query({
+        center: [userDataService.getLatitude(), userDataService.getLongitude()],
+        radius: userDataService.getRadius()
+      });
+
+      geoQuery.on("ready", function () {
+        isGeoQueryInitialized = true;
+        $scope.isLoading = false;
+        $ionicScrollDelegate.scrollBottom(true);
+      });
+
+      geoQuery.on("key_entered", function (key, location, distance) {
+        if (sentMessageKeys.indexOf(key) === -1) {
+          transferGeoQueryResultFromFirebaseToScope(key, location, distance);
+        }
+      });
+    }
+
+    function sortScopeMessagesByTimestamp() {
+      $timeout(function () {
+        $scope.messages.sort(function (x, y) {
+          return x.timestamp - y.timestamp;
+        });
+        $ionicScrollDelegate.resize();
+        $ionicScrollDelegate.scrollBottom(true);
+      });
+    }
 
     function transferGeoQueryResultFromFirebaseToScope(key, location, distance) {
       firebase.database().ref('/public_messages/' + key).once('value').then(function (snapshot) {
@@ -38,30 +75,11 @@ angular.module('app.controllers')
               'is_me': messageSnapshot.user.user_id === userDataService.getId()
             }
           });
-          // Sort by timestamp
-          $timeout(function () {
-            $scope.messages.sort(function (x, y) {
-              return x.timestamp - y.timestamp;
-            });
-            $ionicScrollDelegate.resize();
-            $ionicScrollDelegate.scrollBottom(true);
-          });
+          sortScopeMessagesByTimestamp();
         }
       }, function (error) {
         if (!error.message.indexOf('permission_denied') > 1) {
           throw error;
-        }
-      });
-    }
-
-    function listenForGeoQueryMessages() {
-      var geoQuery = geoFire.query({
-        center: [userDataService.getLatitude(), userDataService.getLongitude()],
-        radius: userDataService.getRadius()
-      });
-      geoQueryKeyEnteredListener = geoQuery.on("key_entered", function (key, location, distance) {
-        if (sentMessageKeys.indexOf(key) === -1) {
-          transferGeoQueryResultFromFirebaseToScope(key, location, distance);
         }
       });
     }
@@ -214,21 +232,12 @@ angular.module('app.controllers')
           }
         });
       }
-
-    }
+    };
 
     /*
-     * Runtime Functions
+     * Runtime
      */
 
-    // Get the initial coordinates and start listening for messages
-    $cordovaGeolocation
-      .getCurrentPosition({timeout: 10000, enableHighAccuracy: false})
-      .then(function (position) {
-        // Set coordinates
-        userDataService.setCoordinates([position.coords.latitude, position.coords.longitude]);
-        listenForGeoQueryMessages();
-      }, function (error) {
-        $ionicPopup.alert({title: 'Error', template: 'Unable to retrieve location. Ensure location services are enabled and restart app.'});
-      });
+    startGeoQuery();
+
   });

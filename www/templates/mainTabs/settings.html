@@ -1,17 +1,21 @@
 <ion-view title="Settings">
   <ion-content padding="true" class="has-header">
-    <div class="list card ">
-      <ion-item>
-        <h2>{{::data.display_name}}</h2>
-        <p>{{::data.team}}</p>
+    <div class="list card">
+      <ion-item ng-click="showUpdateDisplayNamePopup();">
+        <p>Display Name</p>
+        <h2>{{data.displayName}}</h2>
       </ion-item>
+      <ion-item ng-click="showUpdateTeamPopup();">
+        <p>Team</p>
+        <h2>{{data.team}}</h2>
+      </ion-item>
+      <ion-item ng-click="showUpdateRadiusPopup();">
+        <p>Chat Radius</p>
+        <h2>{{data.radius}}km</h2>
+      </ion-item>
+    </div>
+    <div class="list card">
       <button style="text-align:left;border-radius:10px 10px 10px 10px;" class="button button-dark button-block button-clear icon-left ion-log-out" ng-click="signOut();">Sign Out
-      </button>
-      <button style="text-align:left;border-radius:10px 10px 10px 10px;" class="button button-dark button-block button-clear" ng-click="updateDisplayName();">Change display name
-      </button>
-      <button style="text-align:left;border-radius:10px 10px 10px 10px;" class="button button-dark button-block button-clear" ng-click="updateTeam();">Change team
-      </button>
-      <button style="text-align:left;border-radius:10px 10px 10px 10px;" class="button button-dark button-block button-clear" ng-click="updateRadius();">Change chat radius
       </button>
     </div>
   </ion-content>
