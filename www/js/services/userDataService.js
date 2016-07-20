@@ -16,7 +16,8 @@ angular.module('app.services')
         'latitude': null,
         'longitude': null
       },
-      'block_list': []
+      'block_list': [],
+      'is_block_list_stale': false
     };
 
     this.setId = function (id) {
@@ -65,6 +66,10 @@ angular.module('app.services')
 
     this.setBlockList = function(blockList) {
       data.block_list = blockList;
+    };
+
+    this.setIsBlockListStale = function(isStale) {
+      data.is_block_list_stale = isStale;
     };
 
     this.getId = function () {
@@ -136,5 +141,9 @@ angular.module('app.services')
 
     this.getBlockList = function() {
       return data.block_list;
-    }
+    };
+
+    this.getIsBlockListStale = function() {
+      return data.is_block_list_stale;
+    };
   });

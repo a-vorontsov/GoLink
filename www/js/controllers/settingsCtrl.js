@@ -1,5 +1,3 @@
-// TODO: Implement settings
-
 angular.module('app.controllers')
   .controller('settingsCtrl', function ($scope, $state, $ionicPopup, $ionicLoading, userDataService) {
 
@@ -9,7 +7,9 @@ angular.module('app.controllers')
       'radius': userDataService.getRadius(),
       'newDisplayName': userDataService.getDisplayName(),
       'newTeam': userDataService.getTeam(),
-      'newRadius': userDataService.getRadius()
+      'newRadius': userDataService.getRadius(),
+      'blockedUsers': userDataService.getBlockList(),
+      'removedKeys': []
     };
 
     $scope.signOut = function () {
@@ -149,4 +149,48 @@ angular.module('app.controllers')
         ]
       });
     };
+
+    var updateBlockList = function () {
+      $ionicLoading.show();
+      var blockListUpdates = {};
+      $scope.data.removedKeys.forEach(function (removedKey) {
+        blockListUpdates[removedKey] = null;
+      });
+
+      firebase.database().ref('block_list/' + userDataService.getId()).update(blockListUpdates, function (error) {
+        $scope.data.removedKeys = [];
+        if (error) {
+          $ionicLoading.hide();
+          $ionicPopup.alert({title: "Error", template: "Your block list could not be modified. Check your internet connection and try again."});
+        } else {
+          $scope.data.blockedUsers = $scope.data.tempBlockedUsers;
+          userDataService.setBlockList($scope.data.blockedUsers);
+          userDataService.setIsBlockListStale(true);
+          $ionicLoading.hide();
+          $ionicPopup.alert({title: 'Block list updated', template: 'Your block list has been updated.'});
+        }
+      });
+    };
+    $scope.showUpdateBlockListPopup = function () {
+      $scope.data.tempBlockedUsers = $scope.data.blockedUsers;
+      if ($scope.data.blockedUsers.length === 0) {
+        $ionicPopup.alert({title: "No users blocked", template: "There are no users in your block list."});
+      } else {
+        $ionicPopup.show({
+          templateUrl: '/templates/blockList.html',
+          title: 'Block List',
+          scope: $scope,
+          buttons: [
+            {text: 'Cancel'},
+            {
+              text: '<b>Update</b>',
+              type: 'button-positive',
+              onTap: function (e) {
+                updateBlockList();
+              }
+            }
+          ]
+        });
+      }
+    }
   });

@@ -17,8 +17,26 @@ angular.module('app.controllers')
         .then(function (position) {
           // Set coordinates
           userDataService.setCoordinates([position.coords.latitude, position.coords.longitude]);
-          // Navigate to the main tab view
-          $state.go('tabsController.publicConversation');
+
+          // Attempt to retrieve block list
+          firebase.database().ref('block_list/' + userDataService.getId()).once('value').then(function (snapshot) {
+            var snapshotBlockList = snapshot.val();
+            var blockList = [];
+            for (var key in snapshotBlockList) {
+              blockList.push({
+                'user_id': key,
+                'display_name': snapshotBlockList[key].display_name,
+                'blocked_at': snapshotBlockList[key].blocked_at
+              });
+            }
+            userDataService.setBlockList(blockList);
+
+            // Navigate to the main tab view
+            $state.go('tabsController.publicConversation');
+          }, function(error) {
+            $ionicPopup.alert({title: 'Error', template: 'Unable to retrieve your user details. Check your internet connectivity and restart the app.'});
+          });
+
         }, function (error) {
           $ionicPopup.alert({title: 'Error', template: 'Unable to retrieve location. Ensure location services are enabled and restart app.'});
         });

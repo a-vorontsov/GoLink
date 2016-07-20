@@ -6,11 +6,13 @@
       <p>Loading messages</p>
     </div>
     <div ng-hide="isLoading">
-      <div ng-if="messages.length === 0">
+      <div ng-show="!isMessagePresent">
         <p>No messages in your radius in the past 24 hours. Share this app with other trainers and get the chat going!</p>
       </div>
       <div ng-repeat="message in messages" class="messages">
-        <public-message data="message" ng-click="onMessageClicked(message, message.user.is_me);"></public-message>
+        <div ng-hide="message.is_hidden">
+          <public-message data="message" ng-click="onMessageClicked(message, message.user.is_me);"></public-message>
+        </div>
       </div>
     </div>
 

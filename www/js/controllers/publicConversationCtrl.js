@@ -1,5 +1,5 @@
 angular.module('app.controllers')
-  .controller('publicConversationCtrl', function ($scope, $timeout, $cordovaGeolocation, $ionicActionSheet, $ionicScrollDelegate, $ionicPopup, userDataService, uuid) {
+  .controller('publicConversationCtrl', function ($scope, $timeout, $cordovaGeolocation, $ionicLoading, $ionicActionSheet, $ionicScrollDelegate, $ionicPopup, userDataService, uuid) {
     $scope.isLoading = true;
 
     $scope.$on('$ionicView.beforeEnter', function (event, viewData) {
@@ -8,16 +8,40 @@ angular.module('app.controllers')
         $scope.isLoading = true;
         geoQuery.cancel();
         $scope.messages = [];
+        $scope.isMessagePresent = false;
         startGeoQuery();
+      } else if (userDataService.getIsBlockListStale()) {
+        // Check whether the block list has changed, and if so, un-hide unblocked users
+        userDataService.setIsBlockListStale(false);
+        currentBlockList = userDataService.getBlockList();
+        var blockListUserIds = [];
+        currentBlockList.forEach(function (blockedUser) {
+          blockListUserIds.push(blockedUser.user_id);
+        });
+        var scopeMessages = $scope.messages;
+        for (var i = scopeMessages.length - 1; i >= 0; i--) {
+          var scopeMessage = scopeMessages[i];
+          if (scopeMessage.is_hidden === true && blockListUserIds.indexOf(scopeMessage.user.user_id) === -1) {
+            scopeMessage.is_hidden = false;
+            $scope.messages[i] = scopeMessage;
+            $timeout(function () {
+              $ionicScrollDelegate.resize();
+            });
+          }
+        }
       }
     });
 
     $scope.data = {'message': ''};
     $scope.messages = [];
+    $scope.isMessagePresent = false;
 
     var geoQuery;
     var isGeoQueryInitialized = false;
+
     var currentRadius;
+    var currentBlockList;
+
     var sentMessageKeys = [];
     var isIOS = ionic.Platform.isWebView() && ionic.Platform.isIOS();
     var geoFire = new GeoFire(firebase.database().ref('public_message_locations'));
@@ -27,6 +51,7 @@ angular.module('app.controllers')
      */
 
     function startGeoQuery() {
+      currentBlockList = userDataService.getBlockList();
       currentRadius = userDataService.getRadius();
       geoQuery = geoFire.query({
         center: [userDataService.getLatitude(), userDataService.getLongitude()],
@@ -101,6 +126,11 @@ angular.module('app.controllers')
             },
             'is_hidden': isUserIdInBlockList(messageSnapshot.user.user_id)
           });
+
+          if ($scope.isMessagePresent === false && !isUserIdInBlockList(messageSnapshot.user.user_id)) {
+            $scope.isMessagePresent = true;
+          }
+
           sortScopeMessagesByTimestamp();
         }
       }, function (error) {
@@ -154,6 +184,7 @@ angular.module('app.controllers')
           'is_me': true
         }
       });
+      $scope.isMessagePresent = true;
 
       $timeout(function () {
         $ionicScrollDelegate.resize();
@@ -245,13 +276,58 @@ angular.module('app.controllers')
       });
     };
 
+    function showBlockPopup(message) {
+      $ionicPopup.confirm({
+        title: 'Block user?',
+        template: 'Are you sure you want to block the user? You will not be able to see their messages, but they will be able to see yours. You can unblock them on your settings page.'
+      })
+        .then(function (confirmed) {
+          if (!confirmed) {
+            return true;
+          }
+
+          $ionicLoading.show();
+          firebase.database().ref('block_list/' + userDataService.getId() + '/' + message.user.user_id).set({
+            'display_name': message.user.display_name,
+            'blocked_at': firebase.database.ServerValue.TIMESTAMP
+          }, function (error) {
+            if (error) {
+              $ionicLoading.hide();
+              $ionicPopup.alert({title: 'Unable to block user', template: 'The user could not be blocked. Check your internet connection and try again.'});
+              return;
+            }
+
+            var blockList = userDataService.getBlockList();
+            blockList.push({'user_id': message.user.user_id, 'display_name': message.user.display_name, 'blocked_at': Date.now()});
+            userDataService.setBlockList(blockList);
+            currentBlockList = userDataService.getBlockList();
+
+            // Loop through all messages, hiding where the user ID is on the block list
+            var scopeMessages = $scope.messages;
+            for (var i = scopeMessages.length - 1; i >= 0; i--) {
+              var scopeMessage = scopeMessages[i];
+              if (scopeMessage.user.user_id === message.user.user_id) {
+                scopeMessage.is_hidden = true;
+                $scope.messages[i] = scopeMessage;
+                $timeout(function () {
+                  $ionicScrollDelegate.resize();
+                });
+              }
+            }
+            $ionicLoading.hide();
+            $ionicPopup.alert({title: 'User blocked', template: 'The user has been blocked. You can unblock them in the settings page.'});
+            return true;
+          });
+        });
+    }
+
     $scope.onMessageClicked = function (message, isMe) {
       if (isMe) {
         $ionicActionSheet.show({
           destructiveText: 'Delete',
           destructiveButtonClicked: function () {
             if (typeof(message.key) === 'undefined' || message.key === null) {
-              $ionicPopup.show({title: 'Unable to delete', template: 'The message cannot be deleted at this time as it is still being sent to the server.'})
+              $ionicPopup.alert({title: 'Unable to delete', template: 'The message cannot be deleted at this time as it is still being sent to the server.'})
             } else {
               geoFire.remove(message.key);
               var scopeMessages = $scope.messages;
@@ -273,44 +349,8 @@ angular.module('app.controllers')
         $ionicActionSheet.show({
           destructiveText: 'Block',
           destructiveButtonClicked: function () {
-            $ionicPopup.confirm({title: 'Block user?', template: 'Are you sure you want to block the user? You can unblock them on your settings page.'})
-              .then(function (confirmed) {
-                if (!confirmed) {
-                  return true;
-                }
-
-                $ionicLoading.show();
-                firebase().database.ref('block_list/' + userDataService.getId() + '/' + message.user.user_id).set({
-                  'display_name': message.user.display_name,
-                  'blocked_at': firebase.database.ServerValue.TIMESTAMP
-                }, function (error) {
-                  if (error) {
-                    $ionicLoading.hide();
-                    $ionicPopup.show({title: 'Unable to block user', template: 'The user could not be blocked. Check your internet connection and try again.'});
-                    return;
-                  }
-
-                  var blockList = userDataService.getBlockList();
-                  blockList.push({'user_id': message.user.user_id, 'display_name': message.user.display_name, 'blocked_at': Date.now()});
-                  userDataService.setBlockList(blockList);
-
-                  // Loop through all messages, hiding where the user ID is on the block list
-                  var scopeMessages = $scope.messages;
-                  for (var i = scopeMessages.length - 1; i >= 0; i--) {
-                    var scopeMessage = scopeMessages[i];
-                    if (scopeMessage.user.user_id === message.user.user_id) {
-                      scopeMessage.is_hidden = true;
-                      $scope.messages[i] = scopeMessage;
-                      $timeout(function () {
-                        $ionicScrollDelegate.resize();
-                      });
-                    }
-                  }
-                  $ionicLoading.hide();
-                });
-
-                return true;
-              });
+            showBlockPopup(message);
+            return true;
           }
         });
       }
