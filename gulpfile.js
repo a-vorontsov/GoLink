@@ -28,7 +28,8 @@ var paths = {
     './www/lib/moment/min/moment.min.js',
     './www/lib/ngCordova/dist/ng-cordova.min.js',
     './www/lib/ionic-native-transitions/dist/ionic-native-transitions.min.js',
-    './www/lib/angular-uuids/angular-uuid.js'
+    './www/lib/angular-uuids/angular-uuid.js',
+    './www/lib/angular-clipboard/angular-clipboard.js'
   ],
   sass: ['./scss/**/*.scss'],
   scripts: ['./www/js/**/*.js', '!./www/js/app.bundle.min.js'],
