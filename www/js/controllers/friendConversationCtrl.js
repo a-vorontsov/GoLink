@@ -141,16 +141,25 @@ angular.module('app.controllers')
     };
 
     $scope.onMessageClicked = function (message, isMe) {
-      // TODO: Solve the issue where a message sent by the user does not have a key
       if (isMe) {
         $ionicActionSheet.show({
           destructiveText: 'Delete',
           destructiveButtonClicked: function () {
             if (typeof(message.key) === 'undefined' || message.key === null) {
-              $ionicPopup.show({title: 'Unable to delete', template: 'The message cannot be deleted at this time as it is still being sent to the server.'})
+              $ionicPopup.show({title: 'Unable to delete', template: 'The message cannot be deleted at this time as it is still being sent to the server. Try again later.'})
             } else {
               firebase.database().ref('friend_conversations/' + conversationId + '/messages/' + message.key).remove();
-              // TODO: Create a separate directive for message contains, which, when deleted, fades to class = hide
+              var scopeMessages = $scope.data.messages;
+              for (var i = scopeMessages.length - 1; i >= 0; i--) {
+                var scopeMessage = scopeMessages[i];
+                if (scopeMessage.key === message.key) {
+                  $scope.data.messages.splice(i, 1);
+                  $timeout(function () {
+                    $ionicScrollDelegate.resize();
+                  });
+                  break;
+                }
+              }
             }
             return true;
           }
@@ -237,10 +246,11 @@ angular.module('app.controllers')
         for (var i = 0; i < messages.length; i++) {
           var message = messages[i];
           if (message.key === key) {
-            $scope.data.messages.splice(index, 1);
+            $scope.data.messages.splice(i, 1);
             $timeout(function () {
               $ionicScrollDelegate.resize();
             });
+            break;
           }
         }
       });

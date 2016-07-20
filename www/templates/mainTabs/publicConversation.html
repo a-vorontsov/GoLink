@@ -7,7 +7,7 @@
     </div>
     <div ng-hide="isLoading">
       <div ng-repeat="message in messages" class="messages">
-        <public-message data="message"></public-message>
+        <public-message data="message" ng-click="onMessageClicked(message, message.user.is_me);"></public-message>
       </div>
     </div>
 

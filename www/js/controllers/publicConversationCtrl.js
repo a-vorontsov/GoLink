@@ -46,10 +46,10 @@ angular.module('app.controllers')
 
       geoQuery.on("key_exited", function (key, location, distance) {
         var messages = $scope.messages;
-        for (var i = 0; i < messages.length; i++) {
+        for (var i = messages.length - 1; i >= 0; i--) {
           var message = messages[i];
           if (message.key === key) {
-            $scope.messages.splice(index, 1);
+            $scope.messages.splice(i, 1);
             $timeout(function () {
               $ionicScrollDelegate.resize();
             });
@@ -240,8 +240,18 @@ angular.module('app.controllers')
             if (typeof(message.key) === 'undefined' || message.key === null) {
               $ionicPopup.show({title: 'Unable to delete', template: 'The message cannot be deleted at this time as it is still being sent to the server.'})
             } else {
-              firebase.database().ref('public_messages/' + message.key).remove();
-              // TODO: Create a separate directive for message contains, which, when deleted, fades to class = hide
+              geoFire.remove(message.key);
+              var scopeMessages = $scope.messages;
+              for (var i = scopeMessages.length - 1; i >= 0; i--) {
+                var scopeMessage = scopeMessages[i];
+                if (scopeMessage.key === message.key) {
+                  $scope.messages.splice(i, 1);
+                  $timeout(function () {
+                    $ionicScrollDelegate.resize();
+                  });
+                  break;
+                }
+              }
             }
             return true;
           }
