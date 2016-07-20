@@ -15,7 +15,8 @@ angular.module('app.services')
       'coordinates': {
         'latitude': null,
         'longitude': null
-      }
+      },
+      'block_list': []
     };
 
     this.setId = function (id) {
@@ -54,12 +55,16 @@ angular.module('app.services')
 
     this.setLatitude = function (lat) {
       data.coordinates.latitude = Number(lat);
-      $window.localStorage.setItem('latitude', latitude);
+      $window.localStorage.setItem('latitude', lat);
     };
 
     this.setLongitude = function (long) {
       data.coordinates.longitude = Number(long);
-      $window.localStorage.setItem('longitude', longitude);
+      $window.localStorage.setItem('longitude', long);
+    };
+
+    this.setBlockList = function(blockList) {
+      data.block_list = blockList;
     };
 
     this.getId = function () {
@@ -128,4 +133,8 @@ angular.module('app.services')
       }
       return +data.coordinates.longitude.toFixed(FUZZY_PRECISION);
     };
+
+    this.getBlockList = function() {
+      return data.block_list;
+    }
   });
