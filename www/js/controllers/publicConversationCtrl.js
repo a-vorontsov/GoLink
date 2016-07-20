@@ -59,6 +59,17 @@ angular.module('app.controllers')
       });
     }
 
+    function isUserIdInBlockList(userId) {
+      var blockList = userDataService.getBlockList();
+      for (var i = 0; i < blockList.length; i++) {
+        var blockListUser = blockList[i];
+        if (blockListUser.user_id === userId) {
+          return true;
+        }
+      }
+      return false;
+    }
+
     function sortScopeMessagesByTimestamp() {
       $timeout(function () {
         $scope.messages.sort(function (x, y) {
@@ -87,7 +98,8 @@ angular.module('app.controllers')
               'display_name': messageSnapshot.user.display_name,
               'team': messageSnapshot.user.team,
               'is_me': messageSnapshot.user.user_id === userDataService.getId()
-            }
+            },
+            'is_hidden': isUserIdInBlockList(messageSnapshot.user.user_id)
           });
           sortScopeMessagesByTimestamp();
         }
@@ -267,8 +279,35 @@ angular.module('app.controllers')
                   return true;
                 }
 
-                // TODO: Add user to block list
-                // Loop through all messages, hiding where the user ID is on the block list
+                $ionicLoading.show();
+                firebase().database.ref('block_list/' + userDataService.getId() + '/' + message.user.user_id).set({
+                  'display_name': message.user.display_name,
+                  'blocked_at': firebase.database.ServerValue.TIMESTAMP
+                }, function (error) {
+                  if (error) {
+                    $ionicLoading.hide();
+                    $ionicPopup.show({title: 'Unable to block user', template: 'The user could not be blocked. Check your internet connection and try again.'});
+                    return;
+                  }
+
+                  var blockList = userDataService.getBlockList();
+                  blockList.push({'user_id': message.user.user_id, 'display_name': message.user.display_name, 'blocked_at': Date.now()});
+                  userDataService.setBlockList(blockList);
+
+                  // Loop through all messages, hiding where the user ID is on the block list
+                  var scopeMessages = $scope.messages;
+                  for (var i = scopeMessages.length - 1; i >= 0; i--) {
+                    var scopeMessage = scopeMessages[i];
+                    if (scopeMessage.user.user_id === message.user.user_id) {
+                      scopeMessage.is_hidden = true;
+                      $scope.messages[i] = scopeMessage;
+                      $timeout(function () {
+                        $ionicScrollDelegate.resize();
+                      });
+                    }
+                  }
+                  $ionicLoading.hide();
+                });
 
                 return true;
               });
