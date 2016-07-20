@@ -43,6 +43,19 @@ angular.module('app.controllers')
           transferGeoQueryResultFromFirebaseToScope(key, location, distance);
         }
       });
+
+      geoQuery.on("key_exited", function (key, location, distance) {
+        var messages = $scope.data.messages;
+        for (var i = 0; i < messages.length; i++) {
+          var message = messages[i];
+          if (message.key === key) {
+            $scope.data.messages.splice(index, 1);
+            $timeout(function() {
+              $ionicScrollDelegate.resize();
+            });
+          }
+        }
+      });
     }
 
     function sortScopeMessagesByTimestamp() {
@@ -145,7 +158,7 @@ angular.module('app.controllers')
     };
 
     $scope.sendMessage = function () {
-      // TODO: Add front-end and back-end validation+
+      // TODO: Add front-end and back-end validation
 
       var message = $scope.data.message;
       $scope.data.message = '';

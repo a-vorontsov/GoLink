@@ -160,7 +160,7 @@ angular.module('app.controllers')
     $scope.onSideButtonClicked = function () {
       // TODO: Handle race condition where friend ID is not populated yet
       $ionicActionSheet.show({
-        titleText: '{{data.friend.display_name}} - Team Valor<br />Added on ', // TODO: Timestamp
+        titleText: '{{data.friend.display_name}} - Team {{data.friend.team}}<br />Added on ', // TODO: Timestamp
         destructiveText: 'Remove',
         destructiveButtonClicked: function () {
           $ionicPopup.confirm({title: 'Remove friend?', template: 'Are you sure you want to remove this friend? You will need their friend code in order to add them again.'})
@@ -190,6 +190,7 @@ angular.module('app.controllers')
       } else {
         promise = firebase.database().ref('friend_conversations/' + conversationId + '/messages').orderByKey();
       }
+
       promise.on("child_added", function (snapshot) {
         var message = snapshot.val();
         if (sentMessageKeys.indexOf(snapshot.key) === -1) {
@@ -207,6 +208,21 @@ angular.module('app.controllers')
             $ionicScrollDelegate.resize();
             $ionicScrollDelegate.scrollBottom(true);
           });
+        }
+      });
+
+      promise.on("child_removed", function (oldSnapshot) {
+        var key = snapshot.key;
+
+        var messages = $scope.data.messages;
+        for (var i = 0; i < messages.length; i++) {
+          var message = messages[i];
+          if (message.key === key) {
+            $scope.data.messages.splice(index, 1);
+            $timeout(function() {
+              $ionicScrollDelegate.resize();
+            });
+          }
         }
       });
     }
