@@ -1,5 +1,5 @@
 angular.module('app.controllers')
-  .controller('friendConversation', function ($scope, $stateParams, $ionicScrollDelegate, $ionicActionSheet, $ionicNavBarDelegate, $ionicPopup, $cordovaGeolocation, $timeout, ERROR_TYPE, userDataService, helperService) {
+  .controller('friendConversationCtrl', function ($scope, $stateParams, $ionicScrollDelegate, $ionicActionSheet, $ionicNavBarDelegate, $ionicPopup, $cordovaGeolocation, $timeout, ERROR_TYPE, userDataService, helperService) {
 
     $scope.$on('$ionicView.beforeEnter', function (event, viewData) {
       viewData.enableBack = true;

@@ -92,5 +92,7 @@ angular.module('app.controllers')
       });
     }
 
-    checkUser();
+    $scope.$on('$ionicView.beforeEnter', function (event, viewData) {
+      checkUser();
+    });
   });
