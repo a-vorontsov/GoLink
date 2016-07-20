@@ -1,5 +1,5 @@
 angular.module('app.controllers')
-  .controller('publicConversationCtrl', function ($scope, $timeout, $cordovaGeolocation, $ionicActionSheet, $ionicScrollDelegate, $ionicPopup, userDataService, uui) {
+  .controller('publicConversationCtrl', function ($scope, $timeout, $cordovaGeolocation, $ionicActionSheet, $ionicScrollDelegate, $ionicPopup, userDataService, uuid) {
     $scope.isLoading = true;
 
     $scope.$on('$ionicView.beforeEnter', function (event, viewData) {
