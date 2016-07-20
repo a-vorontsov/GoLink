@@ -33,4 +33,5 @@
     <preference name="xwalkMultipleApk" value="true" />
     <preference name="CrosswalkAnimatable" value="true" />
     <plugin name="cordova-plugin-x-toast" spec="https://github.com/EddyVerbruggen/Toast-PhoneGap-Plugin.git" />
+    <plugin name="com.verso.cordova.clipboard" spec="https://github.com/VersoSolutions/CordovaClipboard.git" />
 </widget>
