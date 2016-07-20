@@ -7,6 +7,7 @@ angular.module('app.controllers')
       if (typeof(currentRadius) !== 'undefined' && (isGeoQueryInitialized && currentRadius !== userDataService.getRadius())) {
         $scope.isLoading = true;
         geoQuery.cancel();
+        $scope.messages = [];
         startGeoQuery();
       }
     });
