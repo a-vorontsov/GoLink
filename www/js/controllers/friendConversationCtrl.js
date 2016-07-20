@@ -35,6 +35,7 @@ angular.module('app.controllers')
 
     function addLocalMessageToScope(data) {
       $scope.data.messages.push({
+        'uuid': data.uuid,
         'key': '',
         'distance': 0,
         'timestamp': Date.now(),
@@ -76,13 +77,16 @@ angular.module('app.controllers')
 
       var message = $scope.data.message;
       $scope.data.message = '';
+      var identifier = uuid.v4();
 
       addLocalMessageToScope({
+        'uuid': identifier,
         'type': 'message',
         'message': message
       });
 
       var data = {
+        'uuid': identifier,
         'user_id': userDataService.getId(),
         'timestamp': firebase.database.ServerValue.TIMESTAMP,
         'message': message
@@ -104,9 +108,11 @@ angular.module('app.controllers')
               // Set coordinates
               userDataService.setCoordinates([position.coords.latitude, position.coords.longitude]);
 
-              addLocalMessageToScope({'type': 'location'});
+              var identifier = uuid.v4();
+              addLocalMessageToScope({'uuid': identifier, 'type': 'location'});
 
               var data = {
+                'uuid': identifier,
                 'user_id': userDataService.getId(),
                 'timestamp': firebase.database.ServerValue.TIMESTAMP,
                 'latitude': userDataService.getLatitude(),
@@ -219,7 +225,7 @@ angular.module('app.controllers')
           var message = messages[i];
           if (message.key === key) {
             $scope.data.messages.splice(index, 1);
-            $timeout(function() {
+            $timeout(function () {
               $ionicScrollDelegate.resize();
             });
           }

@@ -1,5 +1,5 @@
 angular.module('app.controllers')
-  .controller('publicConversationCtrl', function ($scope, $timeout, $cordovaGeolocation, $ionicActionSheet, $ionicScrollDelegate, $ionicPopup, userDataService) {
+  .controller('publicConversationCtrl', function ($scope, $timeout, $cordovaGeolocation, $ionicActionSheet, $ionicScrollDelegate, $ionicPopup, userDataService, uui) {
     $scope.isLoading = true;
 
     $scope.$on('$ionicView.beforeEnter', function (event, viewData) {
@@ -75,6 +75,7 @@ angular.module('app.controllers')
           var messageSnapshot = snapshot.val();
           $scope.messages.push({
             'key': key,
+            'uuid': messageSnapshot.uuid,
             'distance': distance,
             'timestamp': messageSnapshot.timestamp,
             'type': typeof(messageSnapshot.longitude) === 'undefined' ? 'message' : 'location',
@@ -114,6 +115,7 @@ angular.module('app.controllers')
     function addLocalMessageToScope(data) {
       $scope.messages.push({
         'key': '',
+        'uuid': data.uuid,
         'distance': 0,
         'timestamp': Date.now(),
         'type': data.type,
@@ -127,6 +129,7 @@ angular.module('app.controllers')
           'is_me': true
         }
       });
+
       $timeout(function () {
         $ionicScrollDelegate.resize();
         $ionicScrollDelegate.scrollBottom(true);
@@ -162,13 +165,16 @@ angular.module('app.controllers')
 
       var message = $scope.data.message;
       $scope.data.message = '';
+      var identifier = uuid.v4();
 
       addLocalMessageToScope({
+        'uuid': identifier,
         'type': 'message',
         'message': message
       });
 
       var data = {
+        'uuid': identifier,
         'user': {
           'user_id': userDataService.getId(),
           'display_name': userDataService.getDisplayName(),
@@ -191,9 +197,11 @@ angular.module('app.controllers')
               // Set coordinates
               userDataService.setCoordinates([position.coords.latitude, position.coords.longitude]);
 
-              addLocalMessageToScope({'type': 'location'});
+              var identifier = uuid.v4();
+              addLocalMessageToScope({'uuid': identifier, 'type': 'location'});
 
               var data = {
+                'uuid': identifier,
                 'user': {
                   'user_id': userDataService.getId(),
                   'display_name': userDataService.getDisplayName(),
