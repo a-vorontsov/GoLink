@@ -13,12 +13,15 @@
       <p>Loading messages</p>
     </div>
     <div ng-hide="isLoading || !isInFriendsList || !isConnectedToFriend">
+      <div ng-if="messages.data.length === 0">
+        <p>You haven't spoken to this trainer yet. Get the conversation started!</p>
+      </div>
       <div ng-repeat="message in data.messages" class="messages">
         <friend-message data="message" ng-click="onMessageClicked(message, message.is_me);"></friend-message>
       </div>
     </div>
     <div ng-show="!isLoading && !isInFriendsList">
-      This person is not in your friends list. You must exchange your friend code with this person in order to chat with them.
+      This trainer is not in your friends list. You must exchange your friend code with this trainer in order to chat with them.
     </div>
     <div ng-show="!isLoading && isInFriendsList && !isConnectedToFriend">
       <b>{{data.friend.display_name}}</b> needs to add you to their friends list before you can chat with them. Share your friend code with them!

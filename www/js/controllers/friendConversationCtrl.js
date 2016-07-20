@@ -185,7 +185,7 @@ angular.module('app.controllers')
                   $ionicPopup.alert('Unable to remove friend', 'Check your internet connection and try again later.');
                 } else {
                   $state.go('tabsController.friends'); // TODO: Handle back stack
-                  $ionicPopup.alert('Friend removed', 'The person has been removed from your friends list.');
+                  $ionicPopup.alert('Friend removed', 'The trainer has been removed from your friends list.');
                 }
               });
 

@@ -130,7 +130,7 @@ angular.module('app.controllers')
         } else if (error === ERROR_TYPE.USER_NOT_FOUND) {
           hideIonicLoadingWithTitleTemplate('User not found', 'The friend code you entered is not tied to a user.');
         } else if (error === ERROR_TYPE.FRIEND_ALREADY_ADDED) {
-          hideIonicLoadingWithTitleTemplate('Friend already added', 'This person is already in your friends list.');
+          hideIonicLoadingWithTitleTemplate('Friend already added', 'This trainer is already in your friends list.');
         } else {
           hideIonicLoadingWithInternetError();
         }
