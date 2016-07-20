@@ -164,23 +164,6 @@ angular.module('app.controllers')
             return true;
           }
         });
-      } else {
-        $ionicActionSheet.show({
-          destructiveText: 'Block',
-          destructiveButtonClicked: function () {
-            $ionicPopup.confirm({title: 'Block user?', template: 'Are you sure you want to block the user? You can unblock them on your settings page.'})
-              .then(function (confirmed) {
-                if (!confirmed) {
-                  return true;
-                }
-
-                // TODO: Add user to block list
-                // Loop through all messages, hiding where the user ID is on the block list
-
-                return true;
-              });
-          }
-        });
       }
 
     };
@@ -197,15 +180,20 @@ angular.module('app.controllers')
                 return true;
               }
 
-              firebase.database().ref('members/' + userDataService.getId() + '/friends/' + friendId).remove();
-              // TODO: Create a function handler where, on error, shows a popup
-              // If completed successfully, tell the user that their friend has been removed from their friends list and $state.go('friends'), removing the friend from the back stack
+              firebase.database().ref('members/' + userDataService.getId() + '/friends/' + friendId).remove(function (error) {
+                if (error) {
+                  $ionicPopup.alert('Unable to remove friend', 'Check your internet connection and try again later.');
+                } else {
+                  $state.go('tabsController.friends'); // TODO: Handle back stack
+                  $ionicPopup.alert('Friend removed', 'The person has been removed from your friends list.');
+                }
+              });
 
               return true;
             });
         }
       });
-    }
+    };
 
     /*
      * Runtime
