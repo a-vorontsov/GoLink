@@ -45,12 +45,12 @@ angular.module('app.controllers')
       });
 
       geoQuery.on("key_exited", function (key, location, distance) {
-        var messages = $scope.data.messages;
+        var messages = $scope.messages;
         for (var i = 0; i < messages.length; i++) {
           var message = messages[i];
           if (message.key === key) {
-            $scope.data.messages.splice(index, 1);
-            $timeout(function() {
+            $scope.messages.splice(index, 1);
+            $timeout(function () {
               $ionicScrollDelegate.resize();
             });
           }
@@ -70,8 +70,7 @@ angular.module('app.controllers')
 
     function transferGeoQueryResultFromFirebaseToScope(key, location, distance) {
       firebase.database().ref('/public_messages/' + key).once('value').then(function (snapshot) {
-        if (snapshot.exists() && snapshot.hasChild('timestamp') && snapshot.hasChild('user')) {
-          // Update user data service
+        if (snapshot.exists() && snapshot.hasChild('timestamp') && snapshot.hasChild('user') && snapshot.hasChild('uuid')) {
           var messageSnapshot = snapshot.val();
           $scope.messages.push({
             'key': key,
@@ -98,10 +97,23 @@ angular.module('app.controllers')
       });
     }
 
-    function sendPublicMessageWithData(data) {
+    function sendConversationMessageWithData(data) {
       // Create a message
       var newMessageRef = firebase.database().ref('public_messages').push();
       sentMessageKeys.push(newMessageRef.key);
+
+      var messages = $scope.messages;
+      for (var i = messages.length - 1; i >= 0; i--) {
+        var message = messages[i];
+        if (message.uuid === data.uuid && message.key === '') {
+          message.key = newMessageRef.key;
+          $scope.messages[i] = message;
+          $timeout(function () {
+            $ionicScrollDelegate.resize();
+          });
+          break;
+        }
+      }
 
       // Set the message
       newMessageRef.set(data, function (error) {
@@ -183,7 +195,7 @@ angular.module('app.controllers')
         'timestamp': firebase.database.ServerValue.TIMESTAMP,
         'message': message
       };
-      sendPublicMessageWithData(data);
+      sendConversationMessageWithData(data);
     };
 
     $scope.showSendLocationPopup = function () {
@@ -211,7 +223,7 @@ angular.module('app.controllers')
                 'latitude': userDataService.getLatitude(),
                 'longitude': userDataService.getLongitude()
               };
-              sendPublicMessageWithData(data);
+              sendConversationMessageWithData(data);
 
             }, function (error) {
               $ionicPopup.alert('Unable to retrieve location', 'Your message was not sent. Ensure location services are enabled and try again.', 4000);
@@ -221,7 +233,6 @@ angular.module('app.controllers')
     };
 
     $scope.onMessageClicked = function (message, isMe) {
-      // TODO: Solve the issue where a message sent by the user does not have a key
       if (isMe) {
         $ionicActionSheet.show({
           destructiveText: 'Delete',

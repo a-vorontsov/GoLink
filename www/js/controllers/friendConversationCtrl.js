@@ -26,6 +26,19 @@ angular.module('app.controllers')
       var newMessageRef = firebase.database().ref('friend_conversations/' + conversationId + '/messages').push();
       sentMessageKeys.push(newMessageRef.key);
 
+      var messages = $scope.data.messages;
+      for (var i = messages.length - 1; i >= 0; i--) {
+        var message = messages[i];
+        if (message.uuid === data.uuid && message.key === '') {
+          message.key = newMessageRef.key;
+          $scope.data.messages[i] = message;
+          $timeout(function () {
+            $ionicScrollDelegate.resize();
+          });
+          break;
+        }
+      }
+
       // Set the message
       var updatedMessageData = {};
       updatedMessageData[conversationId + '/messages/' + newMessageRef.key] = data;
