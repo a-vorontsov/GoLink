@@ -270,7 +270,7 @@ angular.module('app.controllers')
               sendConversationMessageWithData(data);
 
             }, function (error) {
-              $ionicPopup.alert('Unable to retrieve location', 'Your message was not sent. Ensure location services are enabled and try again.');
+              $ionicPopup.alert({title: 'Unable to retrieve location', template: 'Your message was not sent. Ensure location services are enabled and try again.'});
             });
         }
       });

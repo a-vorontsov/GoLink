@@ -1,4 +1,3 @@
-// TODO: Test this part of the app
 angular.module('app.controllers')
   .controller('setupCtrl', function ($scope, $state, $ionicPopup, $ionicLoading) {
     var teams = ['Instinct', 'Mystic', 'Valor'];
