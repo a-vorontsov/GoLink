@@ -321,8 +321,8 @@ angular.module('app.controllers')
         });
     }
 
-    $scope.onMessageClicked = function (message, isMe) {
-      if (isMe) {
+    $scope.onMessageClicked = function (message) {
+      if (message.user.is_me) {
         $ionicActionSheet.show({
           destructiveText: 'Delete',
           destructiveButtonClicked: function () {

@@ -17,7 +17,7 @@
         <p>You haven't spoken to this trainer yet. Get the conversation started!</p>
       </div>
       <div ng-repeat="message in data.messages" class="messages">
-        <friend-message data="message" on-hold="onMessageClicked(message, message.is_me);"></friend-message>
+        <friend-message data="message" on-hold="onMessageClicked(message);"></friend-message>
       </div>
     </div>
     <div ng-show="!isLoading && !isInFriendsList">
