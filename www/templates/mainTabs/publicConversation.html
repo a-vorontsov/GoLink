@@ -11,7 +11,7 @@
       </div>
       <div ng-repeat="message in messages" class="messages">
         <div ng-hide="message.is_hidden">
-          <public-message data="message" ng-click="onMessageClicked(message, message.user.is_me);"></public-message>
+          <public-message data="message" on-hold="onMessageClicked(message, message.user.is_me);"></public-message>
         </div>
       </div>
     </div>
