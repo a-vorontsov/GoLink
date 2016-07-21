@@ -6,11 +6,10 @@
     </div>
     <div ng-hide="isLoading">
       <ion-list>
-        <!--<ion-item>Your friend code is: {{::data.friendCode | friendCodeFormatter}}</ion-item>-->
         <ion-item class="item-icon-left item" ng-click="showAddFriendPopup();">
           <i class="icon ion-person-add"></i>Add a friend
         </ion-item>
-        <ion-item>Your friend code is: <b>{{::data.friendCode | friendCodeFormatter}}</b></ion-item>
+        <ion-item ng-click="copyFriendCode();">Your friend code is: <b>{{::data.friendCode | friendCodeFormatter}}</b></ion-item>
         <div class="spacer" style="width: 300px; height: 10px;"></div>
       </ion-list>
       <ion-list>

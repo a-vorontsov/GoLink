@@ -1,5 +1,5 @@
 angular.module('app.controllers')
-  .controller('friendsCtrl', function ($scope, $ionicPopup, $ionicLoading, $ionicHistory, $ionicNavBarDelegate, $sanitize, $timeout, ERROR_TYPE, userDataService, helperService) {
+  .controller('friendsCtrl', function ($scope, $ionicPopup, $ionicLoading, $ionicHistory, $ionicNavBarDelegate, $sanitize, $timeout, $cordovaClipboard, $cordovaToast, ERROR_TYPE, userDataService, helperService) {
     $ionicHistory.nextViewOptions({
       disableAnimate: false
     });
@@ -45,6 +45,16 @@ angular.module('app.controllers')
     function hideIonicLoadingWithInternetError() {
       hideIonicLoadingWithTitleTemplate('Error', 'An error occurred. Check your internet connection and try again.');
     }
+
+    $scope.copyFriendCode = function () {
+      $cordovaClipboard
+        .copy(userDataService.getFriendCode())
+        .then(function () {
+          $cordovaToast.showShortBottom('Friend code copied to clipboard');
+        }, function () {
+          $cordovaToast.showShortBottom('Friend code not copied - unable to access clipboard');
+        });
+    };
 
     /*
      * Adding friends
