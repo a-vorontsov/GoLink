@@ -2,6 +2,11 @@
 
   <ion-navbar>
     <ion-title>Friends</ion-title>
+    <ion-buttons end>
+      <button (click)="showAddFriendPopup();">
+        <ion-icon name="person-add"></ion-icon>
+      </button>
+    </ion-buttons>
   </ion-navbar>
 
 </ion-header>
@@ -14,10 +19,6 @@
   </div>
   <div [hidden]="isLoading">
     <ion-list>
-      <button ion-item (click)="showAddFriendPopup();">
-        <ion-icon name="person-add" item-left></ion-icon>
-        Add a friend
-      </button>
       <button ion-item (click)="copyFriendCode();">Your friend code is: <b>{{data.friendCode | friendCode}}</b></button>
     </ion-list>
     <div class="spacer" style="width: 300px; height: 10px;"></div>

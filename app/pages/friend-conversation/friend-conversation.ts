@@ -7,6 +7,7 @@ import {Toast, Geolocation} from "ionic-native/dist/index";
 import {AppSettings} from "../../app-settings";
 import {TimestampPipe} from "../../pipes/timestamp.pipe";
 import {TimestampDirective} from "../../directives/timestamp.directive";
+import {FriendDetailsPage} from "../friend-details/friend-details";
 
 /*
  Generated class for the FriendConversationPage page.
@@ -284,6 +285,12 @@ export class FriendConversationPage {
           break;
         }
       }
+    });
+  };
+
+  showInformationPage = (friend) => {
+    this.nav.push(FriendDetailsPage, {
+      friend: friend
     });
   };
 

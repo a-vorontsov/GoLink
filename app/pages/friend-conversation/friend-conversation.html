@@ -2,6 +2,11 @@
 
   <ion-navbar>
     <ion-title>{{data.friend.display_name}}</ion-title>
+    <ion-buttons end>
+      <button (click)="showInformationPage(data.friend);">
+        <ion-icon name="information-circle"></ion-icon>
+      </button>
+    </ion-buttons>
   </ion-navbar>
 
 </ion-header>

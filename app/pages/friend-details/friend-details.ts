@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {NavController} from 'ionic-angular';
+import {NavController, NavParams} from 'ionic-angular';
 import {UserData} from "../../providers/user-data/user-data.provider";
 
 @Component({
@@ -7,9 +7,12 @@ import {UserData} from "../../providers/user-data/user-data.provider";
 })
 export class FriendDetailsPage {
 
-  constructor(private nav:NavController,
-              private userData:UserData) {
+  private data;
 
+  constructor(private nav:NavController,
+              private params:NavParams,
+              private userData:UserData) {
+    this.data = this.params.get('friend');
   }
 
 }
