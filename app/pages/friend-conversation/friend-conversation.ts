@@ -1,5 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
-import {NavController, Content, Alert, ActionSheet, Platform, NavParams} from 'ionic-angular';
+import {NavController, Content, Alert, ActionSheet, Platform, NavParams, ViewController, Loading} from 'ionic-angular';
 import {UserData} from "../../providers/user-data/user-data.provider";
 import {Helper} from "../../providers/helper/helper.provider";
 import {UUID} from "angular2-uuid/index";
@@ -7,6 +7,7 @@ import {Toast, Geolocation} from "ionic-native/dist/index";
 import {AppSettings} from "../../app-settings";
 import {TimestampPipe} from "../../pipes/timestamp.pipe";
 import {TimestampDirective} from "../../directives/timestamp.directive";
+import {FriendsPage} from "../friends/friends";
 
 /*
  Generated class for the FriendConversationPage page.
@@ -23,6 +24,7 @@ export class FriendConversationPage {
 
   constructor(private nav:NavController,
               private params:NavParams,
+              private view:ViewController,
               private userData:UserData,
               private helper:Helper,
               private platform:Platform) {
@@ -212,35 +214,6 @@ export class FriendConversationPage {
     }
   };
 
-  onSideButtonClicked = () => {
-    // TODO: Handle race condition where friend ID is not populated yet
-    /*
-     $ionicActionSheet.show({
-     titleText: '{{data.friend.display_name}} - Team {{data.friend.team}}',
-     destructiveText: 'Remove',
-     destructiveButtonClicked: () => {
-     $ionicPopup.confirm({title: 'Remove friend?', template: 'Are you sure you want to remove this friend? You will need their friend code in order to add them again.'})
-     .then(function (confirmed) {
-     if (!confirmed) {
-     return true;
-     }
-
-     firebase.database().ref('members/' + vm.userData.getId() + '/friends/' + friendId).remove(function (error) {
-     if (error) {
-     $ionicPopup.alert('Unable to remove friend', 'Check your internet connection and try again later.');
-     } else {
-     $state.go('tabsController.friends'); // TODO: Handle back stack
-     $ionicPopup.alert('Friend removed', 'The trainer has been removed from your friends list.');
-     }
-     });
-
-     return true;
-     });
-     }
-     });
-     */
-  };
-
   /*
    * Runtime
    */
@@ -287,19 +260,50 @@ export class FriendConversationPage {
     });
   };
 
-  showActionSheet() {
-    function showRemoveDialog() {
+  showActionSheet = () => {
+    var vm = this;
 
+    function showRemoveDialog() {
+      vm.nav.present(Alert.create({
+        title: 'Remove friend?',
+        message: 'You will need their friend code to add them again in the future.',
+        buttons: [
+          {
+            text: 'No',
+            role: 'cancel'
+          },
+          {
+            text: 'Yes',
+            handler: () => {
+              var loading = Loading.create({dismissOnPageChange: true});
+              vm.nav.present(loading);
+              firebase.database().ref('members/' + vm.userData.getId() + '/friends/' + vm.friendId).remove(function (error) {
+                loading.dismiss();
+                if (error) {
+                  Toast.showLongBottom('Unable to remove friend - Check your internet connection and try again later.');
+                } else {
+                  vm.userData.setIsFriendListStale(true);
+                  Toast.showShortBottom('The trainer has been removed from your friends list.');
+                  vm.nav.setRoot(FriendsPage);
+                }
+              });
+            }
+          }
+        ]
+      }));
     }
-    this.nav.present(ActionSheet.create({
-      title: 'Friend Actions',
+
+    let actionSheet = ActionSheet.create({
       buttons: [
         {
           text: 'Remove Friend',
           role: 'destructive',
           icon: 'trash',
           handler: () => {
-            showRemoveDialog();
+            actionSheet.dismiss().then(() => {
+              showRemoveDialog();
+            });
+            return false;
           }
         },
         {
@@ -308,7 +312,8 @@ export class FriendConversationPage {
           icon: 'close'
         }
       ]
-    }));
+    });
+    this.nav.present(actionSheet);
   };
 
   ionViewLoaded() {
