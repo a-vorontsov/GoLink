@@ -1,0 +1,22 @@
+<ion-content>
+  <p>Let's get you set up! Enter the details below:</p>
+  <p>Enter your display name:</p>
+  <ion-item>
+    <ion-input type="text" placeholder="Display name" [(ngModel)]="data.displayName"></ion-input>
+  </ion-item>
+  <p>What team are you on?</p>
+  <ion-item>
+    <ion-select [(ngModel)]="data.team" class="text-input dropdown-box">
+      <ion-option value="Instinct">Instinct</ion-option>
+      <ion-option value="Mystic">Mystic</ion-option>
+      <ion-option value="Valor">Valor</ion-option>
+    </ion-select>
+  </ion-item>
+  <p>What's the furthest distance (in km) you would like to see other trainers' messages from?</p>
+  <ion-item>
+    <ion-range type="range" step="1" min="1" max="30" value="15" [(ngModel)]="data.radius">
+      <ion-label range-right>{{data.radius}}</ion-label>
+    </ion-range>
+  </ion-item>
+  <button (click)="sendSetup();">Save</button>
+</ion-content>

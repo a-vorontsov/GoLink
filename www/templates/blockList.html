@@ -1,6 +1,0 @@
-<ion-list show-delete="true">
-  <ion-item ng-repeat="user in data.tempBlockedUsers">
-    <ion-delete-button class="ion-minus-circled" ng-click="data.removedKeys.push(user.user_id); data.tempBlockedUsers.splice($index, 1);"></ion-delete-button>
-    <b>{{user.display_name}}</b>
-  </ion-item>
-</ion-list>

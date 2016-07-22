@@ -1,0 +1,72 @@
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>Trainers Near Me</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content padding>
+
+  <div [hidden]="!isLoading">
+    <ion-spinner></ion-spinner>
+    <p>Loading messages</p>
+  </div>
+  <div [hidden]="isLoading">
+    <div [hidden]="isMessagePresent">
+      <p>No messages in your radius in the past 24 hours. Share this app with other trainers and get the chat going!</p>
+    </div>
+    <div *ngFor="let message of messages" class="messages">
+      <div [hidden]="message.is_hidden">
+
+        <div class="message" (click)="onMessageClicked(message)">
+          <div *ngIf="message.type === 'message'" [ngClass]="message.user.is_me ? 'isMe' : 'isOther'">
+            <div class="message-header">
+              <span class="message-display-name">{{message.user.display_name}}</span> <span class="message-team">{{message.user.team}}</span>
+            </div>
+            <div class="message-body">
+              <div class="message-main-text">
+                <span class="message-contents" style="white-space: pre-line;">{{message.message}}</span>
+              </div>
+              <div class="message-misc-text">
+                <span glTimestamp [timestamp]="[message.timestamp]"></span><span *ngIf="!message.user.is_me"> - {{message.distance | distance}}</span>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="message.type === 'location'" [ngClass]="message.user.is_me ? 'isMeLocation' : 'isOtherLocation'">
+            <div class="message-header">
+              <span class="message-display-name">{{message.user.display_name}}</span> <span class="message-team">{{message.user.team}}</span>
+            </div>
+            <div class="message-body-location">
+              <div class="message-main-text">
+              <span class="message-contents">
+                <a href="geo:?q={{message.latitude}},{{message.longitude}}" target="_system">
+                  <img
+                    src="http://maps.googleapis.com/maps/api/staticmap?center={{message.latitude}},{{message.longitude}}&zoom=16&scale=2&size=400x200&maptype=roadmap&format=png&markers=size:mid|color:0xff0000|label:|{{message.latitude}},{{message.longitude}}&style=element:geometry.stroke|visibility:off&style=feature:landscape|element:geometry|saturation:-100&style=feature:water|saturation:-100|invert_lightness:true_"
+                    width="90%"/>
+                </a>
+              </span>
+              </div>
+              <div class="message-misc-text">
+                <span glTimestamp [timestamp]="[message.timestamp]"></span><span *ngIf="!message.user.is_me"> - {{message.distance | distance}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+
+</ion-content>
+<ion-footer>
+  <ion-input [(ngModel)]="data.message" type="text" placeholder="Type your message"></ion-input>
+  <button [hidden]="data.message.length === 0" (click)="sendMessage();">
+    <ion-icon name="send"></ion-icon>
+  </button>
+  <button [hidden]="data.message.length !== 0" (click)="showSendLocationPopup();">
+    <ion-icon name="pin"></ion-icon>
+  </button>
+</ion-footer>
