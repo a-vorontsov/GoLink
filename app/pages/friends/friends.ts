@@ -148,6 +148,7 @@ export class FriendsPage {
                     'added_at': Date.now()
                   });
                   vm.sortScopeDataFriends();
+                  vm.loading.dismiss();
                   Toast.show('Success! <b>' + vm.sanitizer.sanitize(SecurityContext.HTML, vm.friendMemberObject.display_name) + '</b> has been added to your friends list.', "3000", "bottom");
                 });
               return;
