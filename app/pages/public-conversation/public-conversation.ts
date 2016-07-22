@@ -1,18 +1,12 @@
 import {Component, ViewChild} from "@angular/core";
 import {NavController, Platform, Content, Loading, Alert, ActionSheet} from "ionic-angular";
 import {UserData} from "../../providers/user-data/user-data.provider";
-import {Geolocation} from "ionic-native";
+import {Geolocation, Toast} from "ionic-native";
 import {DistancePipe} from "../../pipes/distance.pipe";
 import {TimestampPipe} from "../../pipes/timestamp.pipe";
 import {TimestampDirective} from "../../directives/timestamp.directive";
 import {UUID} from "angular2-uuid";
 
-/*
- Generated class for the PublicConversationPage page.
-
- See http://ionicframework.com/docs/v2/components/#navigation for more info on
- Ionic pages and navigation.
- */
 @Component({
   templateUrl: 'build/pages/public-conversation/public-conversation.html',
   directives: [TimestampDirective],
@@ -197,59 +191,6 @@ export class PublicConversationPage {
     });
   };
 
-  showBlockPopup = (message) => {
-    var vm = this;
-
-    var handleAlert = (data) => {
-      vm.showLoading();
-      firebase.database().ref('block_list/' + vm.userData.getId() + '/' + message.user.user_id).set({
-        'display_name': message.user.display_name,
-        'blocked_at': firebase.database.ServerValue.TIMESTAMP
-      }, function (error) {
-        if (error) {
-          vm.loading.dismiss();
-          vm.nav.present(Alert.create({title: "Unable to block user", subTitle: "The user could not be blocked. Check your internet connection and try again.", buttons: ['Dismiss']}));
-          return;
-        }
-
-        var blockList = vm.userData.getBlockList();
-        blockList.push({'user_id': message.user.user_id, 'display_name': message.user.display_name, 'blocked_at': Date.now()});
-        vm.userData.setBlockList(blockList);
-        vm.currentBlockList = vm.userData.getBlockList();
-
-        // Loop through all messages, hiding where the user ID is on the block list
-        var scopeMessages = vm.messages;
-        for (var i = scopeMessages.length - 1; i >= 0; i--) {
-          var scopeMessage = scopeMessages[i];
-          if (scopeMessage.user.user_id === message.user.user_id) {
-            scopeMessage.is_hidden = true;
-            vm.messages[i] = scopeMessage;
-          }
-        }
-        vm.loading.dismiss();
-        vm.nav.present(Alert.create({title: "User blocked", subTitle: "The user has been blocked. You can unblock them in the settings page.", buttons: ['Dismiss']}));
-      });
-    };
-
-    vm.nav.present(Alert.create({
-      title: 'Block user?',
-      message: 'Are you sure you want to block the user? You will not be able to see their messages, but they will be able to see yours. You can unblock them on your settings page.',
-      buttons: [
-        {
-          text: 'No',
-          role: 'cancel',
-          handler: data => {
-
-          }
-        },
-        {
-          text: 'Yes',
-          handler: handleAlert
-        }
-      ]
-    }));
-  };
-
   /*
    * Scope Functions
    */
@@ -375,6 +316,59 @@ export class PublicConversationPage {
 
   onMessageClicked = (message) => {
     var vm = this;
+
+    var showBlockPopup = (message) => {
+
+      var handleAlert = (data) => {
+        vm.showLoading();
+        firebase.database().ref('block_list/' + vm.userData.getId() + '/' + message.user.user_id).set({
+          'display_name': message.user.display_name,
+          'blocked_at': firebase.database.ServerValue.TIMESTAMP
+        }, function (error) {
+          if (error) {
+            vm.loading.dismiss();
+            Toast.showLongBottom("The user could not be blocked. Check your internet connection and try again.");
+            return;
+          }
+
+          var blockList = vm.userData.getBlockList();
+          blockList.push({'user_id': message.user.user_id, 'display_name': message.user.display_name, 'blocked_at': Date.now()});
+          vm.userData.setBlockList(blockList);
+          vm.currentBlockList = vm.userData.getBlockList();
+
+          // Loop through all messages, hiding where the user ID is on the block list
+          var scopeMessages = vm.messages;
+          for (var i = scopeMessages.length - 1; i >= 0; i--) {
+            var scopeMessage = scopeMessages[i];
+            if (scopeMessage.user.user_id === message.user.user_id) {
+              scopeMessage.is_hidden = true;
+              vm.messages[i] = scopeMessage;
+            }
+          }
+          vm.loading.dismiss();
+          Toast.showLongBottom("The user has been blocked. You can unblock them in the Settings page.");
+        });
+      };
+
+      vm.nav.present(Alert.create({
+        title: 'Block user?',
+        message: 'Are you sure you want to block the user? You will not be able to see their messages, but they will be able to see yours. You can unblock them on your settings page.',
+        buttons: [
+          {
+            text: 'No',
+            role: 'cancel',
+            handler: data => {
+
+            }
+          },
+          {
+            text: 'Yes',
+            handler: handleAlert
+          }
+        ]
+      }));
+    };
+
     if (message.user.is_me) {
       vm.nav.present(ActionSheet.create({
         title: 'Message Actions',
@@ -406,14 +400,16 @@ export class PublicConversationPage {
         ]
       }));
     } else {
-      vm.nav.present(ActionSheet.create({
+      let actionSheet = ActionSheet.create({
         title: 'Message Actions',
         buttons: [
           {
             text: 'Block',
             role: 'destructive',
             handler: () => {
-              vm.showBlockPopup(message);
+              actionSheet.dismiss().then(() => {
+                showBlockPopup(message);
+              });
             }
           },
           {
@@ -421,7 +417,8 @@ export class PublicConversationPage {
             role: 'cancel',
           }
         ]
-      }));
+      });
+      vm.nav.present(actionSheet);
     }
   };
 
