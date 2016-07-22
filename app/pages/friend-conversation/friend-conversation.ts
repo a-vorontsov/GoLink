@@ -7,7 +7,6 @@ import {Toast, Geolocation} from "ionic-native/dist/index";
 import {AppSettings} from "../../app-settings";
 import {TimestampPipe} from "../../pipes/timestamp.pipe";
 import {TimestampDirective} from "../../directives/timestamp.directive";
-import {FriendDetailsPage} from "../friend-details/friend-details";
 
 /*
  Generated class for the FriendConversationPage page.
@@ -288,10 +287,28 @@ export class FriendConversationPage {
     });
   };
 
-  showInformationPage = (friend) => {
-    this.nav.push(FriendDetailsPage, {
-      friend: friend
-    });
+  showActionSheet() {
+    function showRemoveDialog() {
+
+    }
+    this.nav.present(ActionSheet.create({
+      title: 'Friend Actions',
+      buttons: [
+        {
+          text: 'Remove Friend',
+          role: 'destructive',
+          icon: 'trash',
+          handler: () => {
+            showRemoveDialog();
+          }
+        },
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          icon: 'close'
+        }
+      ]
+    }));
   };
 
   ionViewLoaded() {
