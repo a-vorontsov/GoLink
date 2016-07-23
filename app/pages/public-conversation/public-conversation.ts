@@ -243,9 +243,14 @@ export class PublicConversationPage {
 
   sendMessage = () => {
     var vm = this;
-    // TODO: Add front-end and back-end validation
 
     var message = vm.data.message;
+
+    if (message.length < 1 || message > 1000) {
+      Toast.showShortBottom("Your message must be between 1 and 1000 characters long.");
+      return;
+    }
+
     vm.data.message = '';
     var identifier = UUID.UUID();
 

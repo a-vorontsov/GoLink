@@ -19,7 +19,6 @@ export class ForgotPasswordPage {
     this.data = {email: ''};
   }
 
-  // TODO: Add validation
   private loading;
   private showLoading = () => {
     this.loading = Loading.create({dismissOnPageChange: true});
@@ -37,6 +36,11 @@ export class ForgotPasswordPage {
   sendResetInstructions = () => {
     var vm = this;
     var emailAddress = vm.data.email;
+
+    if (typeof(emailAddress) === 'undefined' || emailAddress.length < 1) {
+      Toast.showShortBottom("The email you entered is invalid.");
+      return;
+    }
 
     vm.showLoading();
     firebase.auth().sendPasswordResetEmail(emailAddress).then(function () {
