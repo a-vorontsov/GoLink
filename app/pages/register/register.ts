@@ -7,14 +7,11 @@ import {SplashPage} from "../splash/splash";
   templateUrl: 'build/pages/register/register.html',
 })
 export class RegisterPage {
-  private loginPage;
-
   private loading;
 
   data:{email?:string, password?:string} = {email: '', password: ''};
 
   constructor(private nav:NavController) {
-    this.loginPage = LoginPage;
     this.loading = Loading.create({'dismissOnPageChange': true});
   }
 

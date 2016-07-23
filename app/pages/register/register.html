@@ -8,6 +8,6 @@
       <ion-input type="password" placeholder="Password" [(ngModel)]="data.password"></ion-input>
     </ion-item>
     <button (click)="register();">Sign up</button>
-    <button [navPush]="loginPage">Sign in to an existing account</button>
+    <button (click)="nav.pop();">Sign in to an existing account</button>
   </form>
 </ion-content>
