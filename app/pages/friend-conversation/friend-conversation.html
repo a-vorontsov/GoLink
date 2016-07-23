@@ -1,0 +1,74 @@
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>{{data.friend.display_name}}</ion-title>
+    <ion-buttons end>
+      <button (click)="showActionSheet();">
+        <ion-icon name="more"></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content padding>
+  <div [hidden]="!isLoading">
+    <ion-spinner></ion-spinner>
+    <p>Loading messages</p>
+  </div>
+  <div [hidden]="isLoading || !isInFriendsList || !isConnectedToFriend">
+    <div *ngIf="data.messages.length === 0">
+      <p>You haven't spoken to this trainer yet. Get the conversation started!</p>
+    </div>
+    <div *ngFor="let message of data.messages" class="messages">
+
+      <div class="message" (click)="onMessageClicked(message)">
+        <div *ngIf="message.type === 'message'" [ngClass]="message.is_me ? 'isMe' : 'isOther'">
+          <div class="message-body">
+            <div class="message-main-text">
+              <span class="message-contents" style="white-space: pre-line;">{{message.message}}</span>
+            </div>
+            <div class="message-misc-text">
+              <span glTimestamp [timestamp]="[message.timestamp]"></span>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="message.type === 'location'" [ngClass]="message.is_me ? 'isMeLocation' : 'isOtherLocation'">
+          <div class="message-body-location">
+            <div class="message-main-text">
+        <span class="message-contents">
+          <a [href]="message.geo_uri" target="_system">
+            <img
+              [src]="message.geo_src"
+              width="90%"/>
+          </a>
+        </span>
+            </div>
+            <div class="message-misc-text">
+              <span glTimestamp [timestamp]="[message.timestamp]"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div [hidden]="!(!isLoading && !isInFriendsList)">
+    This trainer is not in your friends list. You must exchange your friend code with this trainer in order to chat with them.
+  </div>
+  <div [hidden]="!(!isLoading && isInFriendsList && !isConnectedToFriend)">
+    <b>{{data.friend.display_name}}</b> needs to add you to their friends list before you can chat with them. Share your friend code with them!
+  </div>
+</ion-content>
+
+<ion-footer>
+  <ion-input [(ngModel)]="data.message" type="text" placeholder="Type your message"></ion-input>
+  <button [hidden]="data.message.length === 0" (click)="sendMessage();">
+    <ion-icon name="send"></ion-icon>
+  </button>
+  <button [hidden]="data.message.length !== 0" (click)="showSendLocationPopup();">
+    <ion-icon name="pin"></ion-icon>
+  </button>
+</ion-footer>
+

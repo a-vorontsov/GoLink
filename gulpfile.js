@@ -1,165 +1,74 @@
-var bower = require('bower');
-var concat = require('gulp-concat');
-var clean = require('gulp-clean');
-var gulp = require('gulp');
-var gutil = require('gulp-util');
-var imageMin = require('gulp-imagemin');
-var livereload = require('gulp-livereload');
-var minifyCss = require('gulp-minify-css');
-var ngAnnotate = require('gulp-ng-annotate');
-var rename = require('gulp-rename');
-var sass = require('gulp-sass');
-var sh = require('shelljs');
-var templateCache = require('gulp-angular-templatecache');
-var uglify = require("gulp-uglify");
+var gulp = require('gulp'),
+    gulpWatch = require('gulp-watch'),
+    del = require('del'),
+    runSequence = require('run-sequence'),
+    argv = process.argv;
 
-var paths = {
-  css: ['./www/css/**/*.min.css'],
-  dist: ['./www/dist/'],
-  html: ['./www/index.html'],
-  ionicBundle: ['./www/lib/ionic/js/ionic.bundle.min.js'],
-  ionicFonts: ['./www/lib/ionic/fonts/*'],
-  images: ['./www/img/**/*'],
-  lib: [
-    './www/lib/firebase/firebase.js',
-    './www/lib/geofire/dist/geofire.min.js',
-    './www/lib/ionic-image-lazy-load/ionic-image-lazy-load.js',
-    './www/lib/moment/min/moment.min.js',
-    './www/lib/ngCordova/dist/ng-cordova.min.js',
-    './www/lib/ionic-native-transitions/dist/ionic-native-transitions.min.js',
-    './www/lib/angular-uuids/angular-uuid.js'
-  ],
-  sass: ['./scss/**/*.scss'],
-  scripts: ['./www/js/**/*.js', '!./www/js/app.bundle.min.js'],
-  templates: ['./www/templates/**/*.html'],
-  unminifiedCss: ['./www/css/**/*.css', '!./www/css/**/*.min.css']
-};
 
-var files = {
-  jsBundle: 'app.bundle.min.js'
-};
+/**
+ * Ionic hooks
+ * Add ':before' or ':after' to any Ionic project command name to run the specified
+ * tasks before or after the command.
+ */
+gulp.task('serve:before', ['watch']);
+gulp.task('emulate:before', ['build']);
+gulp.task('deploy:before', ['build']);
+gulp.task('build:before', ['build']);
 
-gulp.task('build', ['sass', 'scripts', 'styles', 'copy']);
+// we want to 'watch' when livereloading
+var shouldWatch = argv.indexOf('-l') > -1 || argv.indexOf('--livereload') > -1;
+gulp.task('run:before', [shouldWatch ? 'watch' : 'build']);
 
-gulp.task('clean', function () {
-  return gulp.src(paths.dist, {
-    read: false
-  })
-    .pipe(clean());
+/**
+ * Ionic Gulp tasks, for more information on each see
+ * https://github.com/driftyco/ionic-gulp-tasks
+ *
+ * Using these will allow you to stay up to date if the default Ionic 2 build
+ * changes, but you are of course welcome (and encouraged) to customize your
+ * build however you see fit.
+ */
+var buildBrowserify = require('ionic-gulp-browserify-typescript');
+var buildSass = require('ionic-gulp-sass-build');
+var copyHTML = require('ionic-gulp-html-copy');
+var copyFonts = require('ionic-gulp-fonts-copy');
+var copyScripts = require('ionic-gulp-scripts-copy');
+var tslint = require('ionic-gulp-tslint');
+
+var isRelease = argv.indexOf('--release') > -1;
+
+gulp.task('watch', ['clean'], function(done){
+  runSequence(
+    ['sass', 'html', 'fonts', 'scripts'],
+    function(){
+      gulpWatch('app/**/*.scss', function(){ gulp.start('sass'); });
+      gulpWatch('app/**/*.html', function(){ gulp.start('html'); });
+      buildBrowserify({ watch: true }).on('end', done);
+    }
+  );
 });
 
-gulp.task('copy', ['clean'], function () {
-  // Copy ionic bundle file
-  gulp.src(paths.ionicBundle)
-    .pipe(gulp.dest(paths.dist + 'lib/ionic/js/.'));
-
-  gulp.src(paths.ionicFonts)
-    .pipe(gulp.dest(paths.dist + 'lib/ionic/fonts'));
-
-  // Copy lib scripts
-  gulp.src(paths.lib)
-    .pipe(gulp.dest(paths.dist + 'lib'));
+gulp.task('build', ['clean'], function(done){
+  runSequence(
+    ['sass', 'html', 'fonts', 'scripts'],
+    function(){
+      buildBrowserify({
+        minify: isRelease,
+        browserifyOptions: {
+          debug: !isRelease
+        },
+        uglifyOptions: {
+          mangle: false
+        }
+      }).on('end', done);
+    }
+  );
 });
 
-gulp.task('default', ['build']);
-
-gulp.task('git-check', function (done) {
-  if (!sh.which('git')) {
-    console.log(
-      '  ' + gutil.colors.red('Git is not installed.'),
-      '\n  Git, the version control system, is required to download Ionic.',
-      '\n  Download git here:', gutil.colors.cyan('http://git-scm.com/downloads') + '.',
-      '\n  Once git is installed, run \'' + gutil.colors.cyan('gulp install') + '\' again.'
-    );
-    process.exit(1);
-  }
-  done();
+gulp.task('sass', buildSass);
+gulp.task('html', copyHTML);
+gulp.task('fonts', copyFonts);
+gulp.task('scripts', copyScripts);
+gulp.task('clean', function(){
+  return del('www/build');
 });
-
-var imageMinTask = function () {
-  return gulp.src(paths.images)
-    .pipe(imageMin())
-    .pipe(gulp.dest(paths.dist + 'img'))
-    .pipe(livereload());
-};
-gulp.task('imageMin', ['clean'], imageMinTask);
-gulp.task('imageMin-watch', [], imageMinTask);
-
-gulp.task('install', ['git-check'], function () {
-  return bower.commands.install()
-    .on('log', function (data) {
-      gutil.log('bower', gutil.colors.cyan(data.id), data.message);
-    });
-});
-
-gulp.task('minifyCss', function () {
-  return gulp.src(paths.unminifiedCss)
-    .pipe(minifyCss())
-    .pipe(rename({
-      extname: '.min.css'
-    }))
-    .pipe(gulp.dest('./www/css/'))
-    .pipe(livereload());
-});
-
-gulp.task('sass', function (done) {
-  gulp.src('./scss/ionic.app.scss')
-    .pipe(sass())
-    .on('error', sass.logError)
-    .pipe(gulp.dest('./www/css/'))
-    .pipe(minifyCss({
-      keepSpecialComments: 0
-    }))
-    .pipe(rename({extname: '.min.css'}))
-    .pipe(gulp.dest('./www/css/'))
-    .pipe(livereload())
-    .on('end', done);
-});
-
-var scriptsTask = function () {
-  return gulp.src(paths.scripts)
-    .pipe(ngAnnotate({
-      remove: true,
-      add: true,
-      single_quotes: true
-    }).on('error', gutil.log))
-    .pipe(uglify().on('error', gutil.log))
-    .pipe(concat(files.jsBundle))
-    .pipe(gulp.dest(paths.dist + 'js'))
-    .pipe(livereload());
-};
-gulp.task('scripts', ['clean', 'templateCache'], scriptsTask);
-gulp.task('scripts-watch', ['templateCache-watch'], scriptsTask);
-
-var stylesTask = function () {
-  return gulp.src(paths.css)
-    .pipe(gulp.dest(paths.dist + 'css'))
-    .pipe(livereload());
-};
-gulp.task('styles', ['clean', 'minifyCss'], stylesTask);
-gulp.task('styles-watch', ['minifyCss'], stylesTask);
-
-var templateCacheTask = function () {
-  return gulp.src(paths.templates)
-    .pipe(templateCache({
-      'filename': 'templates.js',
-      'root': 'templates/',
-      'module': 'app'
-    }))
-    .pipe(gulp.dest('./www/js'))
-    .pipe(livereload());
-};
-gulp.task('templateCache', ['clean'], templateCacheTask);
-gulp.task('templateCache-watch', templateCacheTask);
-
-gulp.task('watch', function () {
-  livereload.listen();
-  gulp.watch(paths.html, ['templateCache-watch']);
-  gulp.watch(paths.sass, ['sass']);
-  gulp.watch(paths.css, ['styles-watch']);
-  gulp.watch(paths.scripts, ['scripts-watch']);
-  gulp.watch(paths.templates, ['templateCache-watch']);
-  gulp.watch(paths.images, ['imageMin-watch']);
-});
-
-
+gulp.task('lint', tslint);

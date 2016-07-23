@@ -1,73 +1,43 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" dir="ltr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
-  <meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline' *; script-src 'self' 'unsafe-inline' 'unsafe-eval' *">
-  <title></title>
+  <meta charset="UTF-8">
+  <title>Ionic</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="msapplication-tap-highlight" content="no">
 
-
-  <script src="lib/ionic/js/ionic.bundle.js"></script>
-  <!-- cordova script (this will be a 404 during development) -->
-  <script src="cordova.js"></script>
-
-  <script src="dist/lib/firebase.js"></script>
-  <script src="dist/lib/geofire.min.js"></script>
-  <script src="dist/lib/ng-cordova.min.js"></script>
-  <script src="dist/lib/moment.min.js"></script>
-  <script src="dist/lib/ionic-image-lazy-load.js"></script>
-  <script src="dist/lib/ionic-native-transitions.min.js"></script>
-  <script src="dist/lib/angular-uuid.js"></script>
-  <script>
-    // Initialize the Firebase SDK
-    var config = {
-      apiKey: "API_KEY_HERE",
-      authDomain: "AUTH_DOMAIN_HERE.firebaseapp.com",
-      databaseURL: "https://DATABASE_URL_HERE.firebaseio.com",
-      storageBucket: ""
-    };
-    firebase.initializeApp(config);
-  </script>
-
-  <link href="dist/css/ionic.app.min.css" rel="stylesheet">
-  <style type="text/css">
-    .platform-ios .manual-ios-statusbar-padding {
-      padding-top: 20px;
-    }
-
-    .manual-remove-top-padding {
-      padding-top: 0px;
-    }
-
-    .manual-remove-top-padding .scroll {
-      padding-top: 0px !important;
-    }
-
-    ion-list.manual-list-fullwidth div.list, .list.card.manual-card-fullwidth {
-      margin-left: -10px;
-      margin-right: -10px;
-    }
-
-    ion-list.manual-list-fullwidth div.list > .item, .list.card.manual-card-fullwidth > .item {
-      border-radius: 0px;
-      border-left: 0px;
-      border-right: 0px;
-    }
-  </style>
-  <link href="dist/css/style.min.css" rel="stylesheet">
-  <script src="dist/js/app.bundle.min.js"></script>
-
-  <script src="lib/ionicuirouter/ionicUIRouter.js"></script>
-
+  <link ios-href="build/css/app.ios.css" rel="stylesheet">
+  <link md-href="build/css/app.md.css" rel="stylesheet">
+  <link wp-href="build/css/app.wp.css" rel="stylesheet">
 </head>
-<body ng-app="app" animation="slide-left-right-ios7">
-<div>
-  <div>
-    <ion-nav-bar class="bar-stable">
-      <ion-nav-back-button class="button-icon icon ion-ios-arrow-back">Back</ion-nav-back-button>
-    </ion-nav-bar>
-    <ion-nav-view></ion-nav-view>
-  </div>
-</div>
+<body>
+
+<!-- this Ionic's root component and where the app will load -->
+<ion-app></ion-app>
+
+<!-- cordova.js required for cordova apps -->
+<script src="cordova.js"></script>
+<!-- Polyfill needed for platforms without Promise and Collection support -->
+<script src="build/js/es6-shim.min.js"></script>
+<!-- Zone.js and Reflect-metadata  -->
+<script src="build/js/Reflect.js"></script>
+<script src="build/js/zone.js"></script>
+<!-- Libraries -->
+<script src="lib/firebase.js"></script>
+<script>
+  // Initialize the Firebase SDK
+  var config = {
+    apiKey: "API_KEY_HERE",
+    authDomain: "AUTH_DOMAIN_HERE.firebaseapp.com",
+    databaseURL: "https://DATABASE_URL_HERE.firebaseio.com",
+    storageBucket: ""
+  };
+  firebase.initializeApp(config);
+</script>
+<script src="lib/geofire.min.js"></script>
+<script src="lib/moment.min.js"></script>
+<!-- the bundle which is built from the app's source code -->
+<script src="build/js/app.bundle.js"></script>
 </body>
 </html>

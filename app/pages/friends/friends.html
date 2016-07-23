@@ -1,0 +1,32 @@
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>Friends</ion-title>
+    <ion-buttons end>
+      <button (click)="showAddFriendPopup();">
+        <ion-icon name="person-add"></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content padding>
+  <div [hidden]="!isLoading">
+    <ion-spinner></ion-spinner>
+    <p>Loading friends</p>
+  </div>
+  <div [hidden]="isLoading">
+    <ion-list>
+      <button ion-item (click)="copyFriendCode();">Your friend code is: <b>{{data.friendCode | friendCode}}</b></button>
+    </ion-list>
+    <div class="spacer" style="width: 300px; height: 10px;"></div>
+    <ion-list>
+      <button ion-item (click)="navigateConversation(friend.user_id);" *ngFor="let friend of data.friends">
+        {{friend.display_name}} - {{friend.team}}<br/>
+        <small>Last messaged: <span glTimestamp timestamp="{{friend.last_messaged}}"></span></small>
+      </button>
+    </ion-list>
+  </div>
+</ion-content>
