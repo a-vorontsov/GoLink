@@ -118,7 +118,7 @@ export class FriendConversationPage {
     var vm = this;
 
     var message = vm.data.message;
-    if (message.length < 1 || message > 1000) {
+    if (message.length < 1 || message.length > 1000) {
       Toast.showShortBottom("Your message must be between 1 and 1000 characters long.");
       return;
     }
@@ -193,6 +193,7 @@ export class FriendConversationPage {
           {
             text: 'Delete',
             role: 'destructive',
+            icon: (vm.platform.is('ios')) ? undefined : 'trash',
             handler: () => {
               if (typeof(message.key) === 'undefined' || message.key === null) {
                 vm.nav.present(Alert.create({title: "Unable to delete", subTitle: "The message cannot be deleted right now as it is still being sent. Try again later.", buttons: ['Dismiss']}));
@@ -212,6 +213,7 @@ export class FriendConversationPage {
           {
             text: 'Cancel',
             role: 'cancel',
+            icon: (vm.platform.is('ios')) ? undefined : 'close'
           }
         ]
       }));
@@ -302,7 +304,7 @@ export class FriendConversationPage {
         {
           text: 'Remove Friend',
           role: 'destructive',
-          icon: 'trash',
+          icon: (vm.platform.is('ios')) ? undefined : 'trash',
           handler: () => {
             actionSheet.dismiss().then(() => {
               showRemoveDialog();
@@ -313,7 +315,7 @@ export class FriendConversationPage {
         {
           text: 'Cancel',
           role: 'cancel',
-          icon: 'close'
+          icon: (vm.platform.is('ios')) ? undefined : 'close'
         }
       ]
     });

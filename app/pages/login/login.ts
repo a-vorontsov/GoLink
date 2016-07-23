@@ -12,20 +12,30 @@ export class LoginPage {
   private forgotPasswordPage;
   private registerPage;
 
-  private loading;
-
   data:{email?:string, password?:string} = {email: '', password: ''};
 
   constructor(private nav:NavController, private userData:UserData) {
-    this.loading = Loading.create({'dismissOnPageChange': true});
     this.registerPage = RegisterPage;
     this.forgotPasswordPage = ForgotPasswordPage;
   }
 
+  private loading;
+  showIonicLoading = () => {
+    this.loading = Loading.create({'dismissOnPageChange': true});
+    this.nav.present(this.loading);
+  };
+
+  hideIonicLoading = () => {
+    if (this.loading) {
+      setTimeout(() => {
+        this.loading.dismiss();
+      }, 300);
+    }
+  };
+
   login() {
     var vm = this;
     var nav = vm.nav;
-    var loading = vm.loading;
 
     var email = vm.data.email;
     var password = vm.data.password;
@@ -35,15 +45,15 @@ export class LoginPage {
       return;
     }
 
-    nav.present(loading);
+    vm.showIonicLoading();
     firebase.auth().signInWithEmailAndPassword(email, password).then(function (user) {
       vm.data.email = '';
       vm.data.password = '';
-      loading.dismiss();
+      vm.hideIonicLoading();
       nav.setRoot(SplashPage);
 
     }).catch(function (error) {
-      loading.dismiss();
+      vm.hideIonicLoading();
       var errorCode = error.code;
       if (errorCode === "auth/user-disabled") {
         nav.present(Alert.create({title: "Login failed", subTitle: "Your account has been disabled. Contact support for more info.", buttons: ['Dismiss']}));

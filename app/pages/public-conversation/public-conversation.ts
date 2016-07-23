@@ -37,8 +37,6 @@ export class PublicConversationPage {
   private isIOS = this.platform.is('ios');
   private geoFire = new GeoFire(firebase.database().ref('public_message_locations'));
 
-  private loading;
-
   /*
    * Helper Functions
    */
@@ -78,9 +76,18 @@ export class PublicConversationPage {
     });
   };
 
-  showLoading = () => {
+  private loading;
+  showIonicLoading = () => {
     this.loading = Loading.create({dismissOnPageChange: true});
     this.nav.present(this.loading);
+  };
+
+  hideIonicLoading = () => {
+    if (this.loading) {
+      setTimeout(() => {
+        this.loading.dismiss();
+      }, 300);
+    }
   };
 
   isUserIdInBlockList = (userId) => {
@@ -246,7 +253,7 @@ export class PublicConversationPage {
 
     var message = vm.data.message;
 
-    if (message.length < 1 || message > 1000) {
+    if (message.length < 1 || message.length > 1000) {
       Toast.showShortBottom("Your message must be between 1 and 1000 characters long.");
       return;
     }
@@ -325,13 +332,13 @@ export class PublicConversationPage {
     var showBlockPopup = (message) => {
 
       var handleAlert = (data) => {
-        vm.showLoading();
+        vm.showIonicLoading();
         firebase.database().ref('block_list/' + vm.userData.getId() + '/' + message.user.user_id).set({
           'display_name': message.user.display_name,
           'blocked_at': firebase.database.ServerValue.TIMESTAMP
         }, function (error) {
           if (error) {
-            vm.loading.dismiss();
+            vm.hideIonicLoading();
             Toast.showLongBottom("The user could not be blocked. Check your internet connection and try again.");
             return;
           }
@@ -350,7 +357,7 @@ export class PublicConversationPage {
               vm.messages[i] = scopeMessage;
             }
           }
-          vm.loading.dismiss();
+          vm.hideIonicLoading();
           Toast.showLongBottom("The user has been blocked. You can unblock them in the Settings page.");
         });
       };
@@ -381,6 +388,7 @@ export class PublicConversationPage {
           {
             text: 'Delete',
             role: 'destructive',
+            icon: (vm.platform.is('ios')) ? undefined : 'trash',
             handler: () => {
               if (typeof(message.key) === 'undefined' || message.key === null) {
                 vm.nav.present(Alert.create({title: 'Unable to delete', subTitle: 'The message cannot be deleted at this time as it is still being sent to the server.', buttons: ['Dismiss']}));
@@ -401,6 +409,7 @@ export class PublicConversationPage {
           {
             text: 'Cancel',
             role: 'cancel',
+            icon: (vm.platform.is('ios')) ? undefined : 'close'
           }
         ]
       }));
@@ -411,6 +420,7 @@ export class PublicConversationPage {
           {
             text: 'Block',
             role: 'destructive',
+            icon: (vm.platform.is('ios')) ? undefined : 'remove-circle',
             handler: () => {
               actionSheet.dismiss().then(() => {
                 showBlockPopup(message);
@@ -420,6 +430,7 @@ export class PublicConversationPage {
           {
             text: 'Cancel',
             role: 'cancel',
+            icon: (vm.platform.is('ios')) ? undefined : 'close'
           }
         ]
       });

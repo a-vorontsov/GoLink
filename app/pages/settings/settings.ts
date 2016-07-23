@@ -28,10 +28,18 @@ export class SettingsPage {
   protected radius;
 
   private loading;
-  showLoading = () => {
+  showIonicLoading = () => {
     var vm = this;
     vm.loading = Loading.create({dismissOnPageChange: true});
     vm.nav.present(vm.loading);
+  };
+
+  hideIonicLoading = () => {
+    if (this.loading) {
+      setTimeout(() => {
+        this.loading.dismiss();
+      }, 300);
+    }
   };
 
   signOut = () => {
@@ -47,10 +55,10 @@ export class SettingsPage {
     var vm = this;
 
     var updateDisplayName = (displayName) => {
-      vm.showLoading();
+      vm.showIonicLoading();
       var userId = vm.userData.getId();
       firebase.database().ref('members/' + userId + '/display_name').set(displayName, function (error) {
-        vm.loading.dismiss();
+        vm.hideIonicLoading();
         if (error) {
           Toast.showShortBottom("Error - Save failed. Check your internet connection and try again later.");
         } else {
@@ -102,11 +110,11 @@ export class SettingsPage {
     var vm = this;
 
     var updateTeam = (team) => {
-      vm.showLoading();
+      vm.showIonicLoading();
       var userId = vm.userData.getId();
       firebase.database().ref('members/' + userId + '/team').set(team, function (error) {
         if (vm.loading) {
-          vm.loading.dismiss();
+          vm.hideIonicLoading();
         }
         if (error) {
           Toast.showShortBottom("Error - Save failed. Check your internet connection and try again later.");

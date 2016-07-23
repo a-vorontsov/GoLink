@@ -45,6 +45,12 @@ export class FriendsPage {
     this.nav.present(this.loading);
   };
 
+  hideIonicLoading = () => {
+    if (this.loading) {
+      this.loading.dismiss();
+    }
+  };
+
   sortScopeDataFriends = () => {
     this.data.friends.sort(function (x, y) {
       if (x < y) {
@@ -118,7 +124,7 @@ export class FriendsPage {
       }
 
       vm.friendMemberObject = snapshot.val();
-      vm.loading.dismiss();
+      vm.hideIonicLoading();
 
       vm.nav.present(Alert.create({
         title: 'Add friend?',
@@ -148,7 +154,7 @@ export class FriendsPage {
                     'added_at': Date.now()
                   });
                   vm.sortScopeDataFriends();
-                  vm.loading.dismiss();
+                  vm.hideIonicLoading();
                   Toast.show('Success! <b>' + vm.sanitizer.sanitize(SecurityContext.HTML, vm.friendMemberObject.display_name) + '</b> has been added to your friends list.', "3000", "bottom");
                 });
               return;
@@ -158,7 +164,7 @@ export class FriendsPage {
       }));
 
     }, function (error) {
-      vm.loading.dismiss();
+      vm.hideIonicLoading();
       if (error === AppSettings.ERROR['NONE']) {
       } else if (error === AppSettings.ERROR['INET']) {
         Toast.showLongBottom('An error occurred. Check your internet connection and try again.');

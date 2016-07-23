@@ -7,18 +7,29 @@ import {SplashPage} from "../splash/splash";
   templateUrl: 'build/pages/register/register.html',
 })
 export class RegisterPage {
-  private loading;
 
   data:{email?:string, password?:string} = {email: '', password: ''};
 
   constructor(private nav:NavController) {
-    this.loading = Loading.create({'dismissOnPageChange': true});
   }
+
+  private loading;
+  showIonicLoading = () => {
+    this.loading = Loading.create({'dismissOnPageChange': true});
+    this.nav.present(this.loading);
+  };
+
+  hideIonicLoading = () => {
+    if (this.loading) {
+      setTimeout(() => {
+        this.loading.dismiss();
+      }, 300);
+    }
+  };
 
   register = () => {
     var vm = this;
     var nav = vm.nav;
-    var loading = vm.loading;
     var email = vm.data.email;
     var password = vm.data.password;
 
@@ -27,14 +38,14 @@ export class RegisterPage {
       return;
     }
 
-    nav.present(loading);
+    vm.showIonicLoading();
     firebase.auth().createUserWithEmailAndPassword(email, password).then(function (user) {
       vm.data.email = '';
       vm.data.password = '';
-      loading.dismiss();
+      vm.hideIonicLoading();
       nav.setRoot(SplashPage);
     }).catch(function (error) {
-      loading.dismiss();
+      vm.hideIonicLoading();
       var errorCode = error.code;
       if (errorCode === "auth/email-already-in-use") {
         nav.present(Alert.create({title: "Registration failed", subTitle: "The email you entered is already in use.", buttons: ['Dismiss']}));
