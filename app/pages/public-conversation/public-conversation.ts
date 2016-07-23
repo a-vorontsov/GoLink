@@ -1,7 +1,7 @@
 import {Component, ViewChild} from "@angular/core";
 import {NavController, Platform, Content, Loading, Alert, ActionSheet} from "ionic-angular";
 import {UserData} from "../../providers/user-data/user-data.provider";
-import {Geolocation, Toast} from "ionic-native";
+import {Geolocation, Toast, Clipboard} from "ionic-native";
 import {DistancePipe} from "../../pipes/distance.pipe";
 import {TimestampPipe} from "../../pipes/timestamp.pipe";
 import {TimestampDirective} from "../../directives/timestamp.directive";
@@ -381,59 +381,148 @@ export class PublicConversationPage {
       }));
     };
 
-    if (message.user.is_me) {
-      vm.nav.present(ActionSheet.create({
-        title: 'Message Actions',
+    var showReportPopup = (message) => {
+      vm.nav.present(Alert.create({
+        title: 'Report',
+        message: 'Write a reason below. Misuse of this feature will result in your account being disabled.',
+        inputs: [{
+          name: 'reason',
+          placeholder: 'Reason'
+        }],
         buttons: [
           {
-            text: 'Delete',
-            role: 'destructive',
-            icon: (vm.platform.is('ios')) ? undefined : 'trash',
-            handler: () => {
-              if (typeof(message.key) === 'undefined' || message.key === null) {
-                vm.nav.present(Alert.create({title: 'Unable to delete', subTitle: 'The message cannot be deleted at this time as it is still being sent to the server.', buttons: ['Dismiss']}));
-              } else {
-                vm.geoFire.remove(message.key);
-                var scopeMessages = vm.messages;
-                for (var i = scopeMessages.length - 1; i >= 0; i--) {
-                  var scopeMessage = scopeMessages[i];
-                  if (scopeMessage.key === message.key) {
-                    vm.messages.splice(i, 1);
-                    break;
-                  }
-                }
-              }
-              return true;
-            }
+            text: 'Cancel',
+            role: 'cancel'
           },
           {
-            text: 'Cancel',
-            role: 'cancel',
-            icon: (vm.platform.is('ios')) ? undefined : 'close'
+            text: 'Submit',
+            handler: data => {
+              if (data.reason.length < 1 || data.reason.length > 300) {
+                Toast.showShortBottom("Your reason must be between 1 and 300 characters long.");
+                return false;
+              }
+
+              firebase.database().ref('reports').push({
+                'processed': false,
+                'reported_by': vm.userData.getId(),
+                'target_type': 'public_message',
+                'target_id': message['key'],
+                'reason': data.reason,
+                'timestamp': firebase.database.ServerValue.TIMESTAMP
+              }, (error) => {
+                if (!error) {
+                  Toast.showShortBottom("Your report has successfully been submitted.");
+                  return true;
+                }
+                Toast.showShortBottom("Your report could not be submitted. Check your internet connection and try again.");
+                return false;
+              });
+            }
           }
         ]
       }));
-    } else {
-      let actionSheet = ActionSheet.create({
-        title: 'Message Actions',
-        buttons: [
-          {
-            text: 'Block',
-            role: 'destructive',
-            icon: (vm.platform.is('ios')) ? undefined : 'remove-circle',
-            handler: () => {
-              actionSheet.dismiss().then(() => {
-                showBlockPopup(message);
+    };
+
+    if (message.user.is_me) {
+      var buttons = [
+        {
+          text: 'Copy',
+          icon: (vm.platform.is('ios')) ? undefined : 'copy',
+          handler: () => {
+            Clipboard
+              .copy(message.message)
+              .then(() => {
+                Toast.showShortBottom("Message copied to clipboard");
+              }, () => {
+                Toast.showShortBottom("Message not copied - unable to access clipboard");
               });
-            }
-          },
-          {
-            text: 'Cancel',
-            role: 'cancel',
-            icon: (vm.platform.is('ios')) ? undefined : 'close'
           }
-        ]
+        },
+        {
+          text: 'Delete',
+          role: 'destructive',
+          icon: (vm.platform.is('ios')) ? undefined : 'trash',
+          handler: () => {
+            if (typeof(message.key) === 'undefined' || message.key === null) {
+              vm.nav.present(Alert.create({title: 'Unable to delete', subTitle: 'The message cannot be deleted at this time as it is still being sent to the server.', buttons: ['Dismiss']}));
+            } else {
+              vm.geoFire.remove(message.key);
+              var scopeMessages = vm.messages;
+              for (var i = scopeMessages.length - 1; i >= 0; i--) {
+                var scopeMessage = scopeMessages[i];
+                if (scopeMessage.key === message.key) {
+                  vm.messages.splice(i, 1);
+                  break;
+                }
+              }
+            }
+            return true;
+          }
+        },
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          icon: (vm.platform.is('ios')) ? undefined : 'close'
+        }
+      ];
+      if (message.type !== 'message') {
+        buttons.splice(0, 1);
+      }
+      var actionSheet = ActionSheet.create({
+        title: 'Message Actions',
+        buttons: buttons
       });
+
+      vm.nav.present(actionSheet);
+    } else {
+      var buttons = [
+        {
+          text: 'Copy',
+          icon: (vm.platform.is('ios')) ? undefined : 'copy',
+          handler: () => {
+            Clipboard
+              .copy(message.message)
+              .then(() => {
+                Toast.showShortBottom("Message copied to clipboard");
+              }, () => {
+                Toast.showShortBottom("Message not copied - unable to access clipboard");
+              });
+          }
+        },
+        {
+          text: 'Report',
+          role: 'destructive',
+          icon: (vm.platform.is('ios')) ? undefined : 'alert',
+          handler: () => {
+            actionSheet.dismiss().then(() => {
+              showReportPopup(message);
+            });
+          }
+        },
+        {
+          text: 'Block',
+          role: 'destructive',
+          icon: (vm.platform.is('ios')) ? undefined : 'remove-circle',
+          handler: () => {
+            actionSheet.dismiss().then(() => {
+              showBlockPopup(message);
+            });
+          }
+        },
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          icon: (vm.platform.is('ios')) ? undefined : 'close'
+        }
+      ];
+      if (message.type !== 'message') {
+        buttons.splice(0, 2);
+      }
+      var actionSheet = ActionSheet.create({
+        title: 'Message Actions',
+        buttons: buttons
+      });
+
       vm.nav.present(actionSheet);
     }
   };

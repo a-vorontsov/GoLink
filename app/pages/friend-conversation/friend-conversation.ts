@@ -3,7 +3,7 @@ import {NavController, Content, Alert, ActionSheet, Platform, NavParams, ViewCon
 import {UserData} from "../../providers/user-data/user-data.provider";
 import {Helper} from "../../providers/helper/helper.provider";
 import {UUID} from "angular2-uuid/index";
-import {Toast, Geolocation} from "ionic-native/dist/index";
+import {Toast, Geolocation, Clipboard} from "ionic-native/dist/index";
 import {AppSettings} from "../../app-settings";
 import {TimestampPipe} from "../../pipes/timestamp.pipe";
 import {TimestampDirective} from "../../directives/timestamp.directive";
@@ -187,36 +187,54 @@ export class FriendConversationPage {
   onMessageClicked = (message) => {
     var vm = this;
     if (message.is_me) {
-      vm.nav.present(ActionSheet.create({
-        title: 'Message Actions',
-        buttons: [
-          {
-            text: 'Delete',
-            role: 'destructive',
-            icon: (vm.platform.is('ios')) ? undefined : 'trash',
-            handler: () => {
-              if (typeof(message.key) === 'undefined' || message.key === null) {
-                vm.nav.present(Alert.create({title: "Unable to delete", subTitle: "The message cannot be deleted right now as it is still being sent. Try again later.", buttons: ['Dismiss']}));
-              } else {
-                firebase.database().ref('friend_conversations/' + vm.conversationId + '/messages/' + message.key).remove();
-                var scopeMessages = vm.data.messages;
-                for (var i = scopeMessages.length - 1; i >= 0; i--) {
-                  var scopeMessage = scopeMessages[i];
-                  if (scopeMessage.key === message.key) {
-                    vm.data.messages.splice(i, 1);
-                    break;
-                  }
+      var buttons = [
+        {
+          text: 'Copy',
+          icon: (vm.platform.is('ios')) ? undefined : 'copy',
+          handler: () => {
+            Clipboard
+              .copy(message.message)
+              .then(() => {
+                Toast.showShortBottom("Message copied to clipboard");
+              }, () => {
+                Toast.showShortBottom("Message not copied - unable to access clipboard");
+              });
+          }
+        },
+        {
+          text: 'Delete',
+          role: 'destructive',
+          icon: (vm.platform.is('ios')) ? undefined : 'trash',
+          handler: () => {
+            if (typeof(message.key) === 'undefined' || message.key === null) {
+              vm.nav.present(Alert.create({title: "Unable to delete", subTitle: "The message cannot be deleted right now as it is still being sent. Try again later.", buttons: ['Dismiss']}));
+            } else {
+              firebase.database().ref('friend_conversations/' + vm.conversationId + '/messages/' + message.key).remove();
+              var scopeMessages = vm.data.messages;
+              for (var i = scopeMessages.length - 1; i >= 0; i--) {
+                var scopeMessage = scopeMessages[i];
+                if (scopeMessage.key === message.key) {
+                  vm.data.messages.splice(i, 1);
+                  break;
                 }
               }
             }
-          },
-          {
-            text: 'Cancel',
-            role: 'cancel',
-            icon: (vm.platform.is('ios')) ? undefined : 'close'
           }
-        ]
-      }));
+        },
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          icon: (vm.platform.is('ios')) ? undefined : 'close'
+        }
+      ];
+      if (message.type !== 'message') {
+        buttons.splice(0, 1);
+      }
+      var actionSheet = ActionSheet.create({
+        title: 'Message Actions',
+        buttons: buttons
+      });
+      vm.nav.present(actionSheet);
     }
   };
 
