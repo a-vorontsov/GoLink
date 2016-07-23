@@ -1,0 +1,16 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>Update Block List</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+  <p>Tap a trainer's name to unblock them.</p>
+  <ion-list>
+    <button ion-item (click)="removedKeys.push(user.user_id); blockList.splice(index, 1);" *ngFor="let user of blockList">
+      <b>{{user.display_name}}</b>
+    </button>
+  </ion-list>
+  <button (click)="update();">Update</button>
+  <button (click)="dismiss();">Cancel</button>
+</ion-content>

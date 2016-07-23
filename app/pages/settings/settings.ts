@@ -1,8 +1,10 @@
 import {Component} from '@angular/core';
-import {NavController, Alert, Loading} from 'ionic-angular';
+import {NavController, Alert, Loading, Modal} from 'ionic-angular';
 import {UserData} from "../../providers/user-data/user-data.provider";
 import {SplashPage} from "../splash/splash";
 import {Toast} from "ionic-native/dist/index";
+import {RadiusModal} from "./modals/radius/radius.modal";
+import {BlockListModal} from "./modals/block-list/block-list.modal";
 
 @Component({
   templateUrl: 'build/pages/settings/settings.html',
@@ -18,9 +20,6 @@ export class SettingsPage {
     'displayName': this.userData.getDisplayName(),
     'team': this.userData.getTeam(),
     'radius': this.userData.getRadius(),
-    'newDisplayName': this.userData.getDisplayName(),
-    'newTeam': this.userData.getTeam(),
-    'newRadius': this.userData.getRadius(),
     'blockedUsers': this.userData.getBlockList(),
     'removedKeys': [],
     'tempBlockedUsers': null
@@ -53,7 +52,6 @@ export class SettingsPage {
       firebase.database().ref('members/' + userId + '/display_name').set(displayName, function (error) {
         vm.loading.dismiss();
         if (error) {
-          vm.data.newDisplayName = vm.data.displayName;
           Toast.showShortBottom("Error - Save failed. Check your internet connection and try again later.");
         } else {
           vm.userData.setDisplayName(displayName);
@@ -64,7 +62,7 @@ export class SettingsPage {
     };
 
     vm.nav.present(Alert.create({
-      title: 'Enter new display name',
+      title: 'Update display name',
       inputs: [
         {
           name: 'displayName',
@@ -74,7 +72,8 @@ export class SettingsPage {
       buttons: [
         {
           text: 'Cancel',
-          handler: data => {}
+          handler: data => {
+          }
         },
         {
           text: 'Update',
@@ -106,10 +105,11 @@ export class SettingsPage {
       vm.showLoading();
       var userId = vm.userData.getId();
       firebase.database().ref('members/' + userId + '/team').set(team, function (error) {
-        vm.loading.dismiss();
+        if (vm.loading) {
+          vm.loading.dismiss();
+        }
         if (error) {
           Toast.showShortBottom("Error - Save failed. Check your internet connection and try again later.");
-          vm.data.newDisplayName = vm.data.displayName;
         } else {
           vm.userData.setTeam(team);
           vm.data.team = team;
@@ -150,96 +150,30 @@ export class SettingsPage {
     vm.nav.present(alert);
   };
 
-/*  updateRadius = () => {
-    var vm = this;
-    vm.radius = parseInt(vm.data.newRadius, 10);
-
-    vm.showLoading();
-    var userId = vm.userData.getId();
-    firebase.database().ref('members/' + userId + '/radius').set(radius, function (error) {
-      vm.loading.dismiss();
-      if (error) {
-        $ionicPopup.alert({title: 'Error', template: 'Save failed. Try again later.'});
-        vm.data.newRadius = vm.data.radius;
-      } else {
-        vm.userData.setRadius(radius);
-        vm.data.radius = radius;
-        $ionicPopup.alert({title: 'Radius updated', template: 'Your radius has been updated.'});
-      }
-    });
-  };
-
   showUpdateRadiusPopup = () => {
-    Alert.create()
     var vm = this;
-    $ionicPopup.show({
-      template: '<input type="range" step="1" min="1" max="30" value="15" ng-model="data.newRadius"/><span class="">{{data.newRadius}}</span>',
-      title: 'Select the radius of trainers around you to be shown',
-      scope: vm,
-      buttons: [
-        {text: 'Cancel'},
-        {
-          text: '<b>Update</b>',
-          type: 'button-positive',
-          onTap: function (e) {
-            var radius = parseInt(vm.data.newRadius, 10);
-            if (isNaN(radius) || (radius > 30 || radius < 1)) {
-              $ionicPopup.alert({title: "Validation failed", template: "The radius must be within 1km and 30km."});
-              e.preventDefault();
-            } else {
-              vm.updateRadius();
-            }
-          }
-        }
-      ]
+    let radiusModal = Modal.create(RadiusModal, {radius: vm.data.radius});
+    radiusModal.onDismiss(data => {
+      vm.data.radius = this.userData.getRadius();
     });
-  };
-
-  updateBlockList = () => {
-    var vm = this;
-    vm.showLoading();
-    var blockListUpdates = {};
-    vm.data.removedKeys.forEach(function (removedKey) {
-      blockListUpdates[removedKey] = null;
-    });
-
-    firebase.database().ref('block_list/' + vm.userData.getId()).update(blockListUpdates, function (error) {
-      vm.data.removedKeys = [];
-      if (error) {
-        vm.loading.dismiss();
-        $ionicPopup.alert({title: "Error", template: "Your block list could not be modified. Check your internet connection and try again."});
-      } else {
-        vm.data.blockedUsers = vm.data.tempBlockedUsers;
-        vm.userData.setBlockList(vm.data.blockedUsers);
-        vm.userData.setIsBlockListStale(true);
-        vm.loading.dismiss();
-        $ionicPopup.alert({title: 'Block list updated', template: 'Your block list has been updated.'});
-      }
-    });
+    vm.nav.present(radiusModal);
   };
 
   showUpdateBlockListPopup = () => {
     var vm = this;
-    vm.data.tempBlockedUsers = vm.data.blockedUsers;
     if (vm.data.blockedUsers.length === 0) {
-      $ionicPopup.alert({title: "No users blocked", template: "There are no users in your block list."});
+      Toast.showShortBottom("There are no users in your block list.");
     } else {
-      $ionicPopup.show({
-        templateUrl: '/templates/blockList.html',
-        title: 'Block List',
-        scope: vm,
-        buttons: [
-          {text: 'Cancel'},
-          {
-            text: '<b>Update</b>',
-            type: 'button-positive',
-            onTap: function (e) {
-              vm.updateBlockList();
-            }
-          }
-        ]
+      let blockListModal = Modal.create(BlockListModal, {blockList: vm.data.blockedUsers});
+      blockListModal.onDismiss(data => {
+        vm.data.blockedUsers = this.userData.getBlockList();
       });
+      vm.nav.present(blockListModal);
     }
-  }*/
+  };
+
+  ionWillEnter() {
+    this.data.team = this.userData.getTeam();
+  };
 
 }

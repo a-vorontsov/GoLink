@@ -14,32 +14,26 @@
 
 
 <ion-content padding>
-  <ion-card>
-    <ion-list>
-      <button ion-item (click)="showUpdateDisplayNamePopup();">
-        <p>Display Name</p>
-        <h2>{{data.displayName}}</h2>
-      </button>
-      <button ion-item (click)="showUpdateTeamPopup();">
-        <p>Team</p>
-        <h2>{{data.team}}</h2>
-      </button>
-<!--      <button ion-item (click)="showUpdateRadiusPopup();">
-        <p>Chat Radius</p>
-        <h2>{{data.radius}}km</h2>
-      </button>-->
-    </ion-list>
-  </ion-card>
-<!--  <ion-card>
-    <ion-list>
-      <button ion-item (click)="showUpdateBlockListPopup();">
-        <h2>Edit Blocked Users</h2>
-      </button>
-    </ion-list>
-  </ion-card>-->
-  <ion-card>
-    <ion-list>
-      <button ion-item (click)="signOut();">Sign Out</button>
-    </ion-list>
-  </ion-card>
+  <ion-list>
+    <button ion-item (click)="showUpdateDisplayNamePopup();">
+      <p>Display Name</p>
+      <h2>{{data.displayName}}</h2>
+    </button>
+    <button ion-item (click)="showUpdateTeamPopup();">
+      <p>Team</p>
+      <h2>{{data.team}}</h2>
+    </button>
+    <button ion-item (click)="showUpdateRadiusPopup();">
+      <p>Chat Radius</p>
+      <h2>{{data.radius}}km</h2>
+    </button>
+  </ion-list>
+  <ion-list>
+    <button ion-item (click)="showUpdateBlockListPopup();">
+      <h2>Edit Blocked Users</h2>
+    </button>
+  </ion-list>
+  <ion-list>
+    <button ion-item (click)="signOut();">Sign Out</button>
+  </ion-list>
 </ion-content>
