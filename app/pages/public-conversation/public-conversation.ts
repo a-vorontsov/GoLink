@@ -6,6 +6,8 @@ import {DistancePipe} from "../../pipes/distance.pipe";
 import {TimestampPipe} from "../../pipes/timestamp.pipe";
 import {TimestampDirective} from "../../directives/timestamp.directive";
 import {UUID} from "angular2-uuid";
+import {AppSettings} from "../../app-settings";
+import {Helper} from "../../providers/helper/helper.provider";
 
 @Component({
   templateUrl: 'build/pages/public-conversation/public-conversation.html',
@@ -14,7 +16,10 @@ import {UUID} from "angular2-uuid";
 })
 export class PublicConversationPage {
 
-  constructor(private nav:NavController, private platform:Platform, private userData:UserData) {
+  constructor(private nav:NavController,
+              private platform:Platform,
+              private userData:UserData,
+              private helper:Helper) {
     this.platform = platform;
     this.userData = userData;
   }
@@ -124,8 +129,10 @@ export class PublicConversationPage {
           'timestamp': messageSnapshot.timestamp,
           'type': typeof(messageSnapshot.longitude) === 'undefined' ? 'message' : 'location',
           'message': messageSnapshot.message,
-          'longitude': messageSnapshot.longitude,
           'latitude': messageSnapshot.latitude,
+          'longitude': messageSnapshot.longitude,
+          'geo_uri': vm.helper.getGeoUriFromCoordinates(messageSnapshot.latitude, messageSnapshot.longitude),
+          'geo_src': vm.helper.getSrcfromCoordinates(messageSnapshot.latitude, messageSnapshot.longitude),
           'user': {
             'user_id': messageSnapshot.user.user_id,
             'display_name': messageSnapshot.user.display_name,
@@ -184,6 +191,8 @@ export class PublicConversationPage {
       'message': data.message,
       'latitude': vm.userData.getLatitude(),
       'longitude': vm.userData.getLongitude(),
+      'geo_uri': vm.helper.getGeoUriFromCoordinates(vm.userData.getLatitude(), vm.userData.getLongitude()),
+      'geo_src': vm.helper.getSrcfromCoordinates(vm.userData.getLatitude(), vm.userData.getLongitude()),
       'user': {
         'user_id': vm.userData.getId(),
         'display_name': vm.userData.getDisplayName(),
@@ -424,7 +433,8 @@ export class PublicConversationPage {
     };
 
     if (message.user.is_me) {
-      var buttons = [
+      var buttons:any;
+      buttons = [
         {
           text: 'Copy',
           icon: (vm.platform.is('ios')) ? undefined : 'copy',
@@ -475,7 +485,8 @@ export class PublicConversationPage {
 
       vm.nav.present(actionSheet);
     } else {
-      var buttons = [
+      var buttons:any;
+      buttons = [
         {
           text: 'Copy',
           icon: (vm.platform.is('ios')) ? undefined : 'copy',

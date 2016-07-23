@@ -87,6 +87,8 @@ export class FriendConversationPage {
       'message': data.message,
       'latitude': vm.userData.getLatitude(),
       'longitude': vm.userData.getLongitude(),
+      'geo_uri': vm.helper.getGeoUriFromCoordinates(vm.userData.getLatitude(), vm.userData.getLongitude()),
+      'geo_src': vm.helper.getSrcfromCoordinates(vm.userData.getLatitude(), vm.userData.getLongitude()),
       'is_me': true
     });
     vm.content.scrollToBottom(300);
@@ -262,6 +264,8 @@ export class FriendConversationPage {
             'message': message.message,
             'longitude': message.longitude,
             'latitude': message.latitude,
+            'geo_uri': vm.helper.getGeoUriFromCoordinates(message.latitude, message.longitude),
+            'geo_src': vm.helper.getSrcfromCoordinates(message.latitude, message.longitude),
             'user_id': message.user_id,
             'is_me': message.user_id === vm.userId
           });
@@ -379,6 +383,8 @@ export class FriendConversationPage {
           'message': message.message,
           'longitude': message.longitude,
           'latitude': message.latitude,
+          'geo_uri': vm.helper.getGeoUriFromCoordinates(message.latitude, message.longitude),
+          'geo_src': vm.helper.getSrcfromCoordinates(message.latitude, message.longitude),
           'user_id': message.user_id,
           'is_me': message.user_id === vm.userId
         });
