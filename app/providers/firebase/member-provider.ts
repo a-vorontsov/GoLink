@@ -95,14 +95,13 @@ export class MemberProvider {
 
     return new Promise((resolve, reject) => {
       var attemptCounter = 0;
-      var friendCode = generateFriendCode;
 
       var setFriendCode = () => {
-        var rootRef = firebase.database().ref('');
-        var updatedData = {};
-        updatedData['friend_codes/' + friendCode + 'user_id'] = userId;
-        updatedData['members/' + userId + '/friend_code'] = friendCode;
-        rootRef.update(updatedData).then(() => {
+        var friendCode = generateFriendCode();
+
+        firebase.database().ref('friend_codes/' + friendCode + '/user_id').set(userId).then(() => {
+          return firebase.database().ref('members/' + userId + '/friend_code').set(friendCode);
+        }).then(() => {
           resolve();
         }).catch(error => {
           attemptCounter++;
@@ -113,6 +112,8 @@ export class MemberProvider {
           }
         });
       };
+
+      setFriendCode();
     });
   }
 

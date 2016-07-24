@@ -52,7 +52,7 @@ export class SplashPage {
             nav.setRoot(SetupPage);
           }
         }).catch(error => {
-          nav.present(Alert.create({title: 'Error', subTitle: 'Unable to retrieve your user details. Check your internet connection and restart the app.', buttons: ['Dismiss']}));
+          nav.present(Alert.create({title: 'Error', subTitle: 'Unable to retrieve your user details. Check your internet connection and restart the app.'}));
         });
       } else {
         nav.setRoot(LoginPage);
@@ -83,7 +83,7 @@ export class SplashPage {
       // Return promise to set block list
       return vm.memberProvider.getTransformedBlockListObject();
     }, function (error) {
-      nav.present(Alert.create({title: 'Error', subTitle: 'Unable to retrieve location. Ensure location services are enabled and restart app.', buttons: ['Dismiss']}));
+      nav.present(Alert.create({title: 'Error', subTitle: 'Unable to retrieve location. Ensure location services are enabled and restart app.'}));
       return null;
     }).then(blockList => {
       // Set the block list
@@ -92,7 +92,7 @@ export class SplashPage {
       // Navigate to the main tab view
       nav.setRoot(TabsPage);
     }, function (error) {
-      nav.present(Alert.create({title: 'Error', subTitle: 'Unable to retrieve your user details. Check your internet connectivity and restart the app.', buttons: ['Dismiss']}));
+      nav.present(Alert.create({title: 'Error', subTitle: 'Unable to retrieve your user details. Check your internet connectivity and restart the app.'}));
     });
   };
 
@@ -102,7 +102,7 @@ export class SplashPage {
     vm.memberProvider.createFriendCode().then(() => {
       vm.checkUser();
     }).catch(error => {
-      vm.nav.present(Alert.create({title: 'Error', subTitle: 'Unable to retrieve your friend code. Check your internet connection and restart the app.', buttons: ['Dismiss']}));
+      vm.nav.present(Alert.create({title: 'Error', subTitle: 'Unable to retrieve your friend code. Check your internet connection and restart the app.'}));
     });
   };
 }
