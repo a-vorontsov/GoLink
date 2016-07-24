@@ -47,7 +47,7 @@ export class SettingsPage {
     firebase.auth().signOut().then(function () {
       vm.nav.setRoot(SplashPage);
     }).catch(function (error) {
-      Alert.create({title: 'Error', subTitle: 'Unable to sign out. Try again later or clear app data/reinstall the app.', buttons: ['Dismiss']});
+      vm.nav.present(Alert.create({title: 'Error', subTitle: 'Unable to sign out. Try again later or clear app data/reinstall the app.', buttons: ['Dismiss']}));
     });
   };
 
