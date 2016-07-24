@@ -12,7 +12,8 @@ import {PublicConversationProvider} from '../../providers/firebase/public-conver
 @Component({
   templateUrl: 'build/pages/public-conversation/public-conversation.html',
   directives: [TimestampDirective],
-  pipes: [TimestampPipe, DistancePipe]
+  pipes: [TimestampPipe, DistancePipe],
+  providers: [PublicConversationProvider]
 })
 export class PublicConversationPage {
 
