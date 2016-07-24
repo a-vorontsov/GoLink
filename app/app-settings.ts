@@ -8,6 +8,14 @@ export class AppSettings {
     };
   }
 
+  public static get INFO():Object {
+    return {
+      USER_OK: 0,
+      USER_NEEDS_SETUP: 1,
+      USER_NEEDS_FRIEND_CODE: 2
+    }
+  }
+
   public static get ERROR():Object {
     return {
       NONE: 0,
