@@ -148,7 +148,7 @@ export class PublicConversationPage {
         vm.sortScopeMessagesByTimestamp();
       }
     }, function (error) {
-      if (!(error.message.search('permission_denied') > -1)) {
+      if (!(error['message'].search('permission_denied') > -1)) {
         throw error;
       }
     });

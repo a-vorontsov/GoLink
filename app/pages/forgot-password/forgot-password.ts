@@ -49,7 +49,7 @@ export class ForgotPasswordPage {
       vm.data.email = '';
     }, function (error) {
       vm.hideLoading();
-      var errorCode = error.code;
+      var errorCode = error['code'];
       if (errorCode === "auth/invalid-email" || errorCode === "auth/user-not-found") {
         Toast.showShortBottom("The email you entered is not tied to a user.");
       } else if (errorCode === "auth/network-request-failed") {

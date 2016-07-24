@@ -54,7 +54,7 @@ export class LoginPage {
 
     }).catch(function (error) {
       vm.hideIonicLoading();
-      var errorCode = error.code;
+      var errorCode = error['code'];
       if (errorCode === "auth/user-disabled") {
         nav.present(Alert.create({title: "Login failed", subTitle: "Your account has been disabled. Contact support for more info.", buttons: ['Dismiss']}));
       } else if (errorCode === "auth/network-request-failed") {

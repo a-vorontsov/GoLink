@@ -7,7 +7,8 @@
   },
   "filesGlob": [
     "**/*.ts",
-    "!node_modules/**/*"
+    "!node_modules/**/*",
+    "!typings/manual/firebase3.d.ts"
   ],
   "exclude": [
     "node_modules",

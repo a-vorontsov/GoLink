@@ -46,7 +46,7 @@ export class RegisterPage {
       nav.setRoot(SplashPage);
     }).catch(function (error) {
       vm.hideIonicLoading();
-      var errorCode = error.code;
+      var errorCode = error['code'];
       if (errorCode === "auth/email-already-in-use") {
         nav.present(Alert.create({title: "Registration failed", subTitle: "The email you entered is already in use.", buttons: ['Dismiss']}));
       } else if (errorCode === "auth/invalid-email") {
