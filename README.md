@@ -6,9 +6,9 @@
 3. Run `ionic platform add android` to add the Android platform
 
 ## Testing using your web browser
-If you have the [LiveReload Chrome extension](https://chrome.google.com/webstore/detail/livereload/jnihajbhpnppcggbcgedagnkighmdlei) or its equivalent for your browser, your page will refresh automatically when you make changes, so long as you use `gulp watch`.
+If you have the [LiveReload Chrome extension](https://chrome.google.com/webstore/detail/livereload/jnihajbhpnppcggbcgedagnkighmdlei) or its equivalent for your browser, your page will refresh automatically when you make changes.
 
-1. Run `ionic start`!
+1. Run `ionic serve`!
 
 ## Testing on Android
 1. Plug in your Android device and enable USB debugging
