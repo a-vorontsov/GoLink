@@ -29,6 +29,7 @@ export class FriendConversationPage {
               private helper:Helper,
               private platform:Platform) {
     this.friendId = this.params.get('friendId');
+    this.conversationId = this.helper.getConversationId(this.userData.getId(), this.friendId);
   };
 
   @ViewChild(Content) content:Content;
@@ -45,7 +46,7 @@ export class FriendConversationPage {
     'keyboardHeight': null
   };
   protected friendId;
-  protected conversationId = this.helper.getConversationId(this.userData.getId(), this.friendId);
+  protected conversationId;
   private isIOS = this.platform.is('ios');
   protected sentMessageKeys = [];
   protected userId = this.userData.getId();
@@ -346,6 +347,7 @@ export class FriendConversationPage {
 
   ionViewLoaded() {
     var vm = this;
+
     // Check whether the friend is in the friends list
     var friends = vm.userData.getFriends();
     for (var i = 0; i < friends.length; i++) {

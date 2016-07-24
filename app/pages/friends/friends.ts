@@ -32,7 +32,6 @@ export class FriendsPage {
   isLoading = true;
   data = {
     'friendCode': this.userData.getFriendCode(),
-    'targetFriendCode': '',
     'friends': []
   };
 
@@ -53,13 +52,7 @@ export class FriendsPage {
 
   sortScopeDataFriends = () => {
     this.data.friends.sort(function (x, y) {
-      if (x < y) {
-        return -1;
-      } else if (x > y) {
-        return 1;
-      } else {
-        return 0;
-      }
+      return y.last_messaged - x.last_messaged;
     });
   };
 
@@ -88,99 +81,98 @@ export class FriendsPage {
   private friendUserId;
   private friendMemberObject;
 
-  addFriendByFriendCode = (targetFriendCode) => {
-    var vm = this;
+  showAddFriendPopup = function () {
+    var addFriendByFriendCode = (targetFriendCode) => {
+      var vm = this;
 
-    // Show loading screen
-    vm.showIonicLoading();
+      // Show loading screen
+      vm.showIonicLoading();
 
-    // Retrieve the user ID of the friend code
-    firebase.database().ref('/friend_codes/' + targetFriendCode).once('value')
-      .then(function getMemberDetailsFromFriendCodeSnapshot(snapshot) {
-        // Check whether the user ID for this snapshot exists
-        if (!(snapshot.exists() && snapshot.hasChild('user_id'))) {
-          return Promise.reject(AppSettings.ERROR['USER_NOT_FOUND']);
-        }
+      // Retrieve the user ID of the friend code
+      firebase.database().ref('/friend_codes/' + targetFriendCode).once('value')
+        .then(function getMemberDetailsFromFriendCodeSnapshot(snapshot) {
+          // Check whether the user ID for this snapshot exists
+          if (!(snapshot.exists() && snapshot.hasChild('user_id'))) {
+            return Promise.reject(AppSettings.ERROR['USER_NOT_FOUND']);
+          }
 
-        // Retrieve the member details for the user ID
-        vm.friendUserId = snapshot.child('user_id').val();
-        if (vm.friendUserId == vm.userData.getId()) {
+          // Retrieve the member details for the user ID
+          vm.friendUserId = snapshot.child('user_id').val();
+          if (vm.friendUserId == vm.userData.getId()) {
+            return Promise.reject(AppSettings.ERROR['DB_INTEGRITY']);
+          }
+
+          for (var i = 0; i < vm.data.friends.length; i++) {
+            var friend = vm.data.friends[i];
+            if (vm.friendUserId == friend.user_id) {
+              return Promise.reject(AppSettings.ERROR['FRIEND_ALREADY_ADDED']);
+            }
+          }
+
+          return firebase.database().ref('/members/' + vm.friendUserId).once('value');
+
+        }).then(function getFriendMemberSnapshot(snapshot) {
+        // Check whether the display name exists for this snapshot
+        if (!(snapshot.exists() && snapshot.hasChild('display_name'))) {
           return Promise.reject(AppSettings.ERROR['DB_INTEGRITY']);
         }
 
-        for (var i = 0; i < vm.data.friends.length; i++) {
-          var friend = vm.data.friends[i];
-          if (vm.friendUserId == friend.user_id) {
-            return Promise.reject(AppSettings.ERROR['FRIEND_ALREADY_ADDED']);
-          }
-        }
+        vm.friendMemberObject = snapshot.val();
+        vm.hideIonicLoading();
 
-        return firebase.database().ref('/members/' + vm.friendUserId).once('value');
-
-      }).then(function getFriendMemberSnapshot(snapshot) {
-      // Check whether the display name exists for this snapshot
-      if (!(snapshot.exists() && snapshot.hasChild('display_name'))) {
-        return Promise.reject(AppSettings.ERROR['DB_INTEGRITY']);
-      }
-
-      vm.friendMemberObject = snapshot.val();
-      vm.hideIonicLoading();
-
-      vm.nav.present(Alert.create({
-        title: 'Add friend?',
-        message: 'Do you want to add <b>' + vm.sanitizer.sanitize(SecurityContext.HTML, vm.friendMemberObject.display_name) + '</b> as a friend?',
-        buttons: [
-          {
-            text: 'No',
-            role: 'cancel',
-            handler: () => {
-              return true;
-            }
-          },
-          {
-            text: 'Yes',
-            handler: () => {
-              vm.showIonicLoading();
-              firebase.database().ref('members/' + vm.userData.getId() + '/friends/' + vm.friendUserId).set({'added_at': firebase.database.ServerValue.TIMESTAMP})
-                .then(function onGetFriendInfo(error) {
-                  if (error) {
-                    return Promise.reject(AppSettings.ERROR['INET']);
-                  }
-                  vm.data.friends.push({
-                    'user_id': vm.friendUserId,
-                    'display_name': vm.friendMemberObject.display_name,
-                    'team': vm.friendMemberObject.team,
-                    'last_messaged': null,
-                    'added_at': Date.now()
+        vm.nav.present(Alert.create({
+          title: 'Add friend?',
+          message: 'Do you want to add <b>' + vm.sanitizer.sanitize(SecurityContext.HTML, vm.friendMemberObject.display_name) + '</b> as a friend?',
+          buttons: [
+            {
+              text: 'No',
+              role: 'cancel',
+              handler: () => {
+                return true;
+              }
+            },
+            {
+              text: 'Yes',
+              handler: () => {
+                vm.showIonicLoading();
+                firebase.database().ref('members/' + vm.userData.getId() + '/friends/' + vm.friendUserId).set({'added_at': firebase.database.ServerValue.TIMESTAMP})
+                  .then(function onGetFriendInfo(error) {
+                    if (error) {
+                      return Promise.reject(AppSettings.ERROR['INET']);
+                    }
+                    vm.data.friends.push({
+                      'user_id': vm.friendUserId,
+                      'display_name': vm.friendMemberObject.display_name,
+                      'team': vm.friendMemberObject.team,
+                      'last_messaged': null,
+                      'added_at': Date.now()
+                    });
+                    vm.hideIonicLoading();
+                    Toast.show('Success! <b>' + vm.sanitizer.sanitize(SecurityContext.HTML, vm.friendMemberObject.display_name) + '</b> has been added to your friends list.', "3000", "bottom");
                   });
-                  vm.sortScopeDataFriends();
-                  vm.hideIonicLoading();
-                  Toast.show('Success! <b>' + vm.sanitizer.sanitize(SecurityContext.HTML, vm.friendMemberObject.display_name) + '</b> has been added to your friends list.', "3000", "bottom");
-                });
-              return;
+                return;
+              }
             }
-          }
-        ]
-      }));
+          ]
+        }));
 
-    }, function (error) {
-      vm.hideIonicLoading();
-      if (error === AppSettings.ERROR['NONE']) {
-      } else if (error === AppSettings.ERROR['INET']) {
-        Toast.showLongBottom('An error occurred. Check your internet connection and try again.');
-      } else if (error === AppSettings.ERROR['DB_INTEGRITY']) {
-        Toast.showLongBottom('Database integrity error - this shouldn\'t happen. Please email us with the friend code you entered ASAP!');
-      } else if (error === AppSettings.ERROR['USER_NOT_FOUND']) {
-        Toast.showLongBottom('User not found - The friend code you entered is not tied to a user.');
-      } else if (error === AppSettings.ERROR['FRIEND_ALREADY_ADDED']) {
-        Toast.showLongBottom('Friend already added - this trainer is already in your friends list.');
-      } else {
-        Toast.showLongBottom('An error occurred. Check your internet connection and try again.');
-      }
-    });
-  };
+      }, function (error) {
+        vm.hideIonicLoading();
+        if (error === AppSettings.ERROR['NONE']) {
+        } else if (error === AppSettings.ERROR['INET']) {
+          Toast.showLongBottom('An error occurred. Check your internet connection and try again.');
+        } else if (error === AppSettings.ERROR['DB_INTEGRITY']) {
+          Toast.showLongBottom('Database integrity error - this shouldn\'t happen. Please email us with the friend code you entered ASAP!');
+        } else if (error === AppSettings.ERROR['USER_NOT_FOUND']) {
+          Toast.showLongBottom('User not found - The friend code you entered is not tied to a user.');
+        } else if (error === AppSettings.ERROR['FRIEND_ALREADY_ADDED']) {
+          Toast.showLongBottom('Friend already added - this trainer is already in your friends list.');
+        } else {
+          Toast.showLongBottom('An error occurred. Check your internet connection and try again.');
+        }
+      });
+    };
 
-  showAddFriendPopup = function () {
     var vm = this;
     vm.nav.present(Alert.create({
       title: 'Enter friend code',
@@ -196,12 +188,12 @@ export class FriendsPage {
               || !data.targetFriendCode.match(/^[0-9]+$/)) {
               Toast.showShortBottom("Enter a valid 12-digit friend code");
               return false;
-            } else if (vm.userData.getFriendCode() === vm.data.targetFriendCode) {
+            } else if (vm.userData.getFriendCode() === data.targetFriendCode) {
               Toast.showShortBottom("You can't add yourself, you numpty.");
               return false;
             } else {
               // Code passes validation check
-              vm.addFriendByFriendCode(data.targetFriendCode);
+              addFriendByFriendCode(data.targetFriendCode);
               data.targetFriendCode = '';
               return true;
             }
@@ -267,7 +259,7 @@ export class FriendsPage {
               if (vm.data.friends[i].user_id === friendId) {
                 setTimeout(function () {
                   if (typeof(lastMessaged) === undefined || lastMessaged === null) {
-                    vm.data.friends[i].last_messaged = null;
+                    vm.data.friends[i].last_messaged = 0;
                   } else {
                     vm.data.friends[i].last_messaged = (lastMessaged >= Date.now()) ? Date.now() - 1 : lastMessaged;
                   }
@@ -275,6 +267,7 @@ export class FriendsPage {
                 break;
               }
             }
+            vm.sortScopeDataFriends();
           });
         }
 

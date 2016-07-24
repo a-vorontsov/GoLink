@@ -18,12 +18,10 @@ export class TimestampDirective {
   }
 
   @Input() set timestamp(timestamp:any) {
-    if (timestamp) {
-      this._timestamp = Number(timestamp);
-      this.intervalLength = this.TIME_TEN_SECONDS;
-      this.updateTime();
-      this.updateLater();
-    }
+    this._timestamp = Number(timestamp);
+    this.intervalLength = this.TIME_TEN_SECONDS;
+    this.updateTime();
+    this.updateLater();
   }
 
   updateTime() {
