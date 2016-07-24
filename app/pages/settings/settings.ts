@@ -1,18 +1,18 @@
 import {Component} from '@angular/core';
 import {NavController, Alert, Loading, Modal} from 'ionic-angular';
-import {UserData} from "../../providers/user-data/user-data.provider";
-import {SplashPage} from "../splash/splash";
-import {Toast} from "ionic-native/dist/index";
-import {RadiusModal} from "./modals/radius/radius.modal";
-import {BlockListModal} from "./modals/block-list/block-list.modal";
+import {UserData} from '../../providers/user-data/user-data.provider';
+import {SplashPage} from '../splash/splash';
+import {Toast} from 'ionic-native/dist/index';
+import {RadiusModal} from './modals/radius/radius.modal';
+import {BlockListModal} from './modals/block-list/block-list.modal';
 
 @Component({
   templateUrl: 'build/pages/settings/settings.html',
 })
 export class SettingsPage {
 
-  constructor(private nav:NavController,
-              private userData:UserData) {
+  constructor(private nav: NavController,
+              private userData: UserData) {
 
   }
 
@@ -48,7 +48,7 @@ export class SettingsPage {
       vm.nav.setRoot(SplashPage);
     }).catch(function (error) {
       Alert.create({title: 'Error', subTitle: 'Unable to sign out. Try again later or clear app data/reinstall the app.', buttons: ['Dismiss']});
-    })
+    });
   };
 
   showUpdateDisplayNamePopup = () => {
@@ -60,11 +60,11 @@ export class SettingsPage {
       firebase.database().ref('members/' + userId + '/display_name').set(displayName, function (error) {
         vm.hideIonicLoading();
         if (error) {
-          Toast.showShortBottom("Error - Save failed. Check your internet connection and try again later.");
+          Toast.showShortBottom('Error - Save failed. Check your internet connection and try again later.');
         } else {
           vm.userData.setDisplayName(displayName);
           vm.data.displayName = displayName;
-          Toast.showShortBottom(("Your display name has successfully been updated."));
+          Toast.showShortBottom(('Your display name has successfully been updated.'));
         }
       });
     };
@@ -88,13 +88,13 @@ export class SettingsPage {
           handler: data => {
             var displayName = data.displayName;
             if (displayName.length < 1) {
-              Toast.showLongBottom("Enter a display name.");
+              Toast.showLongBottom('Enter a display name.');
               return false;
             } else if (displayName.length > 16) {
-              Toast.showLongBottom("Your display name cannot be greater than 16 characters.");
+              Toast.showLongBottom('Your display name cannot be greater than 16 characters.');
               return false;
-            } else if (displayName == vm.data.displayName) {
-              Toast.showLongBottom("Your new display name cannot be the same as your current one.");
+            } else if (displayName === vm.data.displayName) {
+              Toast.showLongBottom('Your new display name cannot be the same as your current one.');
               return false;
             } else {
               updateDisplayName(displayName);
@@ -117,11 +117,11 @@ export class SettingsPage {
           vm.hideIonicLoading();
         }
         if (error) {
-          Toast.showShortBottom("Error - Save failed. Check your internet connection and try again later.");
+          Toast.showShortBottom('Error - Save failed. Check your internet connection and try again later.');
         } else {
           vm.userData.setTeam(team);
           vm.data.team = team;
-          Toast.showShortBottom(("Your team name has successfully been updated."));
+          Toast.showShortBottom('Your team name has successfully been updated.');
         }
       });
     };
@@ -170,7 +170,7 @@ export class SettingsPage {
   showUpdateBlockListPopup = () => {
     var vm = this;
     if (vm.data.blockedUsers.length === 0) {
-      Toast.showShortBottom("There are no users in your block list.");
+      Toast.showShortBottom('There are no users in your block list.');
     } else {
       let blockListModal = Modal.create(BlockListModal, {blockList: vm.data.blockedUsers});
       blockListModal.onDismiss(data => {

@@ -1,5 +1,5 @@
-import {Directive, ElementRef, Input} from "@angular/core";
-import {TimestampPipe} from "../pipes/timestamp.pipe";
+import {Directive, ElementRef, Input} from '@angular/core';
+import {TimestampPipe} from '../pipes/timestamp.pipe';
 @Directive({
   selector: '[glTimestamp]',
 })
@@ -11,13 +11,13 @@ export class TimestampDirective {
   private _timestamp;
   private intervalLength;
   private timeoutId;
-  private el:HTMLElement;
+  private el: HTMLElement;
 
-  constructor(el:ElementRef) {
+  constructor(el: ElementRef) {
     this.el = el.nativeElement;
   }
 
-  @Input() set timestamp(timestamp:any) {
+  @Input() set timestamp(timestamp: any) {
     this._timestamp = Number(timestamp);
     this.intervalLength = this.TIME_TEN_SECONDS;
     this.updateTime();
@@ -34,7 +34,7 @@ export class TimestampDirective {
       if (timestampDifference >= this.TIME_ONE_MINUTE) {
         this.intervalLength = this.TIME_ONE_MINUTE;
       } else if (timestampDifference >= this.TIME_TEN_MINUTES) {
-        this.intervalLength = this.TIME_TEN_MINUTES
+        this.intervalLength = this.TIME_TEN_MINUTES;
       }
       this.updateTime();
       this.updateLater();

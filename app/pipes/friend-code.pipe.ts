@@ -2,7 +2,7 @@ import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({name: 'friendCode'})
 export class FriendCodePipe implements PipeTransform {
-  transform(friendCode:any):string {
+  transform(friendCode: any): string {
     if (typeof friendCode === 'undefined' || friendCode === null) {
       return 'N/A (Contact Support)';
     } else {

@@ -1,7 +1,7 @@
-import {Component} from "@angular/core";
-import {ViewController, NavParams, Alert, Loading, NavController} from "ionic-angular/index";
-import {UserData} from "../../../../providers/user-data/user-data.provider";
-import {Toast} from "ionic-native/dist/index";
+import {Component} from '@angular/core';
+import {ViewController, NavParams, Loading, NavController} from 'ionic-angular/index';
+import {UserData} from '../../../../providers/user-data/user-data.provider';
+import {Toast} from 'ionic-native/dist/index';
 
 @Component({
   templateUrl: 'build/pages/settings/modals/radius/radius.modal.html',
@@ -10,10 +10,10 @@ import {Toast} from "ionic-native/dist/index";
 export class RadiusModal {
   radius;
 
-  constructor(private viewCtrl:ViewController,
-              private nav:NavController,
-              private params:NavParams,
-              private userData:UserData) {
+  constructor(private viewCtrl: ViewController,
+              private nav: NavController,
+              private params: NavParams,
+              private userData: UserData) {
     this.radius = this.params.get('radius');
   }
 
@@ -37,10 +37,10 @@ export class RadiusModal {
         vm.loading.dismiss();
       }
       if (error) {
-        Toast.showShortBottom("Save failed. Check your internet connection and try again later.");
+        Toast.showShortBottom('Save failed. Check your internet connection and try again later.');
       } else {
         vm.userData.setRadius(vm.radius);
-        Toast.showLongBottom("Your radius has successfully been updated.");
+        Toast.showLongBottom('Your radius has successfully been updated.');
         vm.dismiss();
       }
     });

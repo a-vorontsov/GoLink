@@ -1,20 +1,20 @@
-import {Component} from "@angular/core";
-import {ViewController, NavParams, Alert, Loading, NavController} from "ionic-angular/index";
-import {UserData} from "../../../../providers/user-data/user-data.provider";
-import {Toast} from "ionic-native/dist/index";
+import {Component} from '@angular/core';
+import {ViewController, NavParams, Loading, NavController} from 'ionic-angular/index';
+import {UserData} from '../../../../providers/user-data/user-data.provider';
+import {Toast} from 'ionic-native/dist/index';
 
 @Component({
   templateUrl: 'build/pages/settings/modals/block-list/block-list.modal.html',
 })
 
 export class BlockListModal {
-  blockList:any[];
-  removedKeys:any[];
+  blockList: any[];
+  removedKeys: any[];
 
-  constructor(private viewCtrl:ViewController,
-              private nav:NavController,
-              private params:NavParams,
-              private userData:UserData) {
+  constructor(private viewCtrl: ViewController,
+              private nav: NavController,
+              private params: NavParams,
+              private userData: UserData) {
     this.blockList = this.params.get('blockList');
     this.removedKeys = [];
   }
@@ -40,11 +40,11 @@ export class BlockListModal {
         vm.loading.dismiss();
       }
       if (error) {
-        Toast.showShortBottom("Save failed. Check your internet connection and try again later.");
+        Toast.showShortBottom('Save failed. Check your internet connection and try again later.');
       } else {
         vm.userData.setBlockList(vm.blockList);
         vm.userData.setIsBlockListStale(true);
-        Toast.showLongBottom("Your block list has successfully been updated.");
+        Toast.showLongBottom('Your block list has successfully been updated.');
         vm.dismiss();
       }
     });

@@ -1,24 +1,24 @@
-import {Component} from "@angular/core";
-import {NavController, Alert} from "ionic-angular";
-import {AppSettings} from "../../app-settings";
-import {UserData} from "../../providers/user-data/user-data.provider";
-import {SetupPage} from "../setup/setup";
-import {LoginPage} from "../login/login";
-import {TabsPage} from "../tabs/tabs";
-import {AuthProvider} from "../../providers/firebase/auth.provider";
-import {MemberProvider} from "../../providers/firebase/member-provider";
-import {NativeProvider} from "../../providers/native-provider/native-provider";
+import {Component} from '@angular/core';
+import {NavController, Alert} from 'ionic-angular';
+import {AppSettings} from '../../app-settings';
+import {UserData} from '../../providers/user-data/user-data.provider';
+import {SetupPage} from '../setup/setup';
+import {LoginPage} from '../login/login';
+import {TabsPage} from '../tabs/tabs';
+import {AuthProvider} from '../../providers/firebase/auth.provider';
+import {MemberProvider} from '../../providers/firebase/member-provider';
+import {NativeProvider} from '../../providers/native-provider/native-provider';
 
 @Component({
   templateUrl: 'build/pages/splash/splash.html',
   providers: [AuthProvider, MemberProvider, NativeProvider]
 })
 export class SplashPage {
-  constructor(private nav:NavController,
-              private userData:UserData,
-              private authProvider:AuthProvider,
-              private memberProvider:MemberProvider,
-              private nativeProvider:NativeProvider) {
+  constructor(private nav: NavController,
+              private userData: UserData,
+              private authProvider: AuthProvider,
+              private memberProvider: MemberProvider,
+              private nativeProvider: NativeProvider) {
 
   }
 
@@ -102,7 +102,7 @@ export class SplashPage {
     vm.memberProvider.createFriendCode().then(() => {
       vm.checkUser();
     }).catch(error => {
-      vm.nav.present(Alert.create({title: "Error", subTitle: "Unable to retrieve your friend code. Check your internet connection and restart the app.", buttons: ['Dismiss']}));
+      vm.nav.present(Alert.create({title: 'Error', subTitle: 'Unable to retrieve your friend code. Check your internet connection and restart the app.', buttons: ['Dismiss']}));
     });
   };
 }

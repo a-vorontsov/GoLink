@@ -1,13 +1,13 @@
 import {Component, ViewChild} from '@angular/core';
-import {NavController, Content, Alert, ActionSheet, Platform, NavParams, ViewController, Loading} from 'ionic-angular';
-import {UserData} from "../../providers/user-data/user-data.provider";
-import {Helper} from "../../providers/helper/helper.provider";
-import {UUID} from "angular2-uuid/index";
-import {Toast, Geolocation, Clipboard} from "ionic-native/dist/index";
-import {AppSettings} from "../../app-settings";
-import {TimestampPipe} from "../../pipes/timestamp.pipe";
-import {TimestampDirective} from "../../directives/timestamp.directive";
-import {FriendsPage} from "../friends/friends";
+import {NavController, Content, Alert, ActionSheet, Platform, NavParams, Loading} from 'ionic-angular';
+import {UserData} from '../../providers/user-data/user-data.provider';
+import {Helper} from '../../providers/helper/helper.provider';
+import {UUID} from 'angular2-uuid/index';
+import {Toast, Geolocation, Clipboard} from 'ionic-native/dist/index';
+import {AppSettings} from '../../app-settings';
+import {TimestampPipe} from '../../pipes/timestamp.pipe';
+import {TimestampDirective} from '../../directives/timestamp.directive';
+import {FriendsPage} from '../friends/friends';
 
 /*
  Generated class for the FriendConversationPage page.
@@ -22,17 +22,16 @@ import {FriendsPage} from "../friends/friends";
 })
 export class FriendConversationPage {
 
-  constructor(private nav:NavController,
-              private params:NavParams,
-              private view:ViewController,
-              private userData:UserData,
-              private helper:Helper,
-              private platform:Platform) {
+  constructor(private nav: NavController,
+              private params: NavParams,
+              private userData: UserData,
+              private helper: Helper,
+              private platform: Platform) {
     this.friendId = this.params.get('friendId');
     this.conversationId = this.helper.getConversationId(this.userData.getId(), this.friendId);
   };
 
-  @ViewChild(Content) content:Content;
+  @ViewChild(Content) content: Content;
 
   private data = {
     'message': '',
@@ -122,7 +121,7 @@ export class FriendConversationPage {
 
     var message = vm.data.message;
     if (message.length < 1 || message.length > 1000) {
-      Toast.showShortBottom("Your message must be between 1 and 1000 characters long.");
+      Toast.showShortBottom('Your message must be between 1 and 1000 characters long.');
       return;
     }
 
@@ -198,9 +197,9 @@ export class FriendConversationPage {
             Clipboard
               .copy(message.message)
               .then(() => {
-                Toast.showShortBottom("Message copied to clipboard");
+                Toast.showShortBottom('Message copied to clipboard');
               }, () => {
-                Toast.showShortBottom("Message not copied - unable to access clipboard");
+                Toast.showShortBottom('Message not copied - unable to access clipboard');
               });
           }
         },
@@ -210,7 +209,7 @@ export class FriendConversationPage {
           icon: (vm.platform.is('ios')) ? undefined : 'trash',
           handler: () => {
             if (typeof(message.key) === 'undefined' || message.key === null) {
-              vm.nav.present(Alert.create({title: "Unable to delete", subTitle: "The message cannot be deleted right now as it is still being sent. Try again later.", buttons: ['Dismiss']}));
+              vm.nav.present(Alert.create({title: 'Unable to delete', subTitle: 'The message cannot be deleted right now as it is still being sent. Try again later.', buttons: ['Dismiss']}));
             } else {
               firebase.database().ref('friend_conversations/' + vm.conversationId + '/messages/' + message.key).remove();
               var scopeMessages = vm.data.messages;
@@ -254,7 +253,7 @@ export class FriendConversationPage {
       promise = firebase.database().ref('friend_conversations/' + vm.conversationId + '/messages').orderByKey();
     }
 
-    promise.on("child_added", function (snapshot) {
+    promise.on('child_added', function (snapshot) {
       var message = snapshot.val();
       if (vm.sentMessageKeys.indexOf(snapshot.key) === -1) {
         setTimeout(() => {
@@ -275,7 +274,7 @@ export class FriendConversationPage {
       }
     });
 
-    promise.on("child_removed", (oldSnapshot) => {
+    promise.on('child_removed', (oldSnapshot) => {
       var key = oldSnapshot.key;
 
       var messages = vm.data.messages;
@@ -352,7 +351,7 @@ export class FriendConversationPage {
     var friends = vm.userData.getFriends();
     for (var i = 0; i < friends.length; i++) {
       var friend = friends[i];
-      if (vm.friendId == friend.user_id) {
+      if (vm.friendId === friend.user_id) {
         vm.isInFriendsList = true;
         vm.data.friend.display_name = friend.display_name;
         vm.data.friend.team = friend.team;
@@ -368,7 +367,7 @@ export class FriendConversationPage {
     // Check whether the friend is connected to the user
     firebase.database().ref('members/' + vm.friendId + '/friends/' + vm.userData.getId()).once('value').then((snapshot) => {
       if (!(snapshot.exists() && snapshot.hasChild('added_at'))) {
-        return Promise.reject(AppSettings.ERROR['FRIEND_NOT_ADDED']);
+        return Promise.reject(AppSettings.ERROR.FRIEND_NOT_ADDED);
       }
       vm.data.friend.added_at = snapshot.child('added_at').val();
 
@@ -401,15 +400,15 @@ export class FriendConversationPage {
       return Promise.reject(error);
     }).catch(function (error) {
       setTimeout(() => {
-        if (error === AppSettings.ERROR['FRIEND_NOT_ADDED']) {
+        if (error === AppSettings.ERROR.FRIEND_NOT_ADDED) {
           setTimeout(() => {
             vm.isConnectedToFriend = false;
             vm.isLoading = false;
           });
         } else {
-          vm.nav.present(Alert.create({title: "Error", subTitle: "Unable to retrieve messages. Check your internet connection and restart the app.", buttons: ['Dismiss']}));
+          vm.nav.present(Alert.create({title: 'Error', subTitle: 'Unable to retrieve messages. Check your internet connection and restart the app.', buttons: ['Dismiss']}));
         }
-      })
+      });
     });
   }
 

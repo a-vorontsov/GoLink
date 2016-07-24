@@ -1,13 +1,13 @@
-import {Component} from "@angular/core";
-import {NavController, Alert, Loading} from "ionic-angular";
-import {AppSettings} from "../../app-settings";
-import {UserData} from "../../providers/user-data/user-data.provider";
-import {Clipboard, Toast} from "ionic-native/dist/index";
-import {DomSanitizationService, SecurityContext} from "@angular/platform-browser";
-import {Helper} from "../../providers/helper/helper.provider";
-import {FriendCodePipe} from "../../pipes/friend-code.pipe";
-import {TimestampDirective} from "../../directives/timestamp.directive";
-import {FriendConversationPage} from "../friend-conversation/friend-conversation";
+import {Component} from '@angular/core';
+import {NavController, Alert, Loading} from 'ionic-angular';
+import {AppSettings} from '../../app-settings';
+import {UserData} from '../../providers/user-data/user-data.provider';
+import {Clipboard, Toast} from 'ionic-native/dist/index';
+import {DomSanitizationService, SecurityContext} from '@angular/platform-browser';
+import {Helper} from '../../providers/helper/helper.provider';
+import {FriendCodePipe} from '../../pipes/friend-code.pipe';
+import {TimestampDirective} from '../../directives/timestamp.directive';
+import {FriendConversationPage} from '../friend-conversation/friend-conversation';
 
 /*
  Generated class for the FriendsPage page.
@@ -22,10 +22,10 @@ import {FriendConversationPage} from "../friend-conversation/friend-conversation
 })
 export class FriendsPage {
 
-  constructor(private nav:NavController,
-              private userData:UserData,
-              private helper:Helper,
-              private sanitizer:DomSanitizationService) {
+  constructor(private nav: NavController,
+              private userData: UserData,
+              private helper: Helper,
+              private sanitizer: DomSanitizationService) {
   }
 
   private loading;
@@ -56,10 +56,10 @@ export class FriendsPage {
     });
   };
 
-  copyFriendCode = function () {
+  copyFriendCode = () => {
     var vm = this;
     Clipboard
-      .copy(vm.userData.getFriendCode())
+      .copy(vm.data.friendCode)
       .then(function () {
         Toast.showShortBottom('Friend code copied to clipboard');
       }, function () {
@@ -81,7 +81,7 @@ export class FriendsPage {
   private friendUserId;
   private friendMemberObject;
 
-  showAddFriendPopup = function () {
+  showAddFriendPopup = () => {
     var addFriendByFriendCode = (targetFriendCode) => {
       var vm = this;
 
@@ -93,19 +93,19 @@ export class FriendsPage {
         .then(function getMemberDetailsFromFriendCodeSnapshot(snapshot) {
           // Check whether the user ID for this snapshot exists
           if (!(snapshot.exists() && snapshot.hasChild('user_id'))) {
-            return Promise.reject(AppSettings.ERROR['USER_NOT_FOUND']);
+            return Promise.reject(AppSettings.ERROR.USER_NOT_FOUND);
           }
 
           // Retrieve the member details for the user ID
           vm.friendUserId = snapshot.child('user_id').val();
-          if (vm.friendUserId == vm.userData.getId()) {
-            return Promise.reject(AppSettings.ERROR['DB_INTEGRITY']);
+          if (vm.friendUserId === vm.userData.getId()) {
+            return Promise.reject(AppSettings.ERROR.DB_INTEGRITY);
           }
 
           for (var i = 0; i < vm.data.friends.length; i++) {
             var friend = vm.data.friends[i];
-            if (vm.friendUserId == friend.user_id) {
-              return Promise.reject(AppSettings.ERROR['FRIEND_ALREADY_ADDED']);
+            if (vm.friendUserId === friend.user_id) {
+              return Promise.reject(AppSettings.ERROR.FRIEND_ALREADY_ADDED);
             }
           }
 
@@ -114,7 +114,7 @@ export class FriendsPage {
         }).then(function getFriendMemberSnapshot(snapshot) {
         // Check whether the display name exists for this snapshot
         if (!(snapshot.exists() && snapshot.hasChild('display_name'))) {
-          return Promise.reject(AppSettings.ERROR['DB_INTEGRITY']);
+          return Promise.reject(AppSettings.ERROR.DB_INTEGRITY);
         }
 
         vm.friendMemberObject = snapshot.val();
@@ -138,7 +138,7 @@ export class FriendsPage {
                 firebase.database().ref('members/' + vm.userData.getId() + '/friends/' + vm.friendUserId).set({'added_at': firebase.database.ServerValue.TIMESTAMP})
                   .then(function onGetFriendInfo(error) {
                     if (error) {
-                      return Promise.reject(AppSettings.ERROR['INET']);
+                      return Promise.reject(AppSettings.ERROR.INET);
                     }
                     vm.data.friends.push({
                       'user_id': vm.friendUserId,
@@ -148,7 +148,7 @@ export class FriendsPage {
                       'added_at': Date.now()
                     });
                     vm.hideIonicLoading();
-                    Toast.show('Success! <b>' + vm.sanitizer.sanitize(SecurityContext.HTML, vm.friendMemberObject.display_name) + '</b> has been added to your friends list.', "3000", "bottom");
+                    Toast.showShortBottom('Success! <b>' + vm.sanitizer.sanitize(SecurityContext.HTML, vm.friendMemberObject.display_name) + '</b> has been added to your friends list.');
                   });
                 return;
               }
@@ -158,14 +158,14 @@ export class FriendsPage {
 
       }, function (error) {
         vm.hideIonicLoading();
-        if (error === AppSettings.ERROR['NONE']) {
-        } else if (error === AppSettings.ERROR['INET']) {
+        if (error === AppSettings.ERROR.NONE) {
+        } else if (error === AppSettings.ERROR.INET) {
           Toast.showLongBottom('An error occurred. Check your internet connection and try again.');
-        } else if (error === AppSettings.ERROR['DB_INTEGRITY']) {
+        } else if (error === AppSettings.ERROR.DB_INTEGRITY) {
           Toast.showLongBottom('Database integrity error - this shouldn\'t happen. Please email us with the friend code you entered ASAP!');
-        } else if (error === AppSettings.ERROR['USER_NOT_FOUND']) {
+        } else if (error === AppSettings.ERROR.USER_NOT_FOUND) {
           Toast.showLongBottom('User not found - The friend code you entered is not tied to a user.');
-        } else if (error === AppSettings.ERROR['FRIEND_ALREADY_ADDED']) {
+        } else if (error === AppSettings.ERROR.FRIEND_ALREADY_ADDED) {
           Toast.showLongBottom('Friend already added - this trainer is already in your friends list.');
         } else {
           Toast.showLongBottom('An error occurred. Check your internet connection and try again.');
@@ -186,10 +186,10 @@ export class FriendsPage {
             if (!data.targetFriendCode
               || data.targetFriendCode.length !== 12
               || !data.targetFriendCode.match(/^[0-9]+$/)) {
-              Toast.showShortBottom("Enter a valid 12-digit friend code");
+              Toast.showShortBottom('Enter a valid 12-digit friend code');
               return false;
             } else if (vm.userData.getFriendCode() === data.targetFriendCode) {
-              Toast.showShortBottom("You can't add yourself, you numpty.");
+              Toast.showShortBottom('You can\'t add yourself, you numpty.');
               return false;
             } else {
               // Code passes validation check
@@ -276,12 +276,12 @@ export class FriendsPage {
           vm.isLoading = false;
         });
       }, function (error) {
-        vm.nav.present(Alert.create({title: "Error", subTitle: "Unable to retrieve friends. Check your internet connection and restart the app.", buttons: ['Dismiss']}));
+        vm.nav.present(Alert.create({title: 'Error', subTitle: 'Unable to retrieve friends. Check your internet connection and restart the app.', buttons: ['Dismiss']}));
       });
 
     }, function (error) {
       if (error) {
-        vm.nav.present(Alert.create({title: "Error", subTitle: "Unable to retrieve friends. Check your internet connection and restart the app.", buttons: ['Dismiss']}));
+        vm.nav.present(Alert.create({title: 'Error', subTitle: 'Unable to retrieve friends. Check your internet connection and restart the app.', buttons: ['Dismiss']}));
       }
     });
   };

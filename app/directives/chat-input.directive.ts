@@ -1,13 +1,13 @@
-import {Directive, ElementRef, Input, HostListener} from "@angular/core";
+import {Directive, ElementRef, HostListener} from '@angular/core';
 
 @Directive({
   selector: '[glChatInput]'
 })
 export class ChatInputDirective {
 
-  private el:HTMLElement;
+  private el: HTMLElement;
 
-  constructor(el:ElementRef) {
+  constructor(el: ElementRef) {
     this.el = el.nativeElement;
   }
 

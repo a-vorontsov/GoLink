@@ -3,10 +3,10 @@
   <p class="welcome-text">Log in to link up with trainers around you.</p>
   <form>
     <ion-item>
-      <ion-input type="email" placeholder="Email address" [(ngModel)]="data.email" ></ion-input>
+      <ion-input type="email" placeholder="Email address" [(ngModel)]="data.email"></ion-input>
     </ion-item>
     <ion-item>
-      <ion-input type="password" placeholder="Password" [(ngModel)]="data.password" ></ion-input>
+      <ion-input type="password" placeholder="Password" [(ngModel)]="data.password"></ion-input>
     </ion-item>
     <button (click)="login();" class="button button-balanced button-block generic-button">Log in</button>
     <button [navPush]="registerPage">Create an account</button>

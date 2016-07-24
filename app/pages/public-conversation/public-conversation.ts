@@ -1,12 +1,12 @@
-import {Component, ViewChild} from "@angular/core";
-import {NavController, Platform, Content, Loading, Alert, ActionSheet} from "ionic-angular";
-import {UserData} from "../../providers/user-data/user-data.provider";
-import {Geolocation, Toast, Clipboard} from "ionic-native";
-import {DistancePipe} from "../../pipes/distance.pipe";
-import {TimestampPipe} from "../../pipes/timestamp.pipe";
-import {TimestampDirective} from "../../directives/timestamp.directive";
-import {UUID} from "angular2-uuid";
-import {Helper} from "../../providers/helper/helper.provider";
+import {Component, ViewChild} from '@angular/core';
+import {NavController, Platform, Content, Loading, Alert, ActionSheet} from 'ionic-angular';
+import {UserData} from '../../providers/user-data/user-data.provider';
+import {Geolocation, Toast, Clipboard} from 'ionic-native';
+import {DistancePipe} from '../../pipes/distance.pipe';
+import {TimestampPipe} from '../../pipes/timestamp.pipe';
+import {TimestampDirective} from '../../directives/timestamp.directive';
+import {UUID} from 'angular2-uuid';
+import {Helper} from '../../providers/helper/helper.provider';
 
 @Component({
   templateUrl: 'build/pages/public-conversation/public-conversation.html',
@@ -15,15 +15,15 @@ import {Helper} from "../../providers/helper/helper.provider";
 })
 export class PublicConversationPage {
 
-  constructor(private nav:NavController,
-              private platform:Platform,
-              private userData:UserData,
-              private helper:Helper) {
+  constructor(private nav: NavController,
+              private platform: Platform,
+              private userData: UserData,
+              private helper: Helper) {
     this.platform = platform;
     this.userData = userData;
   }
 
-  @ViewChild(Content) content:Content;
+  @ViewChild(Content) content: Content;
 
   private isLoading = true;
 
@@ -55,7 +55,7 @@ export class PublicConversationPage {
       radius: vm.userData.getRadius()
     });
 
-    vm.geoQuery.on("ready", () => {
+    vm.geoQuery.on('ready', () => {
       vm.isGeoQueryInitialized = true;
       vm.isLoading = false;
       setTimeout(() => {
@@ -63,13 +63,13 @@ export class PublicConversationPage {
       });
     });
 
-    vm.geoQuery.on("key_entered", function (key, location, distance) {
+    vm.geoQuery.on('key_entered', function (key, location, distance) {
       if (vm.sentMessageKeys.indexOf(key) === -1) {
         vm.transferGeoQueryResultFromFirebaseToScope(key, location, distance);
       }
     });
 
-    vm.geoQuery.on("key_exited", function (key, location, distance) {
+    vm.geoQuery.on('key_exited', function (key, location, distance) {
       var messages = vm.messages;
       for (var i = messages.length - 1; i >= 0; i--) {
         var message = messages[i];
@@ -262,7 +262,7 @@ export class PublicConversationPage {
     var message = vm.data.message;
 
     if (message.length < 1 || message.length > 1000) {
-      Toast.showShortBottom("Your message must be between 1 and 1000 characters long.");
+      Toast.showShortBottom('Your message must be between 1 and 1000 characters long.');
       return;
     }
 
@@ -347,7 +347,7 @@ export class PublicConversationPage {
         }, function (error) {
           if (error) {
             vm.hideIonicLoading();
-            Toast.showLongBottom("The user could not be blocked. Check your internet connection and try again.");
+            Toast.showLongBottom('The user could not be blocked. Check your internet connection and try again.');
             return;
           }
 
@@ -366,7 +366,7 @@ export class PublicConversationPage {
             }
           }
           vm.hideIonicLoading();
-          Toast.showLongBottom("The user has been blocked. You can unblock them in the Settings page.");
+          Toast.showLongBottom('The user has been blocked. You can unblock them in the Settings page.');
         });
       };
 
@@ -406,7 +406,7 @@ export class PublicConversationPage {
             text: 'Submit',
             handler: data => {
               if (data.reason.length < 1 || data.reason.length > 300) {
-                Toast.showShortBottom("Your reason must be between 1 and 300 characters long.");
+                Toast.showShortBottom('Your reason must be between 1 and 300 characters long.');
                 return false;
               }
 
@@ -419,10 +419,10 @@ export class PublicConversationPage {
                 'timestamp': firebase.database.ServerValue.TIMESTAMP
               }, (error) => {
                 if (!error) {
-                  Toast.showShortBottom("Your report has successfully been submitted.");
+                  Toast.showShortBottom('Your report has successfully been submitted.');
                   return true;
                 }
-                Toast.showShortBottom("Your report could not be submitted. Check your internet connection and try again.");
+                Toast.showShortBottom('Your report could not be submitted. Check your internet connection and try again.');
                 return false;
               });
             }
@@ -432,7 +432,7 @@ export class PublicConversationPage {
     };
 
     if (message.user.is_me) {
-      var buttons:any;
+      var buttons: any;
       buttons = [
         {
           text: 'Copy',
@@ -441,9 +441,9 @@ export class PublicConversationPage {
             Clipboard
               .copy(message.message)
               .then(() => {
-                Toast.showShortBottom("Message copied to clipboard");
+                Toast.showShortBottom('Message copied to clipboard');
               }, () => {
-                Toast.showShortBottom("Message not copied - unable to access clipboard");
+                Toast.showShortBottom('Message not copied - unable to access clipboard');
               });
           }
         },
@@ -484,7 +484,7 @@ export class PublicConversationPage {
 
       vm.nav.present(actionSheet);
     } else {
-      var buttons:any;
+      var buttons: any;
       buttons = [
         {
           text: 'Copy',
@@ -493,9 +493,9 @@ export class PublicConversationPage {
             Clipboard
               .copy(message.message)
               .then(() => {
-                Toast.showShortBottom("Message copied to clipboard");
+                Toast.showShortBottom('Message copied to clipboard');
               }, () => {
-                Toast.showShortBottom("Message not copied - unable to access clipboard");
+                Toast.showShortBottom('Message not copied - unable to access clipboard');
               });
           }
         },
