@@ -1,5 +1,5 @@
 export class AppSettings {
-  public static get CONFIG():Object {
+  public static get CONFIG():CONFIG {
     return {
       FRIEND_CODE_LENGTH: 12,
       MAX_FRIEND_CODE_GENERATION_ATTEMPTS: 10,
@@ -8,7 +8,7 @@ export class AppSettings {
     };
   }
 
-  public static get INFO():Object {
+  public static get INFO():INFO {
     return {
       USER_OK: 0,
       USER_NEEDS_SETUP: 1,
@@ -16,7 +16,7 @@ export class AppSettings {
     }
   }
 
-  public static get ERROR():Object {
+  public static get ERROR():ERROR {
     return {
       NONE: 0,
       INET: 1,
