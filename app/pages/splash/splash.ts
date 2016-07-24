@@ -52,7 +52,7 @@ export class SplashPage {
             nav.setRoot(SetupPage);
           }
         }).catch(error => {
-          nav.present(Alert.create({title: "Error", subTitle: "Unable to retrieve your user details. Check your internet connection and restart the app.", buttons: ['Dismiss']}));
+          nav.present(Alert.create({title: 'Error', subTitle: 'Unable to retrieve your user details. Check your internet connection and restart the app.', buttons: ['Dismiss']}));
         });
       } else {
         nav.setRoot(LoginPage);

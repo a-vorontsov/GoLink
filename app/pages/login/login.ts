@@ -3,9 +3,12 @@ import {NavController, Alert, Loading} from 'ionic-angular';
 import {RegisterPage} from '../register/register';
 import {ForgotPasswordPage} from '../forgot-password/forgot-password';
 import {SplashPage} from '../splash/splash';
+import {AuthProvider} from '../../providers/firebase/auth.provider';
+import FirebaseError = firebase.FirebaseError;
 
 @Component({
   templateUrl: 'build/pages/login/login.html',
+  providers: [AuthProvider]
 })
 export class LoginPage {
   private forgotPasswordPage;
@@ -13,7 +16,8 @@ export class LoginPage {
 
   data: {email?: string, password?: string} = {email: '', password: ''};
 
-  constructor(private nav: NavController) {
+  constructor(private nav: NavController,
+              private authProvider: AuthProvider) {
     this.registerPage = RegisterPage;
     this.forgotPasswordPage = ForgotPasswordPage;
   }
@@ -45,21 +49,20 @@ export class LoginPage {
     }
 
     vm.showIonicLoading();
-    firebase.auth().signInWithEmailAndPassword(email, password).then(function (user) {
+    vm.authProvider.signInWithEmailAndPassword(email, password).then(function (user) {
       vm.data.email = '';
       vm.data.password = '';
       vm.hideIonicLoading();
       nav.setRoot(SplashPage);
 
-    }).catch(function (error) {
+    }).catch((error: FirebaseError) => {
       vm.hideIonicLoading();
-      var errorCode = error['code'];
+      var errorCode = error.code;
       if (errorCode === 'auth/user-disabled') {
         nav.present(Alert.create({title: 'Login failed', subTitle: 'Your account has been disabled. Contact support for more info.', buttons: ['Dismiss']}));
       } else if (errorCode === 'auth/network-request-failed') {
         nav.present(Alert.create({title: 'Login failed', subTitle: 'Unable to connect to the server. Check your internet connection and try again.', buttons: ['Dismiss']}));
       } else {
-        console.log(errorCode);
         nav.present(Alert.create({title: 'Login failed', subTitle: 'The credentials you entered are invalid.', buttons: ['Dismiss']}));
       }
     });

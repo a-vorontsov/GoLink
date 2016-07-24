@@ -1,15 +1,19 @@
 import {Component} from '@angular/core';
 import {NavController, Loading, Alert} from 'ionic-angular';
 import {SplashPage} from '../splash/splash';
+import {AuthProvider} from '../../providers/firebase/auth.provider';
+import FirebaseError = firebase.FirebaseError;
 
 @Component({
   templateUrl: 'build/pages/register/register.html',
+  providers: [AuthProvider]
 })
 export class RegisterPage {
 
   data: {email?: string, password?: string} = {email: '', password: ''};
 
-  constructor(private nav: NavController) {
+  constructor(private nav: NavController,
+              private authProvider: AuthProvider) {
   }
 
   private loading;
@@ -38,14 +42,14 @@ export class RegisterPage {
     }
 
     vm.showIonicLoading();
-    firebase.auth().createUserWithEmailAndPassword(email, password).then(function (user) {
+    vm.authProvider.createUserWithEmailAndPassword(email, password).then(user => {
       vm.data.email = '';
       vm.data.password = '';
       vm.hideIonicLoading();
       nav.setRoot(SplashPage);
-    }).catch(function (error) {
+    }).catch((error: FirebaseError) => {
       vm.hideIonicLoading();
-      var errorCode = error['code'];
+      var errorCode = error.code;
       if (errorCode === 'auth/email-already-in-use') {
         nav.present(Alert.create({title: 'Registration failed', subTitle: 'The email you entered is already in use.', buttons: ['Dismiss']}));
       } else if (errorCode === 'auth/invalid-email') {

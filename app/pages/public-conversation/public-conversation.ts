@@ -7,6 +7,7 @@ import {TimestampPipe} from '../../pipes/timestamp.pipe';
 import {TimestampDirective} from '../../directives/timestamp.directive';
 import {UUID} from 'angular2-uuid';
 import {Helper} from '../../providers/helper/helper.provider';
+import {PublicConversationProvider} from '../../providers/firebase/public-conversation.provider';
 
 @Component({
   templateUrl: 'build/pages/public-conversation/public-conversation.html',
@@ -18,7 +19,8 @@ export class PublicConversationPage {
   constructor(private nav: NavController,
               private platform: Platform,
               private userData: UserData,
-              private helper: Helper) {
+              private helper: Helper,
+              private publicConversationProvider: PublicConversationProvider) {
     this.platform = platform;
     this.userData = userData;
   }

@@ -1,11 +1,11 @@
-import {Injectable} from "@angular/core";
-import {UserData} from "../user-data/user-data.provider";
+import {Injectable} from '@angular/core';
+import {UserData} from '../user-data/user-data.provider';
 import User = firebase.User;
 
 @Injectable()
 export class AuthProvider {
 
-  constructor(private userData:UserData) {
+  constructor(private userData: UserData) {
   }
 
   /**
@@ -17,10 +17,30 @@ export class AuthProvider {
    */
   getAuthenticatedUser() {
     return new Promise<User>((resolve, reject) => {
-      var unsubscribe = firebase.auth().onAuthStateChanged(function (user) {
+      var unsubscribe = firebase.auth().onAuthStateChanged(user => {
         resolve(user);
         unsubscribe();
-      }, function(error) {
+      }, error => {
+        reject(error);
+      });
+    });
+  }
+
+  signInWithEmailAndPassword(email, password) {
+    return new Promise<User>((resolve, reject) => {
+      firebase.auth().signInWithEmailAndPassword(email, password).then(user => {
+        resolve(user);
+      }).catch(error => {
+        reject(error);
+      });
+    });
+  }
+
+  createUserWithEmailAndPassword(email, password) {
+    return new Promise<User>((resolve, reject) => {
+      firebase.auth().createUserWithEmailAndPassword(email, password).then(user => {
+        resolve(user);
+      }).catch(error => {
         reject(error);
       });
     });
