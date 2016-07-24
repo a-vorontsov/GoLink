@@ -263,11 +263,11 @@ export class FriendsPage {
                   } else {
                     vm.data.friends[i].last_messaged = (lastMessaged >= Date.now()) ? Date.now() - 1 : lastMessaged;
                   }
+                  vm.sortScopeDataFriends();
                 });
                 break;
               }
             }
-            vm.sortScopeDataFriends();
           });
         }
 
