@@ -3,11 +3,11 @@ import {Storage, LocalStorage} from 'ionic-angular';
 
 @Injectable()
 export class UserData {
-  private DEFAULT_RADIUS:number;
-  private EXACT_PRECISION:number;
-  private FUZZY_PRECISION:number;
-  private data:any;
-  private localStorage:any;
+  private DEFAULT_RADIUS: number;
+  private EXACT_PRECISION: number;
+  private FUZZY_PRECISION: number;
+  private data: any;
+  private localStorage: any;
 
   constructor() {
     this.localStorage = new Storage(LocalStorage);
@@ -80,11 +80,11 @@ export class UserData {
     this.data.block_list = blockList;
   };
 
-  setIsBlockListStale(isStale:boolean) {
+  setIsBlockListStale(isStale: boolean) {
     this.data.is_block_list_stale = isStale;
   };
 
-  setIsFriendListStale(isStale:boolean) {
+  setIsFriendListStale(isStale: boolean) {
     this.data.is_friend_list_stale = isStale;
   };
 
