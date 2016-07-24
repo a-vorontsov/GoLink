@@ -6,7 +6,6 @@ import {DistancePipe} from "../../pipes/distance.pipe";
 import {TimestampPipe} from "../../pipes/timestamp.pipe";
 import {TimestampDirective} from "../../directives/timestamp.directive";
 import {UUID} from "angular2-uuid";
-import {AppSettings} from "../../app-settings";
 import {Helper} from "../../providers/helper/helper.provider";
 
 @Component({
