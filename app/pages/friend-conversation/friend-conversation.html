@@ -3,7 +3,7 @@
   <ion-navbar>
     <ion-title>{{data.friend.display_name}}</ion-title>
     <ion-buttons end>
-      <button (click)="showActionSheet();">
+      <button class="misc-icon" (click)="showActionSheet();">
         <ion-icon name="more"></ion-icon>
       </button>
     </ion-buttons>
@@ -41,7 +41,7 @@
           <a [href]="message.geo_uri" target="_system">
             <img
               [src]="message.geo_src"
-              width="90%"/>
+              width="100%"/>
           </a>
         </span>
             </div>
@@ -63,12 +63,16 @@
 </ion-content>
 
 <ion-footer>
-  <ion-input [(ngModel)]="data.message" type="text" placeholder="Type your message"></ion-input>
-  <button [hidden]="data.message.length === 0" (click)="sendMessage();">
-    <ion-icon name="send"></ion-icon>
-  </button>
-  <button [hidden]="data.message.length !== 0" (click)="showSendLocationPopup();">
-    <ion-icon name="pin"></ion-icon>
-  </button>
+  <ion-grid>
+    <ion-row>
+      <ion-input [(ngModel)]="data.message" type="text" placeholder="Type your message"></ion-input>
+      <button clear class="text-location-send" [hidden]="data.message.length === 0" (click)="sendMessage();">
+        <ion-icon name="send"></ion-icon>
+      </button>
+      <button clear class="text-location-send" [hidden]="data.message.length !== 0" (click)="showSendLocationPopup();">
+        <ion-icon name="pin"></ion-icon>
+      </button>
+    </ion-row>
+  </ion-grid>
 </ion-footer>
 

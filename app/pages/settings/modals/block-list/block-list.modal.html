@@ -5,12 +5,16 @@
 </ion-header>
 
 <ion-content>
-  <p>Tap a trainer's name to unblock them.</p>
+  <p style="text-align:center;">Tap a trainer's name to unblock them.</p>
   <ion-list>
     <button ion-item (click)="removedKeys.push(user.user_id); blockList.splice(index, 1);" *ngFor="let user of blockList">
       <b>{{user.display_name}}</b>
     </button>
   </ion-list>
-  <button (click)="update();">Update</button>
-  <button (click)="dismiss();">Cancel</button>
+  <ion-grid>
+    <ion-row>
+      <button class="generic-button" style="width: 30%" (click)="update();">Update</button>
+      <button class="generic-button" style="width: 30%" (click)="dismiss();">Cancel</button>
+    </ion-row>
+  </ion-grid>
 </ion-content>

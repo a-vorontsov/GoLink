@@ -13,7 +13,11 @@
       </ion-range>
     </ion-item>
   </ion-list>
-  <button (click)="update();">Update</button>
-  <button (click)="dismiss();">Cancel</button>
+  <ion-grid>
+    <ion-row>
+      <button class="generic-button" style="width: 30%" (click)="update();">Update</button>
+      <button class="generic-button" style="width: 30%" (click)="dismiss();">Cancel</button>
+    </ion-row>
+  </ion-grid>
 
 </ion-content>
