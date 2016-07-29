@@ -1,25 +1,38 @@
 import {Component} from '@angular/core';
 import {NavController, Loading, Alert} from 'ionic-angular';
 import {SplashPage} from '../splash/splash';
+import {MemberProvider} from '../../providers/firebase/member.provider';
 
 @Component({
   templateUrl: 'build/pages/setup/setup.html',
+  providers: [MemberProvider]
 })
 export class SetupPage {
 
-  private loading;
+  private loading: Loading;
+  private showIonicLoading = () => {
+    this.loading = Loading.create({dismissOnPageChange: true});
+    this.nav.present(this.loading);
+  };
+
+  private hideIonicLoading = () => {
+    if (this.loading) {
+      setTimeout(() => {
+        this.loading.dismiss();
+      }, 300);
+    }
+  };
 
   private teams = ['Instinct', 'Mystic', 'Valor'];
   data: {displayName?: string, team?: string, radius?: number} = {displayName: '', team: 'Instinct', radius: 15};
 
-  constructor(private nav: NavController) {
-    this.loading = Loading.create({dismissOnPageChange: true});
+  constructor(private nav: NavController,
+              private memberProvider: MemberProvider) {
   }
 
   sendSetup = () => {
     var vm = this;
     var nav = vm.nav;
-    var loading = vm.loading;
 
     var displayName = vm.data.displayName;
     var team = vm.data.team;
@@ -39,19 +52,18 @@ export class SetupPage {
       return;
     }
 
-    nav.present(loading);
-    var user = firebase.auth().currentUser;
-    firebase.database().ref('members/' + user.uid).set({
+    vm.showIonicLoading();
+
+    vm.memberProvider.setMemberDetails({
       'display_name': displayName,
       'team': team,
       'radius': radius
-    }, function (error) {
-      loading.dismiss();
-      if (error) {
-        nav.present(Alert.create({title: 'Error', subTitle: 'Save failed. Try again later.', buttons: ['Dismiss']}));
-      } else {
-        nav.setRoot(SplashPage);
-      }
+    }).then(() => {
+      vm.hideIonicLoading();
+      nav.setRoot(SplashPage);
+    }).catch(error => {
+      vm.hideIonicLoading();
+      nav.present(Alert.create({title: 'Error', subTitle: 'Save failed. Try again later.', buttons: ['Dismiss']}));
     });
   }
 

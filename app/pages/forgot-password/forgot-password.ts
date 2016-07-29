@@ -1,21 +1,18 @@
 import {Component} from '@angular/core';
 import {NavController, Alert, Loading} from 'ionic-angular';
 import {Toast} from 'ionic-native/dist/index';
+import {AuthProvider} from '../../providers/firebase/auth.provider';
 
-/*
- Generated class for the ForgotPasswordPage page.
-
- See http://ionicframework.com/docs/v2/components/#navigation for more info on
- Ionic pages and navigation.
- */
 @Component({
   templateUrl: 'build/pages/forgot-password/forgot-password.html',
+  providers: [AuthProvider]
 })
 export class ForgotPasswordPage {
 
   data;
 
-  constructor(private nav: NavController) {
+  constructor(private nav: NavController,
+              private authProvider: AuthProvider) {
     this.data = {email: ''};
   }
 
@@ -43,11 +40,11 @@ export class ForgotPasswordPage {
     }
 
     vm.showLoading();
-    firebase.auth().sendPasswordResetEmail(emailAddress).then(function () {
+    vm.authProvider.sendPasswordResetEmail(emailAddress).then(function () {
       vm.hideLoading();
       vm.nav.present(Alert.create({title: 'Email sent', subTitle: 'Check your email address for the password reset email and follow the instructions from there.', buttons: ['Dismiss']}));
       vm.data.email = '';
-    }, function (error) {
+    }).catch(error => {
       vm.hideLoading();
       var errorCode = error['code'];
       if (errorCode === 'auth/invalid-email' || errorCode === 'auth/user-not-found') {

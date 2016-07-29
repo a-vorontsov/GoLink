@@ -1,10 +1,11 @@
 import {Component} from '@angular/core';
 import {ViewController, NavParams, Loading, NavController} from 'ionic-angular/index';
-import {UserData} from '../../../../providers/user-data/user-data.provider';
 import {Toast} from 'ionic-native/dist/index';
+import {MemberProvider} from '../../../../providers/firebase/member.provider';
 
 @Component({
   templateUrl: 'build/pages/settings/modals/radius/radius.modal.html',
+  providers: [MemberProvider]
 })
 
 export class RadiusModal {
@@ -13,7 +14,7 @@ export class RadiusModal {
   constructor(private viewCtrl: ViewController,
               private nav: NavController,
               private params: NavParams,
-              private userData: UserData) {
+              private memberProvider: MemberProvider) {
     this.radius = this.params.get('radius');
   }
 
@@ -31,22 +32,23 @@ export class RadiusModal {
       return;
     }
 
-    var user = firebase.auth().currentUser;
-    firebase.database().ref('members/' + vm.userData.getId() + '/radius').set(vm.radius, function (error) {
+    vm.showLoading();
+    vm.memberProvider.updateRadius(vm.radius).then(() => {
       if (vm.loading) {
         vm.loading.dismiss();
       }
-      if (error) {
-        Toast.showShortBottom('Save failed. Check your internet connection and try again later.');
-      } else {
-        vm.userData.setRadius(vm.radius);
-        Toast.showLongBottom('Your radius has successfully been updated.');
-        vm.dismiss();
+      Toast.showLongBottom('Your radius has successfully been updated.');
+      vm.dismiss();
+    }).catch(error => {
+      if (vm.loading) {
+        vm.loading.dismiss();
       }
+      Toast.showShortBottom('Save failed. Check your internet connection and try again later.');
     });
   };
 
   dismiss = () => {
     this.viewCtrl.dismiss();
+    this.nav.pop();
   };
 }

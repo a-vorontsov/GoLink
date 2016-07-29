@@ -5,25 +5,35 @@ import {SplashPage} from '../splash/splash';
 import {Toast} from 'ionic-native/dist/index';
 import {RadiusModal} from './modals/radius/radius.modal';
 import {BlockListModal} from './modals/block-list/block-list.modal';
+import {MemberProvider} from '../../providers/firebase/member.provider';
+import {AuthProvider} from '../../providers/firebase/auth.provider';
 
 @Component({
   templateUrl: 'build/pages/settings/settings.html',
+  providers: [AuthProvider, MemberProvider]
 })
 export class SettingsPage {
 
-  constructor(private nav: NavController,
-              private userData: UserData) {
+  data: any;
 
+  constructor(private nav: NavController,
+              private userData: UserData,
+              private authProvider: AuthProvider,
+              private memberProvider: MemberProvider) {
+    this.data = {
+      'displayName': this.userData.getDisplayName(),
+      'team': this.userData.getTeam(),
+      'radius': this.userData.getRadius(),
+      'blockedUsers': this.userData.getBlockList()
+    };
   }
 
-  data = {
-    'displayName': this.userData.getDisplayName(),
-    'team': this.userData.getTeam(),
-    'radius': this.userData.getRadius(),
-    'blockedUsers': this.userData.getBlockList(),
-    'removedKeys': [],
-    'tempBlockedUsers': null
-  };
+  ionWillEnter() {
+    var vm = this;
+    if (vm.userData.getIsBlockListStale() === true) {
+      this.data.blockedUsers = this.userData.getBlockList();
+    }
+  }
 
   protected radius;
 
@@ -44,7 +54,7 @@ export class SettingsPage {
 
   signOut = () => {
     var vm = this;
-    firebase.auth().signOut().then(function () {
+    vm.authProvider.signOut().then(function () {
       vm.nav.setRoot(SplashPage);
     }).catch(function (error) {
       vm.nav.present(Alert.create({title: 'Error', subTitle: 'Unable to sign out. Try again later or clear app data/reinstall the app.', buttons: ['Dismiss']}));
@@ -56,16 +66,14 @@ export class SettingsPage {
 
     var updateDisplayName = (displayName) => {
       vm.showIonicLoading();
-      var userId = vm.userData.getId();
-      firebase.database().ref('members/' + userId + '/display_name').set(displayName, function (error) {
+
+      vm.memberProvider.updateDisplayName(displayName).then(() => {
         vm.hideIonicLoading();
-        if (error) {
-          Toast.showShortBottom('Error - Save failed. Check your internet connection and try again later.');
-        } else {
-          vm.userData.setDisplayName(displayName);
-          vm.data.displayName = displayName;
-          Toast.showShortBottom(('Your display name has successfully been updated.'));
-        }
+        vm.data.displayName = displayName;
+        Toast.showShortBottom(('Your display name has successfully been updated.'));
+      }).catch(error => {
+        vm.hideIonicLoading();
+        Toast.showShortBottom('Error - Save failed. Check your internet connection and try again later.');
       });
     };
 
@@ -111,18 +119,13 @@ export class SettingsPage {
 
     var updateTeam = (team) => {
       vm.showIonicLoading();
-      var userId = vm.userData.getId();
-      firebase.database().ref('members/' + userId + '/team').set(team, function (error) {
-        if (vm.loading) {
-          vm.hideIonicLoading();
-        }
-        if (error) {
-          Toast.showShortBottom('Error - Save failed. Check your internet connection and try again later.');
-        } else {
-          vm.userData.setTeam(team);
-          vm.data.team = team;
-          Toast.showShortBottom('Your team name has successfully been updated.');
-        }
+      vm.memberProvider.updateTeam(team).then(() => {
+        vm.data.team = team;
+        Toast.showShortBottom('Your team name has successfully been updated.');
+        vm.hideIonicLoading();
+      }).catch(error => {
+        vm.hideIonicLoading();
+        Toast.showShortBottom('Error - Save failed. Check your internet connection and try again later.');
       });
     };
 
@@ -173,15 +176,11 @@ export class SettingsPage {
       Toast.showShortBottom('There are no users in your block list.');
     } else {
       let blockListModal = Modal.create(BlockListModal, {blockList: vm.data.blockedUsers});
-      blockListModal.onDismiss(data => {
+      blockListModal.onDismiss(() => {
         vm.data.blockedUsers = this.userData.getBlockList();
       });
       vm.nav.present(blockListModal);
     }
-  };
-
-  ionWillEnter() {
-    this.data.team = this.userData.getTeam();
   };
 
 }

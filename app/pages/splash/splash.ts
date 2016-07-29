@@ -6,7 +6,7 @@ import {SetupPage} from '../setup/setup';
 import {LoginPage} from '../login/login';
 import {TabsPage} from '../tabs/tabs';
 import {AuthProvider} from '../../providers/firebase/auth.provider';
-import {MemberProvider} from '../../providers/firebase/member-provider';
+import {MemberProvider} from '../../providers/firebase/member.provider';
 import {NativeProvider} from '../../providers/native-provider/native-provider';
 
 @Component({

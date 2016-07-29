@@ -1,19 +1,22 @@
 import {Component, ViewChild} from '@angular/core';
 import {NavController, Platform, Content, Loading, Alert, ActionSheet} from 'ionic-angular';
 import {UserData} from '../../providers/user-data/user-data.provider';
-import {Geolocation, Toast, Clipboard} from 'ionic-native';
+import {Toast, Clipboard} from 'ionic-native';
 import {DistancePipe} from '../../pipes/distance.pipe';
 import {TimestampPipe} from '../../pipes/timestamp.pipe';
 import {TimestampDirective} from '../../directives/timestamp.directive';
 import {UUID} from 'angular2-uuid';
 import {Helper} from '../../providers/helper/helper.provider';
 import {PublicConversationProvider} from '../../providers/firebase/public-conversation.provider';
+import {MemberProvider} from '../../providers/firebase/member.provider';
+import {NativeProvider} from '../../providers/native-provider/native-provider';
+import {ReportProvider} from '../../providers/firebase/report.provider';
 
 @Component({
   templateUrl: 'build/pages/public-conversation/public-conversation.html',
   directives: [TimestampDirective],
   pipes: [TimestampPipe, DistancePipe],
-  providers: [PublicConversationProvider]
+  providers: [PublicConversationProvider, MemberProvider, NativeProvider, ReportProvider]
 })
 export class PublicConversationPage {
 
@@ -21,32 +24,118 @@ export class PublicConversationPage {
               private platform: Platform,
               private userData: UserData,
               private helper: Helper,
-              private publicConversationProvider: PublicConversationProvider) {
-    this.platform = platform;
+              private publicConversationProvider: PublicConversationProvider,
+              private nativeProvider: NativeProvider,
+              private memberProvider: MemberProvider,
+              private reportProvider: ReportProvider) {
+    this.isLoading = true;
+    this.data = {'message': '', keyboardHeight: null};
+    this.isMessagePresent = false;
+    this.messages = [];
+    this.sentMessageKeys = [];
+    this.isIOS = platform.is('ios');
     this.userData = userData;
+    this.geoFire = new GeoFire(this.publicConversationProvider.getPublicMessageLocationRef());
   }
 
   @ViewChild(Content) content: Content;
 
-  private isLoading = true;
+  private isLoading: boolean;
+  private isMessagePresent: boolean;
 
-  private data = {'message': '', keyboardHeight: null};
-  private messages = [];
-  private isMessagePresent = false;
+  private data: any;
+  private messages: any[];
 
+  private geoFire;
   private geoQuery;
-  private isGeoQueryInitialized = false;
+  private isGeoQueryInitialized: boolean;
 
-  private currentRadius;
-  private currentBlockList;
+  private currentRadius: number;
+  private currentBlockList: any;
 
-  private sentMessageKeys = [];
-  private isIOS = this.platform.is('ios');
-  private geoFire = new GeoFire(firebase.database().ref('public_message_locations'));
+  private sentMessageKeys: any[];
+  private isIOS;
 
-  /*
-   * Helper Functions
-   */
+  // region Helper Functions
+
+  private loading: Loading;
+  private showIonicLoading = () => {
+    this.loading = Loading.create({dismissOnPageChange: true});
+    this.nav.present(this.loading);
+  };
+
+  private hideIonicLoading = () => {
+    if (this.loading) {
+      setTimeout(() => {
+        this.loading.dismiss();
+      }, 300);
+    }
+  };
+
+  private sortScopeMessagesByTimestamp = () => {
+    var vm = this;
+    setTimeout(() => {
+      vm.messages.sort(function (x, y) {
+        return x.timestamp - y.timestamp;
+      });
+      vm.content.scrollToBottom(300);
+    });
+  };
+
+  // endregion
+
+  // region Ionic View Events
+
+  ionViewLoaded() {
+    this.startGeoQuery();
+  }
+
+  ionViewDidEnter() {
+    var vm = this;
+    // Check whether the radius has been changed in settings
+    if (typeof(vm.currentRadius) !== 'undefined' && (vm.isGeoQueryInitialized && vm.currentRadius !== vm.userData.getRadius())) {
+      vm.isLoading = true;
+      vm.geoQuery.cancel();
+      vm.messages = [];
+      vm.isMessagePresent = false;
+      vm.startGeoQuery();
+    } else if (vm.userData.getIsBlockListStale()) {
+      // Check whether the block list has changed, and if so, un-hide unblocked users
+      vm.userData.setIsBlockListStale(false);
+      vm.currentBlockList = vm.userData.getBlockList();
+      var blockListUserIds = [];
+      vm.currentBlockList.forEach(function (blockedUser) {
+        blockListUserIds.push(blockedUser.user_id);
+      });
+      var scopeMessages = vm.messages;
+      for (var i = scopeMessages.length - 1; i >= 0; i--) {
+        var scopeMessage = scopeMessages[i];
+        if (scopeMessage.is_hidden === true && blockListUserIds.indexOf(scopeMessage.user.user_id) === -1) {
+          scopeMessage.is_hidden = false;
+          vm.messages[i] = scopeMessage;
+          vm.isMessagePresent = true;
+        }
+      }
+    }
+  };
+
+  inputUp = () => {
+    var vm = this;
+    if (vm.isIOS) vm.data.keyboardHeight = 216;
+    setTimeout(() => {
+      vm.content.scrollToBottom(300);
+    });
+
+  };
+
+  inputDown = () => {
+    var vm = this;
+    if (vm.isIOS) vm.data.keyboardHeight = 0;
+  };
+
+  // endregion
+
+  // region Receiving Messages
 
   startGeoQuery = () => {
     var vm = this;
@@ -83,45 +172,9 @@ export class PublicConversationPage {
     });
   };
 
-  private loading;
-  showIonicLoading = () => {
-    this.loading = Loading.create({dismissOnPageChange: true});
-    this.nav.present(this.loading);
-  };
-
-  hideIonicLoading = () => {
-    if (this.loading) {
-      setTimeout(() => {
-        this.loading.dismiss();
-      }, 300);
-    }
-  };
-
-  isUserIdInBlockList = (userId) => {
-    var vm = this;
-    var blockList = vm.userData.getBlockList();
-    for (var i = 0; i < blockList.length; i++) {
-      var blockListUser = blockList[i];
-      if (blockListUser.user_id === userId) {
-        return true;
-      }
-    }
-    return false;
-  };
-
-  sortScopeMessagesByTimestamp = () => {
-    var vm = this;
-    setTimeout(() => {
-      vm.messages.sort(function (x, y) {
-        return x.timestamp - y.timestamp;
-      });
-      vm.content.scrollToBottom(300);
-    });
-  };
-
   transferGeoQueryResultFromFirebaseToScope = (key, location, distance) => {
     var vm = this;
-    firebase.database().ref('/public_messages/' + key).once('value').then(function (snapshot) {
+    vm.publicConversationProvider.getSnapshotForMessageKey(key).then(function (snapshot) {
       if (snapshot.exists() && snapshot.hasChild('timestamp') && snapshot.hasChild('user') && snapshot.hasChild('uuid')) {
         var messageSnapshot = snapshot.val();
         vm.messages.push({
@@ -141,46 +194,25 @@ export class PublicConversationPage {
             'team': messageSnapshot.user.team,
             'is_me': messageSnapshot.user.user_id === vm.userData.getId()
           },
-          'is_hidden': vm.isUserIdInBlockList(messageSnapshot.user.user_id)
+          'is_hidden': vm.memberProvider.isUserIdInCachedBlockList(messageSnapshot.user.user_id)
         });
 
-        if (vm.isMessagePresent === false && !vm.isUserIdInBlockList(messageSnapshot.user.user_id)) {
+        if (vm.isMessagePresent === false && !vm.memberProvider.isUserIdInCachedBlockList(messageSnapshot.user.user_id)) {
           vm.isMessagePresent = true;
         }
 
         vm.sortScopeMessagesByTimestamp();
       }
-    }, function (error) {
+    }).catch(error => {
       if (!(error['message'].search('permission_denied') > -1)) {
         throw error;
       }
     });
   };
 
-  sendConversationMessageWithData = (data) => {
-    var vm = this;
-    // Create a message
-    var newMessageRef = firebase.database().ref('public_messages').push();
-    vm.sentMessageKeys.push(newMessageRef.key);
+  // endregion
 
-    var messages = vm.messages;
-    for (var i = messages.length - 1; i >= 0; i--) {
-      var message = messages[i];
-      if (message.uuid === data.uuid && message.key === '') {
-        message.key = newMessageRef.key;
-        vm.messages[i] = message;
-        break;
-      }
-    }
-
-    // Set the message
-    newMessageRef.set(data, function (error) {
-      if (!error) {
-        // Set the GeoFire instance of the message
-        vm.geoFire.set(newMessageRef.key, [vm.userData.getFuzzyLatitude(), vm.userData.getFuzzyLongitude()]).then();
-      }
-    });
-  };
+  // region Sending Messages
 
   addLocalMessageToScope = (data) => {
     var vm = this;
@@ -209,54 +241,25 @@ export class PublicConversationPage {
     });
   };
 
-  /*
-   * Scope Functions
-   */
-
-  ionViewLoaded() {
-    this.startGeoQuery();
-  }
-
-  ionViewWillEnter() {
+  sendConversationMessageWithData = (data: PublicConversationMessage) => {
     var vm = this;
-    // Check whether the radius has been changed in settings
-    if (typeof(vm.currentRadius) !== 'undefined' && (vm.isGeoQueryInitialized && vm.currentRadius !== vm.userData.getRadius())) {
-      vm.isLoading = true;
-      vm.geoQuery.cancel();
-      vm.messages = [];
-      vm.isMessagePresent = false;
-      vm.startGeoQuery();
-    } else if (vm.userData.getIsBlockListStale()) {
-      // Check whether the block list has changed, and if so, un-hide unblocked users
-      vm.userData.setIsBlockListStale(false);
-      vm.currentBlockList = vm.userData.getBlockList();
-      var blockListUserIds = [];
-      vm.currentBlockList.forEach(function (blockedUser) {
-        blockListUserIds.push(blockedUser.user_id);
-      });
-      var scopeMessages = vm.messages;
-      for (var i = scopeMessages.length - 1; i >= 0; i--) {
-        var scopeMessage = scopeMessages[i];
-        if (scopeMessage.is_hidden === true && blockListUserIds.indexOf(scopeMessage.user.user_id) === -1) {
-          scopeMessage.is_hidden = false;
-          vm.messages[i] = scopeMessage;
-        }
+    // Create a message
+    var newMessageRef = vm.publicConversationProvider.getNewMessageRef();
+    vm.sentMessageKeys.push(newMessageRef.key);
+    var messages = vm.messages;
+    for (var i = messages.length - 1; i >= 0; i--) {
+      var message = messages[i];
+      if (message.uuid === data.uuid && message.key === '') {
+        message.key = newMessageRef.key;
+        vm.messages[i] = message;
+        break;
       }
     }
-  };
-
-  inputUp = () => {
-    var vm = this;
-    if (vm.isIOS) vm.data.keyboardHeight = 216;
-    setTimeout(() => {
-      vm.content.scrollToBottom(300);
+    vm.publicConversationProvider.setMessageForRef(newMessageRef, data).then((ref) => {
+      // Set the GeoFire instance of the message
+      vm.geoFire.set(newMessageRef.key, [vm.userData.getFuzzyLatitude(), vm.userData.getFuzzyLongitude()]);
+    }).catch(error => {
     });
-
-  };
-
-  inputDown = () => {
-    var vm = this;
-    if (vm.isIOS) vm.data.keyboardHeight = 0;
   };
 
   sendMessage = () => {
@@ -295,31 +298,29 @@ export class PublicConversationPage {
     var vm = this;
 
     var onConfirm = () => {
-      Geolocation
-        .getCurrentPosition({timeout: 10000, enableHighAccuracy: true})
-        .then(function (position) {
-          // Set coordinates
-          vm.userData.setCoordinates([position.coords.latitude, position.coords.longitude]);
+      vm.nativeProvider.getPrecisePosition().then(position => {
+        // Set coordinates
+        vm.userData.setCoordinates([position.coords.latitude, position.coords.longitude]);
 
-          var identifier = UUID.UUID();
-          vm.addLocalMessageToScope({'uuid': identifier, 'type': 'location'});
+        var identifier = UUID.UUID();
+        vm.addLocalMessageToScope({'uuid': identifier, 'type': 'location'});
 
-          var data = {
-            'uuid': identifier,
-            'user': {
-              'user_id': vm.userData.getId(),
-              'display_name': vm.userData.getDisplayName(),
-              'team': vm.userData.getTeam()
-            },
-            'timestamp': firebase.database.ServerValue.TIMESTAMP,
-            'latitude': vm.userData.getLatitude(),
-            'longitude': vm.userData.getLongitude()
-          };
-          vm.sendConversationMessageWithData(data);
+        var data = {
+          'uuid': identifier,
+          'user': {
+            'user_id': vm.userData.getId(),
+            'display_name': vm.userData.getDisplayName(),
+            'team': vm.userData.getTeam()
+          },
+          'timestamp': firebase.database.ServerValue.TIMESTAMP,
+          'latitude': vm.userData.getLatitude(),
+          'longitude': vm.userData.getLongitude()
+        };
+        vm.sendConversationMessageWithData(data);
 
-        }, function (error) {
-          vm.nav.present(Alert.create({title: 'Unable to retrieve location', subTitle: 'Your message was not sent. Ensure location services are enabled and try again.', buttons: ['Dismiss']}));
-        });
+      }, function (error) {
+        vm.nav.present(Alert.create({title: 'Unable to retrieve location', subTitle: 'Your message was not sent. Ensure location services are enabled and try again.', buttons: ['Dismiss']}));
+      });
     };
     vm.nav.present(Alert.create({
       title: 'Show Location',
@@ -344,19 +345,7 @@ export class PublicConversationPage {
 
       var handleAlert = (data) => {
         vm.showIonicLoading();
-        firebase.database().ref('block_list/' + vm.userData.getId() + '/' + message.user.user_id).set({
-          'display_name': message.user.display_name,
-          'blocked_at': firebase.database.ServerValue.TIMESTAMP
-        }, function (error) {
-          if (error) {
-            vm.hideIonicLoading();
-            Toast.showLongBottom('The user could not be blocked. Check your internet connection and try again.');
-            return;
-          }
-
-          var blockList = vm.userData.getBlockList();
-          blockList.push({'user_id': message.user.user_id, 'display_name': message.user.display_name, 'blocked_at': Date.now()});
-          vm.userData.setBlockList(blockList);
+        vm.memberProvider.addUserToBlockList(message.user.user_id, message.user.display_name).then(() => {
           vm.currentBlockList = vm.userData.getBlockList();
 
           // Loop through all messages, hiding where the user ID is on the block list
@@ -370,6 +359,10 @@ export class PublicConversationPage {
           }
           vm.hideIonicLoading();
           Toast.showLongBottom('The user has been blocked. You can unblock them in the Settings page.');
+        }).catch(error => {
+          vm.hideIonicLoading();
+          Toast.showLongBottom('The user could not be blocked. Check your internet connection and try again.');
+          return;
         });
       };
 
@@ -413,18 +406,10 @@ export class PublicConversationPage {
                 return false;
               }
 
-              firebase.database().ref('reports').push({
-                'processed': false,
-                'reported_by': vm.userData.getId(),
-                'target_type': 'public_message',
-                'target_id': message['key'],
-                'reason': data.reason,
-                'timestamp': firebase.database.ServerValue.TIMESTAMP
-              }, (error) => {
-                if (!error) {
-                  Toast.showShortBottom('Your report has successfully been submitted.');
-                  return true;
-                }
+              vm.reportProvider.addReport('public_message', message['key'], data.reason).then(() => {
+                Toast.showShortBottom('Your report has successfully been submitted.');
+                return true;
+              }).catch(error => {
                 Toast.showShortBottom('Your report could not be submitted. Check your internet connection and try again.');
                 return false;
               });
@@ -441,13 +426,11 @@ export class PublicConversationPage {
           text: 'Copy',
           icon: (vm.platform.is('ios')) ? undefined : 'copy',
           handler: () => {
-            Clipboard
-              .copy(message.message)
-              .then(() => {
-                Toast.showShortBottom('Message copied to clipboard');
-              }, () => {
-                Toast.showShortBottom('Message not copied - unable to access clipboard');
-              });
+            Clipboard.copy(message.message).then(() => {
+              Toast.showShortBottom('Message copied to clipboard');
+            }, () => {
+              Toast.showShortBottom('Message not copied - unable to access clipboard');
+            });
           }
         },
         {
@@ -493,13 +476,11 @@ export class PublicConversationPage {
           text: 'Copy',
           icon: (vm.platform.is('ios')) ? undefined : 'copy',
           handler: () => {
-            Clipboard
-              .copy(message.message)
-              .then(() => {
-                Toast.showShortBottom('Message copied to clipboard');
-              }, () => {
-                Toast.showShortBottom('Message not copied - unable to access clipboard');
-              });
+            Clipboard.copy(message.message).then(() => {
+              Toast.showShortBottom('Message copied to clipboard');
+            }, () => {
+              Toast.showShortBottom('Message not copied - unable to access clipboard');
+            });
           }
         },
         {
@@ -539,5 +520,8 @@ export class PublicConversationPage {
       vm.nav.present(actionSheet);
     }
   };
+
+  // endregion
+
 
 }

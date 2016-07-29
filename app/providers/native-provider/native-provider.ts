@@ -20,4 +20,16 @@ export class NativeProvider {
     });
   }
 
+  getPrecisePosition() {
+    return new Promise<Position>((resolve, reject) => {
+      Geolocation
+        .getCurrentPosition({timeout: AppSettings.CONFIG.MAX_GEOLOCATION_TIME, enableHighAccuracy: true})
+        .then(function (position) {
+          resolve(position);
+        }).catch(error => {
+        reject(error);
+      });
+    });
+  }
+
 }

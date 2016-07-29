@@ -1,21 +1,24 @@
 import {Component} from '@angular/core';
 import {ViewController, NavParams, Loading, NavController} from 'ionic-angular/index';
-import {UserData} from '../../../../providers/user-data/user-data.provider';
 import {Toast} from 'ionic-native/dist/index';
+import {MemberProvider} from '../../../../providers/firebase/member.provider';
 
 @Component({
   templateUrl: 'build/pages/settings/modals/block-list/block-list.modal.html',
+  providers: [MemberProvider]
 })
 
 export class BlockListModal {
   blockList: any[];
+  oldBlockList: any[];
   removedKeys: any[];
 
   constructor(private viewCtrl: ViewController,
               private nav: NavController,
               private params: NavParams,
-              private userData: UserData) {
-    this.blockList = this.params.get('blockList');
+              private memberProvider: MemberProvider) {
+    this.oldBlockList = this.params.get('blockList');
+    this.blockList = this.oldBlockList.slice(0);
     this.removedKeys = [];
   }
 
@@ -34,23 +37,24 @@ export class BlockListModal {
       blockListUpdates[removedKey] = null;
     });
 
-    firebase.database().ref('block_list/' + vm.userData.getId()).update(blockListUpdates, function (error) {
+    vm.memberProvider.setBlockListUpdates(blockListUpdates, vm.blockList).then(() => {
       vm.removedKeys = [];
       if (vm.loading) {
         vm.loading.dismiss();
       }
-      if (error) {
-        Toast.showShortBottom('Save failed. Check your internet connection and try again later.');
-      } else {
-        vm.userData.setBlockList(vm.blockList);
-        vm.userData.setIsBlockListStale(true);
-        Toast.showLongBottom('Your block list has successfully been updated.');
-        vm.dismiss();
+      Toast.showLongBottom('Your block list has successfully been updated.');
+      vm.dismiss();
+    }).catch(error => {
+      vm.removedKeys = [];
+      if (vm.loading) {
+        vm.loading.dismiss();
       }
+      Toast.showShortBottom('Save failed. Check your internet connection and try again later.');
     });
   };
 
-  dismiss() {
+  dismiss = () => {
     this.viewCtrl.dismiss();
+    this.nav.pop();
   }
 }

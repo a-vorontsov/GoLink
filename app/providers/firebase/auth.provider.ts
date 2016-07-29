@@ -46,5 +46,27 @@ export class AuthProvider {
     });
   }
 
+  sendPasswordResetEmail(emailAddress:string) {
+    return new Promise<any>((resolve, reject) => {
+      firebase.auth().sendPasswordResetEmail(emailAddress).then(() => {
+        resolve();
+      }).catch(error => {
+        reject(error);
+      });
+    });
+  }
+
+  signOut() {
+    var vm = this;
+    return new Promise<any>((resolve, reject) => {
+      firebase.auth().signOut().then(function () {
+        vm.userData.clearData();
+        resolve();
+      }).catch(function (error) {
+        reject(error);
+      });
+    });
+  }
+
 }
 
