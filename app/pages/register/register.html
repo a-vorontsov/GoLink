@@ -1,13 +1,21 @@
-<ion-content>
+<ion-content class="welcome-screen">
   <p class="welcome-text">Sign up to chat with local trainers, add trainers as friends and more!</p>
   <form class="list">
     <ion-item>
-      <ion-input type="email" placeholder="Email address" [(ngModel)]="data.email"></ion-input>
+      <ion-input type="email" placeholder="Email address" class="input-box" [(ngModel)]="data.email"></ion-input>
     </ion-item>
     <ion-item>
-      <ion-input type="password" placeholder="Password" [(ngModel)]="data.password"></ion-input>
+      <ion-input type="password" placeholder="Password" class="input-box" [(ngModel)]="data.password"></ion-input>
     </ion-item>
-    <button (click)="register();">Sign up</button>
-    <button (click)="nav.pop();">Sign in to an existing account</button>
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <button light clear class="misc-button" (click)="register();">Sign up</button>
+        </ion-col>
+        <ion-col>
+          <button light clear class="misc-button" (click)="nav.pop();">Sign in to an existing account</button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
   </form>
 </ion-content>

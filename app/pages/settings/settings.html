@@ -15,11 +15,11 @@
 
 <ion-content padding>
   <ion-list>
-    <button ion-item (click)="showUpdateDisplayNamePopup();">
+    <button ion-item class="remove-border" (click)="showUpdateDisplayNamePopup();">
       <p>Display Name</p>
       <h2>{{data.displayName}}</h2>
     </button>
-    <button ion-item (click)="showUpdateTeamPopup();">
+    <button ion-item class="remove-border" (click)="showUpdateTeamPopup();">
       <p>Team</p>
       <h2>{{data.team}}</h2>
     </button>
@@ -29,11 +29,9 @@
     </button>
   </ion-list>
   <ion-list>
-    <button ion-item (click)="showUpdateBlockListPopup();">
-      <h2>Edit Blocked Users</h2>
-    </button>
+    <button class="button button-balanced button-block generic-button" (click)="showUpdateBlockListPopup();">Edit Blocked Users</button>
   </ion-list>
   <ion-list>
-    <button ion-item (click)="signOut();">Sign Out</button>
+    <button class="button button-balanced button-block generic-button" (click)="signOut();">Sign Out</button>
   </ion-list>
 </ion-content>

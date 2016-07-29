@@ -1,15 +1,23 @@
-<ion-content>
+<ion-content class="welcome-screen">
   <p class="welcome-text">Welcome to GOLink.</p>
   <p class="welcome-text">Log in to link up with trainers around you.</p>
-  <form>
+  <form class="list">
     <ion-item>
-      <ion-input type="email" placeholder="Email address" [(ngModel)]="data.email"></ion-input>
+      <ion-input type="email" placeholder="Email address" class="input-box" [(ngModel)]="data.email" ></ion-input>
     </ion-item>
     <ion-item>
-      <ion-input type="password" placeholder="Password" [(ngModel)]="data.password"></ion-input>
+      <ion-input type="password" placeholder="Password" class="input-box" [(ngModel)]="data.password" ></ion-input>
     </ion-item>
     <button (click)="login();" class="button button-balanced button-block generic-button">Log in</button>
-    <button [navPush]="registerPage">Create an account</button>
-    <button [navPush]="forgotPasswordPage">Forgot password?</button>
+    <ion-grid>
+      <ion-row>
+        <ion-col class="column-align">
+          <button light clear class="misc-button" [navPush]="registerPage">Create an account</button>
+        </ion-col>
+        <ion-col class="column-align">
+          <button light clear class="misc-button" [navPush]="forgotPasswordPage">Forgot password?</button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
   </form>
 </ion-content>

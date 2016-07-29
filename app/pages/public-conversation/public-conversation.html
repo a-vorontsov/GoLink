@@ -22,7 +22,7 @@
 
         <div class="message" (click)="onMessageClicked(message)">
           <div *ngIf="message.type === 'message'" [ngClass]="message.user.is_me ? 'isMe' : 'isOther'">
-            <div class="message-header">
+            <div class="message-header" *ngIf="!message.user.is_me">
               <span class="message-display-name">{{message.user.display_name}}</span> <span class="message-team">{{message.user.team}}</span>
             </div>
             <div class="message-body">
@@ -35,7 +35,7 @@
             </div>
           </div>
           <div *ngIf="message.type === 'location'" [ngClass]="message.user.is_me ? 'isMeLocation' : 'isOtherLocation'">
-            <div class="message-header">
+            <div class="message-header" *ngIf="!message.user.is_me">
               <span class="message-display-name">{{message.user.display_name}}</span> <span class="message-team">{{message.user.team}}</span>
             </div>
             <div class="message-body-location">
@@ -44,7 +44,7 @@
                 <a [href]="message.geo_uri" target="_system">
                   <img
                     [src]="message.geo_src"
-                    width="90%"/>
+                    width="100%"/>
                 </a>
               </span>
               </div>
@@ -62,11 +62,15 @@
 
 </ion-content>
 <ion-footer>
-  <ion-input [(ngModel)]="data.message" type="text" placeholder="Type your message"></ion-input>
-  <button [hidden]="data.message.length === 0" (click)="sendMessage();">
-    <ion-icon name="send"></ion-icon>
-  </button>
-  <button [hidden]="data.message.length !== 0" (click)="showSendLocationPopup();">
-    <ion-icon name="pin"></ion-icon>
-  </button>
+  <ion-grid>
+    <ion-row>
+      <ion-input [(ngModel)]="data.message" type="text" placeholder="Type your message"></ion-input>
+      <button clear class="text-location-send" [hidden]="data.message.length === 0" (click)="sendMessage();">
+        <ion-icon name="send"></ion-icon>
+      </button>
+      <button clear class="text-location-send" [hidden]="data.message.length !== 0" (click)="showSendLocationPopup();">
+        <ion-icon name="pin"></ion-icon>
+      </button>
+    </ion-row>
+  </ion-grid>
 </ion-footer>
