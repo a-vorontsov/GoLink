@@ -14,7 +14,7 @@
 
 
 <ion-content padding>
-  <ion-list>
+  <ion-list class="remove-margin">
     <button ion-item class="remove-border" (click)="showUpdateDisplayNamePopup();">
       <p>Display Name</p>
       <h2>{{data.displayName}}</h2>
@@ -28,8 +28,11 @@
       <h2>{{data.radius}}km</h2>
     </button>
   </ion-list>
-  <ion-list>
+  <ion-list class="remove-margin">
     <button class="button button-balanced button-block generic-button" (click)="showUpdateBlockListPopup();">Edit Blocked Users</button>
+  </ion-list>
+  <ion-list class="remove-margin">
+    <div class="line-separator"></div>
   </ion-list>
   <ion-list>
     <button class="button button-balanced button-block generic-button" (click)="signOut();">Sign Out</button>

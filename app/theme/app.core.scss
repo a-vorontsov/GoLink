@@ -189,10 +189,6 @@ ion-spinner circle{
   border-color: #24CCA9 !important;
 }
 
-.alert-radio-inner {
-  background-color: #24CCA9 !important;
-}
-
 .message-header {
   color: darkslategray;
 }
@@ -301,16 +297,22 @@ tab-highlight {
   border: none !important;
 }
 
+ion-list > .item:last-child, ion-list > .item-wrapper:last-child .item {
+  border-bottom: 1px solid #dedede;
+}
+
 .line-separator {
+  text-align: center !important;
   height:1px;
   background: #dedede;
-  margin-top: -50%;
-  margin-bottom: 50%;
+  width: 90%;
+  margin: auto;
 }
 
 .alert-input {
   color: slategrey;
   border: none;
+  margin: 5px 0 5px 0 !important;
 }
 
 .alert-input-wrapper {
@@ -326,4 +328,8 @@ tab-highlight {
 
 .alert-input:focus {
   border: none;
+}
+
+.remove-margin {
+  margin-bottom: 10px;
 }
