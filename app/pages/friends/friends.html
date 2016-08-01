@@ -19,9 +19,8 @@
   </div>
   <div [hidden]="isLoading">
     <ion-list>
-      <button ion-item (click)="copyFriendCode();">Your friend code is: <b>{{data.friendCode | friendCode}}</b></button>
+      <button ion-item (click)="copyFriendCode();"><small>Your friend code is:</small><br/><b>{{data.friendCode | friendCode}}</b></button>
     </ion-list>
-    <div class="spacer" style="width: 300px; height: 10px;"></div>
     <ion-list>
       <button ion-item (click)="navigateConversation(friend.user_id);" *ngFor="let friend of data.friends">
         {{friend.display_name}} - {{friend.team}}<br/>
