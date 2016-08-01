@@ -8,22 +8,19 @@ import {Helper} from '../../providers/helper/helper.provider';
 import {FriendCodePipe} from '../../pipes/friend-code.pipe';
 import {TimestampDirective} from '../../directives/timestamp.directive';
 import {FriendConversationPage} from '../friend-conversation/friend-conversation';
+import {FriendsProvider} from '../../providers/firebase/friends.provider';
 
-/*
- Generated class for the FriendsPage page.
-
- See http://ionicframework.com/docs/v2/components/#navigation for more info on
- Ionic pages and navigation.
- */
 @Component({
   templateUrl: 'build/pages/friends/friends.html',
   directives: [TimestampDirective],
+  providers: [FriendsProvider],
   pipes: [FriendCodePipe]
 })
 export class FriendsPage {
 
   constructor(private nav: NavController,
               private userData: UserData,
+              private friendsProvider: FriendsProvider,
               private helper: Helper,
               private sanitizer: DomSanitizationService) {
   }
@@ -39,22 +36,28 @@ export class FriendsPage {
    * General helper functions
    */
 
-  showIonicLoading = () => {
+  private showIonicLoading = () => {
     this.loading = Loading.create({dismissOnPageChange: true});
     this.nav.present(this.loading);
   };
 
-  hideIonicLoading = () => {
+  private hideIonicLoading = () => {
     if (this.loading) {
-      this.loading.dismiss();
+      setTimeout(() => {
+        this.loading.dismiss();
+      }, 300);
     }
   };
 
-  sortScopeDataFriends = () => {
+  private sortScopeDataFriends = () => {
     this.data.friends.sort(function (x, y) {
       return y.last_messaged - x.last_messaged;
     });
   };
+
+  /*
+   * View functions
+   */
 
   copyFriendCode = () => {
     var vm = this;
@@ -82,45 +85,19 @@ export class FriendsPage {
   private friendMemberObject;
 
   showAddFriendPopup = () => {
+    var vm = this;
     var addFriendByFriendCode = (targetFriendCode) => {
-      var vm = this;
 
       // Show loading screen
       vm.showIonicLoading();
 
       // Retrieve the user ID of the friend code
-      firebase.database().ref('/friend_codes/' + targetFriendCode).once('value')
-        .then(function getMemberDetailsFromFriendCodeSnapshot(snapshot) {
-          // Check whether the user ID for this snapshot exists
-          if (!(snapshot.exists() && snapshot.hasChild('user_id'))) {
-            return Promise.reject(AppSettings.ERROR.USER_NOT_FOUND);
-          }
-
-          // Retrieve the member details for the user ID
-          vm.friendUserId = snapshot.child('user_id').val();
-          if (vm.friendUserId === vm.userData.getId()) {
-            return Promise.reject(AppSettings.ERROR.DB_INTEGRITY);
-          }
-
-          for (var i = 0; i < vm.data.friends.length; i++) {
-            var friend = vm.data.friends[i];
-            if (vm.friendUserId === friend.user_id) {
-              return Promise.reject(AppSettings.ERROR.FRIEND_ALREADY_ADDED);
-            }
-          }
-
-          return firebase.database().ref('/members/' + vm.friendUserId).once('value');
-
-        }).then(function getFriendMemberSnapshot(snapshot) {
-        // Check whether the display name exists for this snapshot
-        if (!(snapshot.exists() && snapshot.hasChild('display_name'))) {
-          return Promise.reject(AppSettings.ERROR.DB_INTEGRITY);
-        }
-
+      vm.friendsProvider.getProspectiveFriendByFriendCode(targetFriendCode, vm.data.friends).then(snapshot => {
+        vm.friendUserId = snapshot.ref.key;
         vm.friendMemberObject = snapshot.val();
         vm.hideIonicLoading();
 
-        vm.nav.present(Alert.create({
+        let addFriendPopup = Alert.create({
           title: 'Add friend?',
           message: 'Do you want to add <b>' + vm.sanitizer.sanitize(SecurityContext.HTML, vm.friendMemberObject.display_name) + '</b> as a friend?',
           buttons: [
@@ -135,28 +112,32 @@ export class FriendsPage {
               text: 'Yes',
               handler: () => {
                 vm.showIonicLoading();
-                firebase.database().ref('members/' + vm.userData.getId() + '/friends/' + vm.friendUserId).set({'added_at': firebase.database.ServerValue.TIMESTAMP})
-                  .then(function onGetFriendInfo(error) {
-                    if (error) {
-                      return Promise.reject(AppSettings.ERROR.INET);
-                    }
-                    vm.data.friends.push({
-                      'user_id': vm.friendUserId,
-                      'display_name': vm.friendMemberObject.display_name,
-                      'team': vm.friendMemberObject.team,
-                      'last_messaged': null,
-                      'added_at': Date.now()
-                    });
-                    vm.hideIonicLoading();
-                    Toast.showShortBottom('Success! <b>' + vm.sanitizer.sanitize(SecurityContext.HTML, vm.friendMemberObject.display_name) + '</b> has been added to your friends list.');
+                vm.friendsProvider.addUserIdToFriendsList(vm.friendUserId).then(() => {
+                  vm.data.friends.push({
+                    'user_id': vm.friendUserId,
+                    'display_name': vm.friendMemberObject.display_name,
+                    'team': vm.friendMemberObject.team,
+                    'last_messaged': null,
+                    'added_at': Date.now()
                   });
-                return;
+                  this.loading.dismiss().then(() => {
+                    addFriendPopup.dismiss().then(() => {
+                      Toast.showShortBottom('Success! <b>' + vm.sanitizer.sanitize(SecurityContext.HTML, vm.friendMemberObject.display_name) + '</b> has been added to your friends list.');
+                    });
+                  });
+                }).catch(error => {
+                  addFriendPopup.dismiss().then(() => {
+                    Promise.reject(AppSettings.ERROR.INET);
+                  });
+                });
+                return false;
               }
             }
           ]
-        }));
+        });
+        vm.nav.present(addFriendPopup);
 
-      }, function (error) {
+      }).catch(error => {
         vm.hideIonicLoading();
         if (error === AppSettings.ERROR.NONE) {
         } else if (error === AppSettings.ERROR.INET) {
@@ -173,8 +154,7 @@ export class FriendsPage {
       });
     };
 
-    var vm = this;
-    vm.nav.present(Alert.create({
+    let enterFriendCodePopup = Alert.create({
       title: 'Enter friend code',
       message: 'Enter a 12-digit friend code without hyphens (-) below.',
       inputs: [{name: 'targetFriendCode', placeholder: ''}],
@@ -187,52 +167,38 @@ export class FriendsPage {
               || data.targetFriendCode.length !== 12
               || !data.targetFriendCode.match(/^[0-9]+$/)) {
               Toast.showShortBottom('Enter a valid 12-digit friend code');
-              return false;
             } else if (vm.userData.getFriendCode() === data.targetFriendCode) {
               Toast.showShortBottom('You can\'t add yourself, you numpty.');
-              return false;
             } else {
               // Code passes validation check
-              addFriendByFriendCode(data.targetFriendCode);
-              data.targetFriendCode = '';
-              return true;
+              enterFriendCodePopup.dismiss().then(() => {
+                addFriendByFriendCode(data.targetFriendCode);
+                data.targetFriendCode = '';
+              });
             }
+            return false;
           }
         }
       ]
-    }));
+    });
+    vm.nav.present(enterFriendCodePopup);
   };
 
   /*
    * Getting list of friends
    */
 
-  getFriendObjectPromise = (friendId) => {
-    return firebase.database().ref('members/' + friendId).once('value').then(function (snapshot) {
-      var friend = snapshot.val();
-      friend.user_id = friendId;
-      return friend;
-    });
-  };
-
-  getLastMessagedSnapshotPromise = (conversationId) => {
-    return firebase.database().ref('friend_conversations/' + conversationId + '/last_messaged').once('value').then(function (snapshot) {
-      return snapshot;
-    });
-  };
-
   updateFriendList() {
     var vm = this;
-    firebase.database().ref('members/' + vm.userData.getId() + '/friends').once('value').then(function (snapshot) {
+    var getFriendObjectPromises = [];
+    var getLastMessagedPromises = [];
+    vm.friendsProvider.getFriendsList().then(function (friends) {
       // Add initial list of friends to array and get further information about each friend
-      var friends = snapshot.val();
-      var getFriendObjectPromises = [];
-      var getLastMessagedPromises = [];
       for (var friendUserId in friends) {
         var friend = friends[friendUserId];
         vm.data.friends.push({'user_id': friendUserId, 'added_at': friend.added_at});
-        getFriendObjectPromises.push(vm.getFriendObjectPromise(friendUserId));
-        getLastMessagedPromises.push(vm.getLastMessagedSnapshotPromise(vm.helper.getConversationId(vm.userData.getId(), friendUserId)));
+        getFriendObjectPromises.push(vm.friendsProvider.getFriendObjectPromise(friendUserId));
+        getLastMessagedPromises.push(vm.friendsProvider.getLastMessagedSnapshotPromise(vm.helper.getConversationIdByFriendId(friendUserId)));
       }
 
       // Execute all promises
@@ -252,8 +218,8 @@ export class FriendsPage {
       }).then(function onGetLastMessagedPromisesComplete(results) {
         for (var result of results) {
           // Listen for timestamp updates
-          firebase.database().ref('friend_conversations/' + result.ref.parent.key + '/last_messaged').on('value', function (snapshot) {
-            var friendId = vm.helper.getFriendUserIdFromConversationId(vm.userData.getId(), snapshot.ref.parent.key);
+          vm.friendsProvider.getLastMessageRefByConversationId(result.ref.parent.key).on('value', function (snapshot) {
+            var friendId = vm.helper.getFriendUserIdFromConversationId(snapshot.ref.parent.key);
             var lastMessaged = snapshot.val();
             for (var i = 0; i < vm.data.friends.length; i++) {
               if (vm.data.friends[i].user_id === friendId) {

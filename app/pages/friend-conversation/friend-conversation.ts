@@ -8,27 +8,26 @@ import {AppSettings} from '../../app-settings';
 import {TimestampPipe} from '../../pipes/timestamp.pipe';
 import {TimestampDirective} from '../../directives/timestamp.directive';
 import {FriendsPage} from '../friends/friends';
+import {FriendConversationProvider} from '../../providers/firebase/friend-conversation.provider';
+import {FriendsProvider} from '../../providers/firebase/friends.provider';
 
-/*
- Generated class for the FriendConversationPage page.
-
- See http://ionicframework.com/docs/v2/components/#navigation for more info on
- Ionic pages and navigation.
- */
 @Component({
   templateUrl: 'build/pages/friend-conversation/friend-conversation.html',
   pipes: [TimestampPipe],
-  directives: [TimestampDirective]
+  directives: [TimestampDirective],
+  providers: [FriendConversationProvider, FriendsProvider]
 })
 export class FriendConversationPage {
 
   constructor(private nav: NavController,
               private params: NavParams,
               private userData: UserData,
+              private friendsProvider: FriendsProvider,
+              private friendConversationProvider: FriendConversationProvider,
               private helper: Helper,
               private platform: Platform) {
     this.friendId = this.params.get('friendId');
-    this.conversationId = this.helper.getConversationId(this.userData.getId(), this.friendId);
+    this.conversationId = this.helper.getConversationIdByFriendId(this.friendId);
   };
 
   @ViewChild(Content) content: Content;
@@ -38,7 +37,6 @@ export class FriendConversationPage {
     'messages': [],
     'friend': {
       'user_id': this.friendId,
-      'added_at': null,
       'display_name': null,
       'team': null
     },
@@ -56,7 +54,7 @@ export class FriendConversationPage {
   sendConversationMessageWithData = (data) => {
     var vm = this;
     // Create a message
-    var newMessageRef = firebase.database().ref('friend_conversations/' + vm.conversationId + '/messages').push();
+    var newMessageRef = vm.friendConversationProvider.getNewMessageRefByConversationId(vm.conversationId);
     vm.sentMessageKeys.push(newMessageRef.key);
 
     var messages = vm.data.messages;
@@ -70,10 +68,7 @@ export class FriendConversationPage {
     }
 
     // Set the message
-    var updatedMessageData = {};
-    updatedMessageData[vm.conversationId + '/messages/' + newMessageRef.key] = data;
-    updatedMessageData[vm.conversationId + '/last_messaged'] = firebase.database.ServerValue.TIMESTAMP;
-    firebase.database().ref('friend_conversations').update(updatedMessageData);
+    vm.friendConversationProvider.addMessageToConversation(vm.conversationId, newMessageRef.key, data);
   };
 
   addLocalMessageToScope = (data) => {
@@ -211,7 +206,7 @@ export class FriendConversationPage {
             if (typeof(message.key) === 'undefined' || message.key === null) {
               vm.nav.present(Alert.create({title: 'Unable to delete', subTitle: 'The message cannot be deleted right now as it is still being sent. Try again later.', buttons: ['Dismiss']}));
             } else {
-              firebase.database().ref('friend_conversations/' + vm.conversationId + '/messages/' + message.key).remove();
+              vm.friendConversationProvider.removeMessageFromConversation(vm.conversationId, message.key);
               var scopeMessages = vm.data.messages;
               for (var i = scopeMessages.length - 1; i >= 0; i--) {
                 var scopeMessage = scopeMessages[i];
@@ -246,14 +241,7 @@ export class FriendConversationPage {
 
   listenForNewMessages = () => {
     var vm = this;
-    var promise;
-    if (vm.data.messages.length > 0) {
-      promise = firebase.database().ref('friend_conversations/' + vm.conversationId + '/messages').orderByKey().startAt(vm.data.messages[vm.data.messages.length - 1].key);
-    } else {
-      promise = firebase.database().ref('friend_conversations/' + vm.conversationId + '/messages').orderByKey();
-    }
-
-    promise.on('child_added', function (snapshot) {
+    vm.friendConversationProvider.getChildAddedListenerReference(vm.conversationId, vm.data.messages).on('child_added', function (snapshot) {
       var message = snapshot.val();
       if (vm.sentMessageKeys.indexOf(snapshot.key) === -1) {
         setTimeout(() => {
@@ -274,7 +262,7 @@ export class FriendConversationPage {
       }
     });
 
-    promise.on('child_removed', (oldSnapshot) => {
+    vm.friendConversationProvider.getChildAddedListenerReference(vm.conversationId, vm.data.messages).on('child_removed', (oldSnapshot) => {
       var key = oldSnapshot.key;
 
       var messages = vm.data.messages;
@@ -305,15 +293,14 @@ export class FriendConversationPage {
             handler: () => {
               var loading = Loading.create({dismissOnPageChange: true});
               vm.nav.present(loading);
-              firebase.database().ref('members/' + vm.userData.getId() + '/friends/' + vm.friendId).remove(function (error) {
+              vm.friendsProvider.removeFriendFromFriendsList(vm.friendId).then(() => {
                 loading.dismiss();
-                if (error) {
-                  Toast.showLongBottom('Unable to remove friend - Check your internet connection and try again later.');
-                } else {
-                  vm.userData.setIsFriendListStale(true);
-                  Toast.showShortBottom('The trainer has been removed from your friends list.');
-                  vm.nav.setRoot(FriendsPage);
-                }
+                vm.userData.setIsFriendListStale(true);
+                Toast.showShortBottom('The trainer has been removed from your friends list.');
+                vm.nav.setRoot(FriendsPage);
+              }).catch(error => {
+                loading.dismiss();
+                Toast.showLongBottom('Unable to remove friend - Check your internet connection and try again later.');
               });
             }
           }
@@ -365,16 +352,9 @@ export class FriendConversationPage {
     }
 
     // Check whether the friend is connected to the user
-    firebase.database().ref('members/' + vm.friendId + '/friends/' + vm.userData.getId()).once('value').then((snapshot) => {
-      if (!(snapshot.exists() && snapshot.hasChild('added_at'))) {
-        return Promise.reject(AppSettings.ERROR.FRIEND_NOT_ADDED);
-      }
-      vm.data.friend.added_at = snapshot.child('added_at').val();
 
-      return firebase.database().ref('friend_conversations/' + vm.conversationId + '/messages').once('value');
-    }).then((snapshot) => {
+    vm.friendConversationProvider.getMessagesForFriendConversation(vm.friendId, vm.conversationId).then((messages) => {
       // Populate the list of messages
-      var messages = snapshot.val();
       for (var key in messages) {
         var message = messages[key];
         vm.data.messages.push({
@@ -395,9 +375,6 @@ export class FriendConversationPage {
         vm.content.scrollToBottom(300);
       });
       vm.listenForNewMessages();
-
-    }, function (error) {
-      return Promise.reject(error);
     }).catch(function (error) {
       setTimeout(() => {
         if (error === AppSettings.ERROR.FRIEND_NOT_ADDED) {

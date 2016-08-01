@@ -1,15 +1,18 @@
 import {Injectable} from '@angular/core';
 import {Platform} from 'ionic-angular/index';
 import {DomSanitizationService} from '@angular/platform-browser';
+import {UserData} from '../user-data/user-data.provider';
 
 @Injectable()
 export class Helper {
   constructor(private platform: Platform,
+              private userData: UserData,
               private sanitizer: DomSanitizationService) {
 
   }
 
-  getConversationId(userId, friendUserId) {
+  getConversationIdByFriendId(friendUserId) {
+    var userId = this.userData.getId();
     if (userId < friendUserId) {
       return userId + '+' + friendUserId;
     } else {
@@ -17,8 +20,8 @@ export class Helper {
     }
   }
 
-  getFriendUserIdFromConversationId(userId, conversationId) {
-    return conversationId.replace(userId, '').replace('+', '');
+  getFriendUserIdFromConversationId(conversationId) {
+    return conversationId.replace(this.userData.getId(), '').replace('+', '');
   }
 
   getGeoUriFromCoordinates(latitude, longitude) {
