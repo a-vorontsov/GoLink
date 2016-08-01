@@ -1,8 +1,8 @@
 import {Component} from '@angular/core';
 import {SettingsPage} from '../settings/settings';
-import {PokedexPage} from '../pokedex/pokedex';
 import {FriendsPage} from '../friends/friends';
 import {PublicConversationPage} from '../public-conversation/public-conversation';
+import {ChannelsPage} from '../channels/channels';
 
 @Component({
   templateUrl: 'build/pages/tabs/tabs.html'
@@ -17,7 +17,7 @@ export class TabsPage {
   constructor() {
     this.tab1Root = PublicConversationPage;
     this.tab2Root = FriendsPage;
-    this.tab3Root = PokedexPage;
+    this.tab3Root = ChannelsPage;
     this.tab4Root = SettingsPage;
   }
 }
