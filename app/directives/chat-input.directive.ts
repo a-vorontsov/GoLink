@@ -1,25 +1,16 @@
 import {Directive, ElementRef, HostListener} from '@angular/core';
+import {Keyboard} from 'ionic-native';
 
 @Directive({
   selector: '[glChatInput]'
 })
 export class ChatInputDirective {
 
-  private el: HTMLElement;
-
-  constructor(el: ElementRef) {
-    this.el = el.nativeElement;
+  constructor(private el: ElementRef,
+              private keyboard: Keyboard) {
   }
 
-  @HostListener('blur') onBlur() {
-
-  }
-
-  @HostListener('focus') onFocus() {
-
-  }
-
-  @HostListener('keydown') onKeyDown() {
+  @HostListener('keydown', ) onKeyDown() {
 
   }
 

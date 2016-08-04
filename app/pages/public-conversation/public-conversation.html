@@ -64,7 +64,7 @@
 <ion-footer>
   <ion-grid>
     <ion-row>
-      <ion-input [(ngModel)]="data.message" type="text" placeholder="Type your message"></ion-input>
+      <ion-input [(ngModel)]="data.message" type="text" placeholder="Type your message" [glChatInput]></ion-input>
       <button clear class="text-location-send" [hidden]="data.message.length === 0" (click)="sendMessage();">
         <ion-icon name="send"></ion-icon>
       </button>

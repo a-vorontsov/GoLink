@@ -2,11 +2,27 @@
 
   <ion-navbar>
     <ion-title>Channels</ion-title>
+    <ion-buttons end>
+      <button class="misc-icon" (click)="showAddChannelPopup();">
+        <ion-icon name="add"></ion-icon>
+      </button>
+    </ion-buttons>
   </ion-navbar>
 
 </ion-header>
 
 
 <ion-content padding>
-
+  <div [hidden]="!isLoading">
+    <ion-spinner></ion-spinner>
+    <p>Loading channels</p>
+  </div>
+  <div [hidden]="isLoading">
+    <ion-list>
+      <button ion-item (click)="navigateConversation(channel.channel_id);" *ngFor="let channel of data.channels">
+        {{channel.name}}<br/>
+        <small>Last messaged: <span glTimestamp timestamp="{{channel.last_messaged}}"></span></small>
+      </button>
+    </ion-list>
+  </div>
 </ion-content>
