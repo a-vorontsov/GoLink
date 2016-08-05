@@ -55,7 +55,7 @@ export class SettingsPage {
   signOut = () => {
     var vm = this;
     vm.authProvider.signOut().then(function () {
-      vm.nav.setRoot(SplashPage);
+      vm.nav.rootNav.setRoot(SplashPage);
     }).catch(function (error) {
       vm.nav.present(Alert.create({title: 'Error', subTitle: 'Unable to sign out. Try again later or clear app data/reinstall the app.', buttons: ['Dismiss']}));
     });
