@@ -67,12 +67,6 @@ export class FriendsProvider {
     });
   }
 
-  getLastMessagedSnapshotPromise(conversationId) {
-    return firebase.database().ref('friend_conversations/' + conversationId + '/last_messaged').once('value').then(function (snapshot) {
-      return snapshot;
-    });
-  }
-
   getFriendsList() {
     var vm = this;
     return new Promise((resolve, reject) => {

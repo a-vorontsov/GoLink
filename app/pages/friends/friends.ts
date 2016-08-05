@@ -191,64 +191,60 @@ export class FriendsPage {
   updateFriendList() {
     var vm = this;
     var getFriendObjectPromises = [];
-    var getLastMessagedPromises = [];
-    vm.friendsProvider.getFriendsList().then(function (friends) {
+    var conversationIds = [];
+    var friends;
+    vm.friendsProvider.getFriendsList().then(tempFriends => {
+      friends = tempFriends;
+
       // Add initial list of friends to array and get further information about each friend
       for (var friendUserId in friends) {
         var friend = friends[friendUserId];
         vm.data.friends.push({'user_id': friendUserId, 'added_at': friend.added_at});
         getFriendObjectPromises.push(vm.friendsProvider.getFriendObjectPromise(friendUserId));
-        getLastMessagedPromises.push(vm.friendsProvider.getLastMessagedSnapshotPromise(vm.helper.getConversationIdByFriendId(friendUserId)));
+        conversationIds.push(vm.helper.getConversationIdByFriendId(friendUserId));
       }
 
       // Execute all promises
-      Promise.all(getFriendObjectPromises).then(function onGetFriendObjectPromisesComplete(results) {
-        results.forEach(function (result) {
+      return Promise.all(getFriendObjectPromises);
+    }).then(results => {
+      results.forEach(function (result) {
+        for (var i = 0; i < vm.data.friends.length; i++) {
+          if (vm.data.friends[i].user_id === result.user_id) {
+            vm.data.friends[i].display_name = result.display_name;
+            vm.data.friends[i].friend_code = result.friend_code;
+            vm.data.friends[i].team = result.team;
+            break;
+          }
+        }
+      });
+
+      for (var conversationId of conversationIds) {
+        // Listen for timestamp updates
+        vm.friendsProvider.getLastMessageRefByConversationId(conversationId).on('value', snapshot => {
+          var friendId = vm.helper.getFriendUserIdFromConversationId(snapshot.ref.parent.key);
+          var lastMessaged = snapshot.val();
           for (var i = 0; i < vm.data.friends.length; i++) {
-            if (vm.data.friends[i].user_id === result.user_id) {
-              vm.data.friends[i].display_name = result.display_name;
-              vm.data.friends[i].friend_code = result.friend_code;
-              vm.data.friends[i].team = result.team;
+            if (vm.data.friends[i].user_id === friendId) {
+              setTimeout(function () {
+                if (typeof(lastMessaged) === undefined || lastMessaged === null) {
+                  vm.data.friends[i].last_messaged = 0;
+                } else {
+                  vm.data.friends[i].last_messaged = (lastMessaged >= Date.now()) ? Date.now() - 1 : lastMessaged;
+                }
+                vm.sortScopeDataFriends();
+              });
               break;
             }
           }
         });
-
-        return Promise.all(getLastMessagedPromises);
-      }).then(function onGetLastMessagedPromisesComplete(results) {
-        for (var result of results) {
-          // Listen for timestamp updates
-          vm.friendsProvider.getLastMessageRefByConversationId(result.ref.parent.key).on('value', function (snapshot) {
-            var friendId = vm.helper.getFriendUserIdFromConversationId(snapshot.ref.parent.key);
-            var lastMessaged = snapshot.val();
-            for (var i = 0; i < vm.data.friends.length; i++) {
-              if (vm.data.friends[i].user_id === friendId) {
-                setTimeout(function () {
-                  if (typeof(lastMessaged) === undefined || lastMessaged === null) {
-                    vm.data.friends[i].last_messaged = 0;
-                  } else {
-                    vm.data.friends[i].last_messaged = (lastMessaged >= Date.now()) ? Date.now() - 1 : lastMessaged;
-                  }
-                  vm.sortScopeDataFriends();
-                });
-                break;
-              }
-            }
-          });
-        }
-
-        setTimeout(function () {
-          vm.userData.setFriends(vm.data.friends);
-          vm.isLoading = false;
-        });
-      }, function (error) {
-        vm.nav.present(Alert.create({title: 'Error', subTitle: 'Unable to retrieve friends. Check your internet connection and restart the app.', buttons: ['Dismiss']}));
-      });
-
-    }, function (error) {
-      if (error) {
-        vm.nav.present(Alert.create({title: 'Error', subTitle: 'Unable to retrieve friends. Check your internet connection and restart the app.', buttons: ['Dismiss']}));
       }
+
+      setTimeout(function () {
+        vm.userData.setFriends(vm.data.friends);
+        vm.isLoading = false;
+      });
+    }).catch(error => {
+      vm.nav.present(Alert.create({title: 'Error', subTitle: 'Unable to retrieve friends. Check your internet connection and restart the app.', buttons: ['Dismiss']}));
     });
   };
 
