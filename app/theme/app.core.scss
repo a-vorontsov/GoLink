@@ -19,6 +19,10 @@
 @import "../pages/friend-conversation/friend-conversation.scss";
 @import "../pages/settings/settings.scss";
 
+body {
+  font-family: "Roboto", sans-serif !important;
+}
+
 .welcome-screen {
   background: linear-gradient(#18125A, #00DCDC);
 }
