@@ -57,8 +57,8 @@
                 </div>
               </div>
             </div>
-            <div *ngIf="message.type === 'joined'"><p style="text-align: center">{{ message.user.display_name }} has joined the channel</p></div>
-            <div *ngIf="message.type === 'left'"><p style="text-align: center">{{ message.user.display_name }} has left the channel</p></div>
+            <div *ngIf="message.type === 'joined'" class="message-join-text"><p style="text-align: center">{{ message.user.display_name }} has joined the channel</p></div>
+            <div *ngIf="message.type === 'left'" class="message-join-text"><p style="text-align: center">{{ message.user.display_name }} has left the channel</p></div>
           </div>
 
 

@@ -124,6 +124,10 @@
   margin:auto;
 }
 
+#splash-spinner svg circle {
+  stroke: #fff !important;
+}
+
 ion-spinner {
   margin: auto !important;
   position: absolute !important;
@@ -135,11 +139,11 @@ ion-spinner {
 }
 
 ion-spinner circle{
-  stroke: #fff !important;
+  stroke: #000 !important;
 }
 
 .spinner-ios line {
-  stroke: #fff !important;
+  stroke: #000 !important;
 }
 
 .alert-wrapper {
@@ -257,6 +261,11 @@ ion-spinner circle{
 .message-misc-text {
   font-size: 12px;
   color: lightgray;
+}
+
+.message-join-text p {
+  font-size: 10px !important;
+  color: gray !important;
 }
 
 .isMe {
