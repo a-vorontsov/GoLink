@@ -24,7 +24,7 @@
     <div *ngFor="let message of data.messages" class="messages">
 
       <div class="message" (click)="onMessageClicked(message)">
-        <div *ngIf="message.type === 'message'" [ngClass]="message.is_me ? 'isMe' : 'isOther'">
+        <div *ngIf="message.type === 'message'" [ngClass]="message.user.is_me ? 'isMe' : 'isOther'">
           <div class="message-body">
             <div class="message-main-text">
               <span class="message-contents" style="white-space: pre-line;">{{message.message}}</span>
@@ -34,7 +34,7 @@
             </div>
           </div>
         </div>
-        <div *ngIf="message.type === 'location'" [ngClass]="message.is_me ? 'isMeLocation' : 'isOtherLocation'">
+        <div *ngIf="message.type === 'location'" [ngClass]="message.user.is_me ? 'isMeLocation' : 'isOtherLocation'">
           <div class="message-body-location">
             <div class="message-main-text">
         <span class="message-contents">

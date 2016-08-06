@@ -18,9 +18,10 @@
     <p>Loading channels</p>
   </div>
   <div [hidden]="isLoading">
+    <p [hidden]="data.channels.length > 0">Speak to groups of trainers by creating or joining a channel!</p>
     <ion-list>
       <button ion-item (click)="navigateConversation(channel.channel_id);" *ngFor="let channel of data.channels">
-        {{channel.name}}<br/>
+        {{channel.channel_id}}<br/>
         <small>Last messaged: <span glTimestamp timestamp="{{channel.last_messaged}}"></span></small>
       </button>
     </ion-list>

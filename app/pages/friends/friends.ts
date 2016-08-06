@@ -252,7 +252,7 @@ export class FriendsPage {
     this.updateFriendList();
   };
 
-  ionViewWillEnter() {
+  ionViewDidEnter() {
     if (this.userData.getIsFriendListStale()) {
       this.updateFriendList();
     }

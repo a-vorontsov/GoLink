@@ -6,7 +6,7 @@ declare var moment: any;
 declare var GeoFire: any;
 declare var uuid: any;
 
-interface PublicConversationUser {
+interface ConversationUser {
   user_id: string;
   display_name: string;
   team: string;
@@ -14,8 +14,26 @@ interface PublicConversationUser {
 
 interface PublicConversationMessage {
   uuid: string;
-  user: PublicConversationUser;
+  user: ConversationUser;
   timestamp: any;
+  message?: string;
+  latitude?: number;
+  longitude?: number;
+}
+
+interface FriendConversationMessage {
+  uuid: string;
+  timestamp: any;
+  message?: string;
+  latitude?: number;
+  longitude?: number;
+}
+
+interface ChannelConversationMessage {
+  uuid: string;
+  user: ConversationUser;
+  timestamp: any;
+  is_joined: boolean;
   message?: string;
   latitude?: number;
   longitude?: number;

@@ -45,7 +45,8 @@ export class UserData {
       },
       'block_list': [],
       'is_block_list_stale': false,
-      'is_friend_list_stale': false
+      'is_friend_list_stale': false,
+      'is_channels_stale': true
     };
     this.localStorage.clear();
   }
@@ -105,6 +106,10 @@ export class UserData {
 
   setIsFriendListStale(isStale: boolean) {
     this.data.is_friend_list_stale = isStale;
+  };
+
+  setIsChannelsStale(isStale: boolean) {
+    this.data.is_channels_stale = isStale;
   };
 
   getId(): string {
@@ -185,5 +190,9 @@ export class UserData {
   getIsFriendListStale(): boolean {
     return this.data.is_friend_list_stale;
   };
+
+  getIsChannelsStale(): boolean {
+    return this.data.is_channels_stale;
+  }
 }
 

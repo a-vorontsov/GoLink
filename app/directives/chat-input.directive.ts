@@ -10,7 +10,7 @@ export class ChatInputDirective {
               private keyboard: Keyboard) {
   }
 
-  @HostListener('keydown', ) onKeyDown() {
+  @HostListener('keydown') onKeyDown() {
 
   }
 

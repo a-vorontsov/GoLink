@@ -17,7 +17,7 @@
     <div [hidden]="isMessagePresent">
       <p>No messages in your radius in the past 24 hours. Share this app with other trainers and get the chat going!</p>
     </div>
-    <div *ngFor="let message of messages" class="messages">
+    <div *ngFor="let message of data.messages" class="messages">
       <div [hidden]="message.is_hidden">
 
         <div class="message" (click)="onMessageClicked(message)">
