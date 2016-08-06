@@ -13,7 +13,7 @@ export class PublicConversationProvider {
     return firebase.database().ref('public_message_locations');
   }
 
-  getSnapshotForMessageKey(key: string) {
+  getMessageSnapshot(key: string) {
     return new Promise<DataSnapshot>((resolve, reject) => {
       firebase.database().ref('/public_messages/' + key).once('value').then(snapshot => {
         resolve(snapshot);

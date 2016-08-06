@@ -21,13 +21,15 @@ export class UserData {
       'friend_code': null,
       'radius': null,
       'friends': [],
+      'channels': [],
       'coordinates': {
         'latitude': null,
         'longitude': null
       },
       'block_list': [],
       'is_block_list_stale': false,
-      'is_friend_list_stale': false
+      'is_friend_list_stale': false,
+      'is_channels_stale': false
     };
   }
 
@@ -39,6 +41,7 @@ export class UserData {
       'friend_code': null,
       'radius': null,
       'friends': [],
+      'channels': [],
       'coordinates': {
         'latitude': null,
         'longitude': null
@@ -46,7 +49,7 @@ export class UserData {
       'block_list': [],
       'is_block_list_stale': false,
       'is_friend_list_stale': false,
-      'is_channels_stale': true
+      'is_channels_stale': false
     };
     this.localStorage.clear();
   }
@@ -78,6 +81,10 @@ export class UserData {
 
   setFriends(friends: any[]) {
     this.data.friends = friends;
+  };
+
+  setChannels(channels: any[]) {
+    this.data.channels = channels;
   };
 
   setCoordinates(coordinates: number[]) {
@@ -149,6 +156,10 @@ export class UserData {
 
   getFriends(): any[] {
     return this.data.friends;
+  };
+
+  getChannels(): any[] {
+    return this.data.channels;
   };
 
   getLatitude(): number {

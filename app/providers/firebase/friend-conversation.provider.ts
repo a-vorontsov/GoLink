@@ -9,7 +9,7 @@ export class FriendConversationProvider {
   constructor(private userData: UserData) {
   }
 
-  getMessagesForFriendConversation(friendId, conversationId) {
+  getMessages(friendId, conversationId) {
     var vm = this;
     return new Promise((resolve, reject) => {
       firebase.database().ref('members/' + friendId + '/friends/' + vm.userData.getId()).once('value').then((snapshot) => {
@@ -25,11 +25,11 @@ export class FriendConversationProvider {
     });
   }
 
-  getNewMessageRefByConversationId(conversationId): Reference {
+  getNewMessageRef(conversationId): Reference {
     return firebase.database().ref('friend_conversations/' + conversationId + '/messages').push();
   }
 
-  addMessageToConversation(conversationId, key, data) {
+  addMessage(conversationId, key, data) {
     return new Promise((resolve, reject) => {
       var updatedMessageData = {};
       updatedMessageData[conversationId + '/messages/' + key] = data;
@@ -42,7 +42,7 @@ export class FriendConversationProvider {
     });
   }
 
-  removeMessageFromConversation(conversationId, key) {
+  deleteMessage(conversationId, key) {
     return new Promise((resolve, reject) => {
       firebase.database().ref('friend_conversations/' + conversationId + '/messages/' + key).remove().then(() => {
         resolve();
@@ -52,7 +52,7 @@ export class FriendConversationProvider {
     });
   }
 
-  getChildAddedListenerReference(conversationId, messages) {
+  getChildAddedListenerRef(conversationId, messages) {
     if (messages.length > 0) {
       return firebase.database().ref('friend_conversations/' + conversationId + '/messages').orderByKey().startAt(messages[messages.length - 1].key);
     } else {

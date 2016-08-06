@@ -33,7 +33,6 @@ interface ChannelConversationMessage {
   uuid: string;
   user: ConversationUser;
   timestamp: any;
-  is_joined: boolean;
   message?: string;
   latitude?: number;
   longitude?: number;

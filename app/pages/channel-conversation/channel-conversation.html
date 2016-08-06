@@ -1,7 +1,7 @@
 <ion-header>
 
   <ion-navbar>
-    <ion-title>{{channelId}}</ion-title>
+    <ion-title>#{{channelId}}</ion-title>
   </ion-navbar>
 
 </ion-header>
@@ -9,37 +9,36 @@
 
 <ion-content padding>
 
-  <div [hidden]="!isLoading">
-    <ion-spinner></ion-spinner>
-    <p>Loading messages</p>
-  </div>
-  <div [hidden]="isLoading">
-    <div [hidden]="isMessagePresent">
-      <p>No messages in your radius in the past 24 hours. Share this app with other trainers and get the chat going!</p>
+  <div [hidden]="isInChannel"><p>You have not joined this channel yet. Go back and join this channel before you can view it.</p></div>
+  <div [hidden]="!isInChannel">
+    <div [hidden]="!isLoading">
+      <ion-spinner></ion-spinner>
+      <p>Loading messages</p>
     </div>
-    <div *ngFor="let message of messages" class="messages">
-      <div [hidden]="message.is_hidden">
+    <div [hidden]="isLoading">
+      <div *ngFor="let message of data.messages" class="messages">
+        <div [hidden]="message.is_hidden">
 
-        <div class="message" (click)="onMessageClicked(message)">
-          <div *ngIf="message.type === 'message'" [ngClass]="message.user.is_me ? 'isMe' : 'isOther'">
-            <div class="message-header" *ngIf="!message.user.is_me">
-              <span class="message-display-name">{{message.user.display_name}}</span> <span class="message-team">{{message.user.team}}</span>
-            </div>
-            <div class="message-body">
-              <div class="message-main-text">
-                <span class="message-contents" style="white-space: pre-line;">{{message.message}}</span>
+          <div class="message" (click)="onMessageClicked(message)">
+            <div *ngIf="message.type === 'message'" [ngClass]="message.user.is_me ? 'isMe' : 'isOther'">
+              <div class="message-header" *ngIf="!message.user.is_me">
+                <span class="message-display-name">{{message.user.display_name}}</span> <span class="message-team">{{message.user.team}}</span>
               </div>
-              <div class="message-misc-text">
-                <span glTimestamp [timestamp]="message.timestamp"></span><span *ngIf="!message.user.is_me"> - {{message.distance | distance}}</span>
+              <div class="message-body">
+                <div class="message-main-text">
+                  <span class="message-contents" style="white-space: pre-line;">{{message.message}}</span>
+                </div>
+                <div class="message-misc-text">
+                  <span glTimestamp [timestamp]="message.timestamp"></span><span *ngIf="!message.user.is_me"></span>
+                </div>
               </div>
             </div>
-          </div>
-          <div *ngIf="message.type === 'location'" [ngClass]="message.user.is_me ? 'isMeLocation' : 'isOtherLocation'">
-            <div class="message-header" *ngIf="!message.user.is_me">
-              <span class="message-display-name">{{message.user.display_name}}</span> <span class="message-team">{{message.user.team}}</span>
-            </div>
-            <div class="message-body-location">
-              <div class="message-main-text">
+            <div *ngIf="message.type === 'location'" [ngClass]="message.user.is_me ? 'isMeLocation' : 'isOtherLocation'">
+              <div class="message-header" *ngIf="!message.user.is_me">
+                <span class="message-display-name">{{message.user.display_name}}</span> <span class="message-team">{{message.user.team}}</span>
+              </div>
+              <div class="message-body-location">
+                <div class="message-main-text">
               <span class="message-contents">
                 <a [href]="message.geo_uri" target="_system">
                   <img
@@ -47,15 +46,16 @@
                     width="100%"/>
                 </a>
               </span>
-              </div>
-              <div class="message-misc-text">
-                <span glTimestamp [timestamp]="message.timestamp"></span><span *ngIf="!message.user.is_me"> - {{message.distance | distance}}</span>
+                </div>
+                <div class="message-misc-text">
+                  <span glTimestamp [timestamp]="message.timestamp"></span><span *ngIf="!message.user.is_me"></span>
+                </div>
               </div>
             </div>
           </div>
+
+
         </div>
-
-
       </div>
     </div>
   </div>

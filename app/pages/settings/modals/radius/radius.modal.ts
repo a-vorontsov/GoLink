@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
 import {ViewController, NavParams, Loading, NavController} from 'ionic-angular/index';
-import {Toast} from 'ionic-native/dist/index';
+import {Toast} from 'ionic-native';
 import {MemberProvider} from '../../../../providers/firebase/member.provider';
 
 @Component({

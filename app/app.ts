@@ -1,9 +1,9 @@
-import {Component} from "@angular/core";
-import {Platform, ionicBootstrap} from "ionic-angular";
-import {StatusBar} from "ionic-native";
-import {SplashPage} from "./pages/splash/splash";
-import {UserData} from "./providers/user-data/user-data.provider";
-import {Helper} from "./providers/helper/helper.provider";
+import {Component} from '@angular/core';
+import {Platform, ionicBootstrap} from 'ionic-angular';
+import {StatusBar} from 'ionic-native';
+import {SplashPage} from './pages/splash/splash';
+import {UserData} from './providers/user-data/user-data.provider';
+import {Helper} from './providers/helper/helper.provider';
 
 
 @Component({
@@ -11,9 +11,9 @@ import {Helper} from "./providers/helper/helper.provider";
 })
 export class MyApp {
 
-  private rootPage:any;
+  private rootPage: any;
 
-  constructor(private platform:Platform) {
+  constructor(private platform: Platform) {
     this.rootPage = SplashPage;
 
     platform.ready().then(() => {

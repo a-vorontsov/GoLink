@@ -9,7 +9,7 @@ export class ChannelConversationProvider {
   constructor(private userData: UserData) {
   }
 
-  getMessagesForChannel(channelId) {
+  getMessages(channelId) {
     var vm = this;
     return new Promise((resolve, reject) => {
       firebase.database().ref('channels/' + channelId + '/messages').once('value').then((snapshot) => {
@@ -20,11 +20,11 @@ export class ChannelConversationProvider {
     });
   }
 
-  getNewMessageRefByChannelId(channelId): Reference {
+  getNewMessageRef(channelId): Reference {
     return firebase.database().ref('channels/' + channelId + '/messages').push();
   }
 
-  addMessageToChannel(channelId, key, data) {
+  addMessage(channelId, key, data) {
     return new Promise((resolve, reject) => {
       var updatedMessageData = {};
       updatedMessageData[channelId + '/messages/' + key] = data;
@@ -37,7 +37,7 @@ export class ChannelConversationProvider {
     });
   }
 
-  removeMessageFromConversation(channelId, key) {
+  deleteMessage(channelId, key) {
     return new Promise((resolve, reject) => {
       firebase.database().ref('channels/' + channelId + '/messages/' + key).remove().then(() => {
         resolve();
@@ -47,7 +47,7 @@ export class ChannelConversationProvider {
     });
   }
 
-  getChildAddedListenerReference(channelId, messages) {
+  getChildAddedListenerRef(channelId, messages) {
     if (messages.length > 0) {
       return firebase.database().ref('channels/' + channelId + '/messages').orderByKey().startAt(messages[messages.length - 1].key);
     } else {

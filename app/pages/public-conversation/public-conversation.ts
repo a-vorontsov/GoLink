@@ -315,7 +315,7 @@ export class PublicConversationPage {
 
   transferGeoQueryResultFromFirebaseToScope = (key, location, distance) => {
     var vm = this;
-    vm.publicConversationProvider.getSnapshotForMessageKey(key).then(function (snapshot) {
+    vm.publicConversationProvider.getMessageSnapshot(key).then(function (snapshot) {
       if (snapshot.exists() && snapshot.hasChild('timestamp') && snapshot.hasChild('user') && snapshot.hasChild('uuid')) {
         var messageSnapshot = snapshot.val();
         vm.data.messages.push({

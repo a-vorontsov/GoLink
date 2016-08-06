@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import {NavController, Alert, Loading} from 'ionic-angular';
 import {ChannelsProvider} from '../../providers/firebase/channels.provider';
 import {UserData} from '../../providers/user-data/user-data.provider';
-import {Toast} from 'ionic-native/dist/index';
+import {Toast} from 'ionic-native';
 import {TimestampDirective} from '../../directives/timestamp.directive';
 import {ChannelConversationPage} from '../channel-conversation/channel-conversation';
 
@@ -102,6 +102,7 @@ export class ChannelsPage {
    */
   updateChannels() {
     var vm = this;
+    vm.data.channels = [];
     var channelIds = [];
     vm.channelsProvider.getChannels().then(channels => {
       for (let channelId in channels) {
@@ -115,7 +116,7 @@ export class ChannelsPage {
         vm.channelsProvider.getLastMessageRefByChannelId(channelId).on('value', snapshot => {
           var lastMessaged = snapshot.val();
           for (var i = 0; i < vm.data.channels.length; i++) {
-            if (vm.data.channels[i].user_id === channelId) {
+            if (vm.data.channels[i].channel_id === channelId) {
               setTimeout(function () {
                 if (typeof(lastMessaged) === undefined || lastMessaged === null) {
                   vm.data.channels[i].last_messaged = 0;
@@ -129,6 +130,8 @@ export class ChannelsPage {
           }
         });
       }
+
+      vm.userData.setChannels(vm.data.channels);
       vm.isLoading = false;
     }).catch(error => {
       vm.nav.present(Alert.create({title: 'Error', subTitle: 'Unable to retrieve friends. Check your internet connection and restart the app.', buttons: ['Dismiss']}));

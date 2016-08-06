@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import {NavController, Alert, Loading, Modal} from 'ionic-angular';
 import {UserData} from '../../providers/user-data/user-data.provider';
 import {SplashPage} from '../splash/splash';
-import {Toast} from 'ionic-native/dist/index';
+import {Toast} from 'ionic-native';
 import {RadiusModal} from './modals/radius/radius.modal';
 import {BlockListModal} from './modals/block-list/block-list.modal';
 import {MemberProvider} from '../../providers/firebase/member.provider';

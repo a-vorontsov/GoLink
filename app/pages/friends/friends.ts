@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import {NavController, Alert, Loading} from 'ionic-angular';
 import {AppSettings} from '../../app-settings';
 import {UserData} from '../../providers/user-data/user-data.provider';
-import {Clipboard, Toast} from 'ionic-native/dist/index';
+import {Clipboard, Toast} from 'ionic-native';
 import {DomSanitizationService, SecurityContext} from '@angular/platform-browser';
 import {Helper} from '../../providers/helper/helper.provider';
 import {FriendCodePipe} from '../../pipes/friend-code.pipe';

@@ -3,25 +3,27 @@ import {NavController, Content, Alert, ActionSheet, Platform, NavParams, Loading
 import {UserData} from '../../providers/user-data/user-data.provider';
 import {Helper} from '../../providers/helper/helper.provider';
 import {UUID} from 'angular2-uuid/index';
-import {Toast, Geolocation, Clipboard} from 'ionic-native/dist/index';
+import {Toast, Clipboard} from 'ionic-native';
 import {AppSettings} from '../../app-settings';
 import {TimestampPipe} from '../../pipes/timestamp.pipe';
 import {TimestampDirective} from '../../directives/timestamp.directive';
 import {FriendsPage} from '../friends/friends';
 import {FriendConversationProvider} from '../../providers/firebase/friend-conversation.provider';
 import {FriendsProvider} from '../../providers/firebase/friends.provider';
+import {NativeProvider} from '../../providers/native-provider/native-provider';
 
 @Component({
   templateUrl: 'build/pages/friend-conversation/friend-conversation.html',
   pipes: [TimestampPipe],
   directives: [TimestampDirective],
-  providers: [FriendConversationProvider, FriendsProvider]
+  providers: [FriendConversationProvider, FriendsProvider, NativeProvider]
 })
 export class FriendConversationPage {
 
   constructor(private nav: NavController,
               private params: NavParams,
               private userData: UserData,
+              private nativeProvider: NativeProvider,
               private friendsProvider: FriendsProvider,
               private friendConversationProvider: FriendConversationProvider,
               private helper: Helper,
@@ -53,7 +55,7 @@ export class FriendConversationPage {
   sendConversationMessageWithData = (data: FriendConversationMessage) => {
     var vm = this;
     // Create a message
-    var newMessageRef = vm.friendConversationProvider.getNewMessageRefByConversationId(vm.conversationId);
+    var newMessageRef = vm.friendConversationProvider.getNewMessageRef(vm.conversationId);
     vm.sentMessageKeys.push(newMessageRef.key);
 
     var messages = vm.data.messages;
@@ -67,7 +69,7 @@ export class FriendConversationPage {
     }
 
     // Set the message
-    vm.friendConversationProvider.addMessageToConversation(vm.conversationId, newMessageRef.key, data);
+    vm.friendConversationProvider.addMessage(vm.conversationId, newMessageRef.key, data);
   };
 
   addLocalMessageToScope = (data) => {
@@ -118,7 +120,7 @@ export class FriendConversationPage {
       return;
     }
 
-    vm.friendConversationProvider.getMessagesForFriendConversation(vm.friendId, vm.conversationId).then((messages) => {
+    vm.friendConversationProvider.getMessages(vm.friendId, vm.conversationId).then((messages) => {
       // Populate the list of messages
       for (var key in messages) {
         var message = messages[key];
@@ -255,7 +257,7 @@ export class FriendConversationPage {
           if (typeof(message.key) === 'undefined' || message.key === null) {
             vm.nav.present(Alert.create({title: 'Unable to delete', subTitle: 'The message cannot be deleted right now as it is still being sent. Try again later.', buttons: ['Dismiss']}));
           } else {
-            vm.friendConversationProvider.removeMessageFromConversation(vm.conversationId, message.key);
+            vm.friendConversationProvider.deleteMessage(vm.conversationId, message.key);
             var scopeMessages = vm.data.messages;
             for (var i = scopeMessages.length - 1; i >= 0; i--) {
               var scopeMessage = scopeMessages[i];
@@ -284,7 +286,7 @@ export class FriendConversationPage {
 
   listenForNewMessages = () => {
     var vm = this;
-    vm.friendConversationProvider.getChildAddedListenerReference(vm.conversationId, vm.data.messages).on('child_added', function (snapshot) {
+    vm.friendConversationProvider.getChildAddedListenerRef(vm.conversationId, vm.data.messages).on('child_added', function (snapshot) {
       var message = snapshot.val();
       if (vm.sentMessageKeys.indexOf(snapshot.key) === -1) {
         setTimeout(() => {
@@ -307,7 +309,7 @@ export class FriendConversationPage {
       }
     });
 
-    vm.friendConversationProvider.getChildAddedListenerReference(vm.conversationId, vm.data.messages).on('child_removed', (oldSnapshot) => {
+    vm.friendConversationProvider.getChildAddedListenerRef(vm.conversationId, vm.data.messages).on('child_removed', (oldSnapshot) => {
       var key = oldSnapshot.key;
 
       var messages = vm.data.messages;
@@ -356,27 +358,25 @@ export class FriendConversationPage {
     var vm = this;
 
     var onConfirm = () => {
-      Geolocation
-        .getCurrentPosition({timeout: 10000, enableHighAccuracy: true})
-        .then(function (position) {
-          // Set coordinates
-          vm.userData.setCoordinates([position.coords.latitude, position.coords.longitude]);
+      vm.nativeProvider.getPrecisePosition().then(function (position) {
+        // Set coordinates
+        vm.userData.setCoordinates([position.coords.latitude, position.coords.longitude]);
 
-          var identifier = UUID.UUID();
-          vm.addLocalMessageToScope({'uuid': identifier, 'type': 'location'});
+        var identifier = UUID.UUID();
+        vm.addLocalMessageToScope({'uuid': identifier, 'type': 'location'});
 
-          var data = {
-            'uuid': identifier,
-            'user_id': vm.userData.getId(),
-            'timestamp': firebase.database.ServerValue.TIMESTAMP,
-            'latitude': vm.userData.getLatitude(),
-            'longitude': vm.userData.getLongitude()
-          };
-          vm.sendConversationMessageWithData(data);
+        var data = {
+          'uuid': identifier,
+          'user_id': vm.userData.getId(),
+          'timestamp': firebase.database.ServerValue.TIMESTAMP,
+          'latitude': vm.userData.getLatitude(),
+          'longitude': vm.userData.getLongitude()
+        };
+        vm.sendConversationMessageWithData(data);
 
-        }, function (error) {
-          Toast.showShortBottom('Error: Unable to retrieve your location. Your message was not sent. Ensure location retrieval is enabled and try again.');
-        });
+      }, function (error) {
+        Toast.showShortBottom('Error: Unable to retrieve your location. Your message was not sent. Ensure location retrieval is enabled and try again.');
+      });
     };
 
     vm.nav.present(Alert.create({
