@@ -102,12 +102,12 @@ export class ChannelsPage {
    */
   updateChannels() {
     var vm = this;
-    vm.data.channels = [];
+    var tempChannels = [];
     var channelIds = [];
     vm.channelsProvider.getChannels().then(channels => {
       for (let channelId in channels) {
         let channel = channels[channelId];
-        vm.data.channels.push({'channel_id': channelId, 'joined_at': channel.joined_at});
+        tempChannels.push({'channel_id': channelId, 'joined_at': channel.joined_at});
         channelIds.push(channelId);
       }
 
@@ -115,13 +115,13 @@ export class ChannelsPage {
         // Listen for timestamp updates
         vm.channelsProvider.getLastMessageRefByChannelId(channelId).on('value', snapshot => {
           var lastMessaged = snapshot.val();
-          for (var i = 0; i < vm.data.channels.length; i++) {
-            if (vm.data.channels[i].channel_id === channelId) {
+          for (var i = 0; i < tempChannels.length; i++) {
+            if (tempChannels[i].channel_id === channelId) {
               setTimeout(function () {
                 if (typeof(lastMessaged) === undefined || lastMessaged === null) {
-                  vm.data.channels[i].last_messaged = 0;
+                  tempChannels[i].last_messaged = 0;
                 } else {
-                  vm.data.channels[i].last_messaged = (lastMessaged >= Date.now()) ? Date.now() - 1 : lastMessaged;
+                  tempChannels[i].last_messaged = (lastMessaged >= Date.now()) ? Date.now() - 1 : lastMessaged;
                 }
                 vm.sortScopeDataChannels();
               });
@@ -131,21 +131,17 @@ export class ChannelsPage {
         });
       }
 
+      vm.data.channels = tempChannels;
       vm.userData.setChannels(vm.data.channels);
+      vm.userData.setIsChannelsStale(false);
       vm.isLoading = false;
     }).catch(error => {
-      vm.nav.present(Alert.create({title: 'Error', subTitle: 'Unable to retrieve friends. Check your internet connection and restart the app.', buttons: ['Dismiss']}));
+      vm.nav.present(Alert.create({title: 'Error', subTitle: 'Unable to retrieve channels. Check your internet connection and restart the app.', buttons: ['Dismiss']}));
     });
   }
 
-  ionViewLoaded() {
-    this.updateChannels();
-  };
-
   ionViewDidEnter() {
-    if (this.userData.getIsChannelsStale()) {
-      this.updateChannels();
-    }
+    this.updateChannels();
   };
 
 }
