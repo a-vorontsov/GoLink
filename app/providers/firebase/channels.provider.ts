@@ -33,6 +33,31 @@ export class ChannelsProvider {
     });
   }
 
+  leaveChannel(channelId) {
+    var vm = this;
+    return new Promise((resolve, reject) => {
+      var userId = vm.userData.getId();
+      firebase.database().ref('channels/' + channelId + '/messages').push({
+        'uuid': UUID.UUID(),
+        'user': {
+          'user_id': vm.userData.getId(),
+          'display_name': vm.userData.getDisplayName(),
+          'team': vm.userData.getTeam()
+        },
+        'timestamp': firebase.database.ServerValue.TIMESTAMP,
+        'is_joined': false
+      }).then(() => {
+        return firebase.database().ref('members/' + userId + '/channels/' + channelId).set(null);
+      }).then(() => {
+        return firebase.database().ref('channels/' + channelId + '/members/' + userId).set(null);
+      }).then(() => {
+        resolve();
+      }).catch(error => {
+        reject(error);
+      });
+    });
+  }
+
   getChannels() {
     var vm = this;
     return new Promise((resolve, reject) => {

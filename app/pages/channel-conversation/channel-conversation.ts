@@ -9,12 +9,14 @@ import {UserData} from '../../providers/user-data/user-data.provider';
 import {Helper} from '../../providers/helper/helper.provider';
 import {NativeProvider} from '../../providers/native-provider/native-provider';
 import {UUID} from 'angular2-uuid/index';
+import {ChannelsPage} from '../channels/channels';
+import {ChannelsProvider} from '../../providers/firebase/channels.provider';
 
 @Component({
   templateUrl: 'build/pages/channel-conversation/channel-conversation.html',
   pipes: [TimestampPipe],
   directives: [TimestampDirective, ChatInputDirective],
-  providers: [ChannelConversationProvider, NativeProvider]
+  providers: [ChannelConversationProvider, NativeProvider, ChannelsProvider]
 })
 export class ChannelConversationPage {
 
@@ -22,6 +24,7 @@ export class ChannelConversationPage {
               private params: NavParams,
               private userData: UserData,
               private nativeProvider: NativeProvider,
+              private channelsProvider: ChannelsProvider,
               private channelConversationProvider: ChannelConversationProvider,
               private helper: Helper,
               private platform: Platform) {
@@ -103,6 +106,18 @@ export class ChannelConversationPage {
     });
   };
 
+  private getMessageType = (message) => {
+    if (message.is_joined === true) {
+      return 'joined';
+    } else if(message.is_joined === false) {
+      return 'left';
+    } else if(typeof(message.longitude) === 'undefined') {
+      return 'message';
+    } else {
+      return 'location';
+    }
+  };
+
   // endregion
 
   // region Ionic View Events
@@ -139,7 +154,7 @@ export class ChannelConversationPage {
         vm.data.messages.push({
           'key': key,
           'timestamp': message.timestamp,
-          'type': (message.is_joined === true) ? 'joined' : (typeof(message.longitude) === 'undefined' ? 'message' : 'location'),
+          'type': vm.getMessageType(message),
           'message': message.message,
           'longitude': message.longitude,
           'latitude': message.latitude,
@@ -186,7 +201,7 @@ export class ChannelConversationPage {
       });
     } else if (message.type === 'location') {
       actionSheetOpts.buttons.push({
-        text: 'Copy coordinates',
+        text: 'Copy Coordinates',
         icon: (vm.platform.is('ios')) ? undefined : 'copy',
         handler: () => {
           Clipboard
@@ -232,6 +247,60 @@ export class ChannelConversationPage {
     vm.nav.present(actionSheet);
   };
 
+  showActionSheet = () => {
+    var vm = this;
+
+    function showRemoveDialog() {
+      vm.nav.present(Alert.create({
+        title: 'Leave channel?',
+        message: 'Are you sure you want to leave this channel?',
+        buttons: [
+          {
+            text: 'No',
+            role: 'cancel'
+          },
+          {
+            text: 'Yes',
+            handler: () => {
+              vm.showIonicLoading();
+              vm.channelsProvider.leaveChannel(vm.channelId).then(() => {
+                vm.hideIonicLoading();
+                vm.userData.setIsChannelsStale(true);
+                Toast.showShortBottom('You have left the channel.');
+                vm.nav.setRoot(ChannelsPage);
+              }).catch(error => {
+                vm.hideIonicLoading();
+                Toast.showLongBottom('Unable to leave channel - Check your internet connection and try again later.');
+              });
+            }
+          }
+        ]
+      }));
+    }
+
+    let actionSheet = ActionSheet.create({
+      buttons: [
+        {
+          text: 'Leave Channel',
+          role: 'destructive',
+          icon: (vm.platform.is('ios')) ? undefined : 'exit',
+          handler: () => {
+            actionSheet.dismiss().then(() => {
+              showRemoveDialog();
+            });
+            return false;
+          }
+        },
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          icon: (vm.platform.is('ios')) ? undefined : 'close'
+        }
+      ]
+    });
+    this.nav.present(actionSheet);
+  };
+
   // endregion
 
   // region Receiving Messages
@@ -245,7 +314,7 @@ export class ChannelConversationPage {
           vm.data.messages.push({
             'key': snapshot.key,
             'timestamp': message.timestamp,
-            'type': (message.is_joined === true) ? 'joined' : (typeof(message.longitude) === 'undefined' ? 'message' : 'location'),
+            'type': vm.getMessageType(message),
             'message': message.message,
             'longitude': message.longitude,
             'latitude': message.latitude,

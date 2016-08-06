@@ -92,6 +92,20 @@ export class FriendConversationPage {
     vm.content.scrollToBottom(300);
   };
 
+  private loading;
+  private showIonicLoading = () => {
+    this.loading = Loading.create({dismissOnPageChange: true});
+    this.nav.present(this.loading);
+  };
+
+  private hideIonicLoading = () => {
+    if (this.loading) {
+      setTimeout(() => {
+        this.loading.dismiss();
+      }, 300);
+    }
+  };
+
   // region Ionic View Events
 
   ionViewDidEnter() {
@@ -173,15 +187,14 @@ export class FriendConversationPage {
           {
             text: 'Yes',
             handler: () => {
-              var loading = Loading.create({dismissOnPageChange: true});
-              vm.nav.present(loading);
+              vm.showIonicLoading();
               vm.friendsProvider.removeFriendFromFriendsList(vm.friendId).then(() => {
-                loading.dismiss();
+                vm.hideIonicLoading();
                 vm.userData.setIsFriendListStale(true);
                 Toast.showShortBottom('The trainer has been removed from your friends list.');
                 vm.nav.setRoot(FriendsPage);
               }).catch(error => {
-                loading.dismiss();
+                vm.hideIonicLoading();
                 Toast.showLongBottom('Unable to remove friend - Check your internet connection and try again later.');
               });
             }
@@ -234,7 +247,7 @@ export class FriendConversationPage {
       });
     } else if (message.type === 'location') {
       actionSheetOpts.buttons.push({
-        text: 'Copy coordinates',
+        text: 'Copy Coordinates',
         icon: (vm.platform.is('ios')) ? undefined : 'copy',
         handler: () => {
           Clipboard

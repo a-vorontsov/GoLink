@@ -206,7 +206,7 @@ export class PublicConversationPage {
       });
     } else if (message.type === 'location') {
       actionSheetOpts.buttons.push({
-        text: 'Copy coordinates',
+        text: 'Copy Coordinates',
         icon: (vm.platform.is('ios')) ? undefined : 'copy',
         handler: () => {
           Clipboard
