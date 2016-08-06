@@ -52,6 +52,9 @@
                 </div>
               </div>
             </div>
+            <div *ngIf="message.type === 'joined'">
+              <p style="text-align: center">{{ message.user.display_name }} has joined the channel</p>
+            </div>
           </div>
 
 

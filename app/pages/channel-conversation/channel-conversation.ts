@@ -131,6 +131,7 @@ export class ChannelConversationPage {
       return;
     }
 
+    vm.data.messages = [];
     vm.channelConversationProvider.getMessages(vm.channelId).then((messages) => {
       // Populate the list of messages
       for (var key in messages) {
@@ -239,7 +240,7 @@ export class ChannelConversationPage {
     var vm = this;
     vm.channelConversationProvider.getChildAddedListenerRef(vm.channelId, vm.data.messages).on('child_added', function (snapshot) {
       var message = snapshot.val();
-      if (vm.sentMessageKeys.indexOf(snapshot.key) === -1) {
+      if (vm.sentMessageKeys.indexOf(snapshot.key) === -1 && vm.data.messages[vm.data.messages.length - 1]['key'] !== snapshot.key) {
         setTimeout(() => {
           vm.data.messages.push({
             'key': snapshot.key,
