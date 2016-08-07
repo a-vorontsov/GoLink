@@ -17,8 +17,8 @@
   <div [hidden]="isInChannel"><p>You have not joined this channel yet. Go back and join this channel before you can view it.</p></div>
   <div [hidden]="!isInChannel">
     <div [hidden]="!isLoading">
-      <ion-spinner></ion-spinner>
-      <p>Loading messages</p>
+      <ion-spinner id="menu-spinner"></ion-spinner>
+      <p class="loading-message">Loading messages</p>
     </div>
     <div [hidden]="isLoading">
       <div *ngFor="let message of data.messages" class="messages">

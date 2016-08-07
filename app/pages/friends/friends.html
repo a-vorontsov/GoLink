@@ -14,8 +14,8 @@
 
 <ion-content padding>
   <div [hidden]="!isLoading">
-    <ion-spinner></ion-spinner>
-    <p>Loading friends</p>
+    <ion-spinner id="menu-spinner"></ion-spinner>
+    <p class="loading-message">Loading friends</p>
   </div>
   <div [hidden]="isLoading">
     <ion-list>

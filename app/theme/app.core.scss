@@ -128,14 +128,50 @@ body {
   margin:auto;
 }
 
+.loading-message {
+  margin: auto !important;
+  position: absolute !important;
+  top: 55% !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  right: 0 !important;
+  text-align: center !important;
+  font-size: 18px;
+  color: gray;
+}
+
+#menu-spinner {
+  margin: auto !important;
+  position: absolute !important;
+  top: -5% !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  right: 0 !important;
+  text-align: center !important;
+}
+
+#menu-spinner svg circle {
+  stroke: gray !important;
+}
+
 #splash-spinner svg circle {
   stroke: #fff !important;
+}
+
+#splash-spinner {
+  margin: auto !important;
+  position: absolute !important;
+  top: 45% !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  right: 0 !important;
+  text-align: center !important;
 }
 
 ion-spinner {
   margin: auto !important;
   position: absolute !important;
-  top: 45% !important;
+  top: 0 !important;
   left: 0 !important;
   bottom: 0 !important;
   right: 0 !important;

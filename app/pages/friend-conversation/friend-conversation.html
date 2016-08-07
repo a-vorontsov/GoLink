@@ -14,8 +14,8 @@
 
 <ion-content padding>
   <div [hidden]="!isLoading">
-    <ion-spinner></ion-spinner>
-    <p>Loading messages</p>
+    <ion-spinner id="menu-spinner"></ion-spinner>
+    <p class="loading-message">Loading messages</p>
   </div>
   <div [hidden]="isLoading || !isInFriendsList || !isConnectedToFriend">
     <div *ngIf="data.messages.length === 0">

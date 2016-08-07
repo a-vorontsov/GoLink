@@ -14,8 +14,8 @@
 
 <ion-content padding>
   <div [hidden]="!isLoading">
-    <ion-spinner></ion-spinner>
-    <p>Loading channels</p>
+    <ion-spinner id="menu-spinner"></ion-spinner>
+    <p class="loading-message">Loading channels</p>
   </div>
   <div [hidden]="isLoading">
     <p [hidden]="data.channels.length > 0">Speak to groups of trainers by creating or joining a channel!</p>
