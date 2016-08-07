@@ -1,13 +1,14 @@
-import {Component} from '@angular/core';
-import {NavController, Alert} from 'ionic-angular';
-import {AppSettings} from '../../app-settings';
-import {UserData} from '../../providers/user-data/user-data.provider';
-import {SetupPage} from '../setup/setup';
-import {LoginPage} from '../login/login';
-import {TabsPage} from '../tabs/tabs';
-import {AuthProvider} from '../../providers/firebase/auth.provider';
-import {MemberProvider} from '../../providers/firebase/member.provider';
-import {NativeProvider} from '../../providers/native-provider/native-provider';
+import {Component} from "@angular/core";
+import {NavController, Alert} from "ionic-angular";
+import {AppSettings} from "../../app-settings";
+import {UserData} from "../../providers/user-data/user-data.provider";
+import {SetupPage} from "../setup/setup";
+import {LoginPage} from "../login/login";
+import {TabsPage} from "../tabs/tabs";
+import {AuthProvider} from "../../providers/firebase/auth.provider";
+import {MemberProvider} from "../../providers/firebase/member.provider";
+import {NativeProvider} from "../../providers/native-provider/native-provider";
+import {Splashscreen} from "ionic-native";
 
 @Component({
   templateUrl: 'build/pages/splash/splash.html',
@@ -23,6 +24,7 @@ export class SplashPage {
   }
 
   ionViewDidEnter() {
+    Splashscreen.hide();
     setTimeout(() => {
       this.checkUser();
     }, 3000);
