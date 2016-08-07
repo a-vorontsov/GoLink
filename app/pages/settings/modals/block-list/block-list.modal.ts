@@ -1,7 +1,7 @@
-import {Component} from '@angular/core';
-import {ViewController, NavParams, Loading, NavController} from 'ionic-angular/index';
-import {Toast} from 'ionic-native';
-import {MemberProvider} from '../../../../providers/firebase/member.provider';
+import {Component} from "@angular/core";
+import {ViewController, NavParams, NavController, LoadingController} from "ionic-angular/index";
+import {Toast} from "ionic-native";
+import {MemberProvider} from "../../../../providers/firebase/member.provider";
 
 @Component({
   templateUrl: 'build/pages/settings/modals/block-list/block-list.modal.html',
@@ -14,6 +14,7 @@ export class BlockListModal {
   removedKeys: any[];
 
   constructor(private viewCtrl: ViewController,
+              private loadingController: LoadingController,
               private nav: NavController,
               private params: NavParams,
               private memberProvider: MemberProvider) {
@@ -25,8 +26,8 @@ export class BlockListModal {
   private loading;
 
   private showLoading() {
-    this.loading = Loading.create({dismissOnPageChange: true});
-    this.nav.present(this.loading);
+    this.loading = this.loadingController.create({dismissOnPageChange: true});
+    this.loading.present();
   }
 
   update() {

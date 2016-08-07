@@ -1,12 +1,12 @@
-import {Component} from '@angular/core';
-import {NavController, Alert, Loading, Modal} from 'ionic-angular';
-import {UserData} from '../../providers/user-data/user-data.provider';
-import {SplashPage} from '../splash/splash';
-import {Toast} from 'ionic-native';
-import {RadiusModal} from './modals/radius/radius.modal';
-import {BlockListModal} from './modals/block-list/block-list.modal';
-import {MemberProvider} from '../../providers/firebase/member.provider';
-import {AuthProvider} from '../../providers/firebase/auth.provider';
+import {Component} from "@angular/core";
+import {NavController, ModalController, AlertController, LoadingController} from "ionic-angular";
+import {UserData} from "../../providers/user-data/user-data.provider";
+import {SplashPage} from "../splash/splash";
+import {Toast} from "ionic-native";
+import {RadiusModal} from "./modals/radius/radius.modal";
+import {BlockListModal} from "./modals/block-list/block-list.modal";
+import {MemberProvider} from "../../providers/firebase/member.provider";
+import {AuthProvider} from "../../providers/firebase/auth.provider";
 
 @Component({
   templateUrl: 'build/pages/settings/settings.html',
@@ -17,6 +17,9 @@ export class SettingsPage {
   data: any;
 
   constructor(private nav: NavController,
+              private alertController: AlertController,
+              private modalController: ModalController,
+              private loadingController: LoadingController,
               private userData: UserData,
               private authProvider: AuthProvider,
               private memberProvider: MemberProvider) {
@@ -40,8 +43,8 @@ export class SettingsPage {
   private loading;
   showIonicLoading = () => {
     var vm = this;
-    vm.loading = Loading.create({dismissOnPageChange: true});
-    vm.nav.present(vm.loading);
+    vm.loading = vm.loadingController.create({dismissOnPageChange: true});
+    vm.loading.present();
   };
 
   hideIonicLoading = () => {
@@ -55,9 +58,9 @@ export class SettingsPage {
   signOut = () => {
     var vm = this;
     vm.authProvider.signOut().then(function () {
-      vm.nav.rootNav.setRoot(SplashPage);
+      vm.nav.setRoot(SplashPage);
     }).catch(function (error) {
-      vm.nav.present(Alert.create({title: 'Error', subTitle: 'Unable to sign out. Try again later or clear app data/reinstall the app.', buttons: ['Dismiss']}));
+      vm.alertController.create({title: 'Error', subTitle: 'Unable to sign out. Try again later or clear app data/reinstall the app.', buttons: ['Dismiss']}).present();
     });
   };
 
@@ -77,7 +80,7 @@ export class SettingsPage {
       });
     };
 
-    vm.nav.present(Alert.create({
+    vm.alertController.create({
       title: 'Update display name',
       inputs: [
         {
@@ -111,7 +114,7 @@ export class SettingsPage {
           }
         }
       ]
-    }));
+    }).present();
   };
 
   showUpdateTeamPopup = () => {
@@ -129,7 +132,7 @@ export class SettingsPage {
       });
     };
 
-    let alert = Alert.create();
+    let alert = vm.alertController.create();
     alert.setTitle('Select your team');
     alert.addInput({
       type: 'radio',
@@ -158,16 +161,16 @@ export class SettingsPage {
         return true;
       }
     });
-    vm.nav.present(alert);
+    alert.present();
   };
 
   showUpdateRadiusPopup = () => {
     var vm = this;
-    let radiusModal = Modal.create(RadiusModal, {radius: vm.data.radius});
-    radiusModal.onDismiss(data => {
+    let radiusModal = vm.modalController.create(RadiusModal, {radius: vm.data.radius});
+    radiusModal.onDidDismiss(data => {
       vm.data.radius = this.userData.getRadius();
     });
-    vm.nav.present(radiusModal);
+    radiusModal.present();
   };
 
   showUpdateBlockListPopup = () => {
@@ -175,11 +178,11 @@ export class SettingsPage {
     if (vm.data.blockedUsers.length === 0) {
       Toast.showShortBottom('There are no users in your block list.');
     } else {
-      let blockListModal = Modal.create(BlockListModal, {blockList: vm.data.blockedUsers});
-      blockListModal.onDismiss(() => {
+      let blockListModal = vm.modalController.create(BlockListModal, {blockList: vm.data.blockedUsers});
+      blockListModal.onDidDismiss(() => {
         vm.data.blockedUsers = this.userData.getBlockList();
       });
-      vm.nav.present(blockListModal);
+      blockListModal.present();
     }
   };
 
