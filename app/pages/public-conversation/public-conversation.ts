@@ -1,16 +1,16 @@
-import {Component, ViewChild} from '@angular/core';
-import {NavController, Platform, Content, Loading, Alert, ActionSheet} from 'ionic-angular';
-import {UserData} from '../../providers/user-data/user-data.provider';
-import {Toast, Clipboard} from 'ionic-native';
-import {DistancePipe} from '../../pipes/distance.pipe';
-import {TimestampPipe} from '../../pipes/timestamp.pipe';
-import {TimestampDirective} from '../../directives/timestamp.directive';
-import {UUID} from 'angular2-uuid';
-import {Helper} from '../../providers/helper/helper.provider';
-import {PublicConversationProvider} from '../../providers/firebase/public-conversation.provider';
-import {MemberProvider} from '../../providers/firebase/member.provider';
-import {NativeProvider} from '../../providers/native-provider/native-provider';
-import {ReportProvider} from '../../providers/firebase/report.provider';
+import {Component, ViewChild} from "@angular/core";
+import {NavController, Platform, Content, Loading, LoadingController, ActionSheetController, AlertController} from "ionic-angular";
+import {UserData} from "../../providers/user-data/user-data.provider";
+import {Toast, Clipboard} from "ionic-native";
+import {DistancePipe} from "../../pipes/distance.pipe";
+import {TimestampPipe} from "../../pipes/timestamp.pipe";
+import {TimestampDirective} from "../../directives/timestamp.directive";
+import {UUID} from "angular2-uuid";
+import {Helper} from "../../providers/helper/helper.provider";
+import {PublicConversationProvider} from "../../providers/firebase/public-conversation.provider";
+import {MemberProvider} from "../../providers/firebase/member.provider";
+import {NativeProvider} from "../../providers/native-provider/native-provider";
+import {ReportProvider} from "../../providers/firebase/report.provider";
 
 @Component({
   templateUrl: 'build/pages/public-conversation/public-conversation.html',
@@ -21,6 +21,9 @@ import {ReportProvider} from '../../providers/firebase/report.provider';
 export class PublicConversationPage {
 
   constructor(private nav: NavController,
+              private alertController: AlertController,
+              private actionSheetController: ActionSheetController,
+              private loadingController: LoadingController,
               private platform: Platform,
               private userData: UserData,
               private helper: Helper,
@@ -48,8 +51,8 @@ export class PublicConversationPage {
 
   private loading: Loading;
   private showIonicLoading = () => {
-    this.loading = Loading.create({dismissOnPageChange: true});
-    this.nav.present(this.loading);
+    this.loading = this.loadingController.create({dismissOnPageChange: true});
+    this.loading.present();
   };
 
   private hideIonicLoading = () => {
@@ -135,7 +138,7 @@ export class PublicConversationPage {
         });
       };
 
-      vm.nav.present(Alert.create({
+      vm.alertController.create({
         title: 'Block user?',
         message: 'Are you sure you want to block the user? You will not be able to see their messages, but they will be able to see yours. You can unblock them on your settings page.',
         buttons: [
@@ -151,11 +154,11 @@ export class PublicConversationPage {
             handler: handleAlert
           }
         ]
-      }));
+      }).present();
     };
 
     var showReportPopup = (message) => {
-      vm.nav.present(Alert.create({
+      vm.alertController.create({
         title: 'Report',
         message: 'Write a reason below. Misuse of this feature will result in your account being disabled.',
         inputs: [{
@@ -185,7 +188,7 @@ export class PublicConversationPage {
             }
           }
         ]
-      }));
+      }).present();
     };
 
     let actionSheetOpts = {title: 'Message Actions', buttons: []};
@@ -227,7 +230,7 @@ export class PublicConversationPage {
         icon: (vm.platform.is('ios')) ? undefined : 'trash',
         handler: () => {
           if (typeof(message.key) === 'undefined' || message.key === null) {
-            vm.nav.present(Alert.create({title: 'Unable to delete', subTitle: 'The message cannot be deleted at this time as it is still being sent to the server.', buttons: ['Dismiss']}));
+            vm.alertController.create({title: 'Unable to delete', subTitle: 'The message cannot be deleted at this time as it is still being sent to the server.', buttons: ['Dismiss']}).present();
           } else {
             vm.geoFire.remove(message.key);
             var scopeMessages = vm.data.messages;
@@ -270,8 +273,8 @@ export class PublicConversationPage {
       role: 'cancel',
       icon: (vm.platform.is('ios')) ? undefined : 'close'
     });
-    let actionSheet = ActionSheet.create(actionSheetOpts);
-    vm.nav.present(actionSheet);
+    let actionSheet = vm.actionSheetController.create(actionSheetOpts);
+    actionSheet.present();
   };
 
   // endregion
@@ -460,10 +463,10 @@ export class PublicConversationPage {
         vm.sendConversationMessageWithData(data);
 
       }, function (error) {
-        vm.nav.present(Alert.create({title: 'Unable to retrieve location', subTitle: 'Your message was not sent. Ensure location services are enabled and try again.', buttons: ['Dismiss']}));
+        vm.alertController.create({title: 'Unable to retrieve location', subTitle: 'Your message was not sent. Ensure location services are enabled and try again.', buttons: ['Dismiss']}).present();
       });
     };
-    vm.nav.present(Alert.create({
+    vm.alertController.create({
       title: 'Show Location',
       subTitle: 'Are you sure you want to share your location? Your precise location will be sent to all chat participants.',
       buttons: [
@@ -476,7 +479,7 @@ export class PublicConversationPage {
           handler: onConfirm
         }
       ]
-    }));
+    }).present();
   };
 
   // endregion

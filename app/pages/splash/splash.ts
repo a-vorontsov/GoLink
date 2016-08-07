@@ -1,5 +1,5 @@
 import {Component} from "@angular/core";
-import {NavController, Alert} from "ionic-angular";
+import {NavController, AlertController} from "ionic-angular";
 import {AppSettings} from "../../app-settings";
 import {UserData} from "../../providers/user-data/user-data.provider";
 import {SetupPage} from "../setup/setup";
@@ -17,6 +17,7 @@ import {Splashscreen} from "ionic-native";
 export class SplashPage {
   constructor(private nav: NavController,
               private userData: UserData,
+              private alertController: AlertController,
               private authProvider: AuthProvider,
               private memberProvider: MemberProvider,
               private nativeProvider: NativeProvider) {
@@ -34,7 +35,6 @@ export class SplashPage {
     var vm = this;
 
     var userData = vm.userData;
-    var nav = vm.nav;
     var onUserConfigured = vm.onUserConfigured;
     var onUserMissingFriendCode = vm.onUserMissingFriendCode;
 
@@ -51,13 +51,13 @@ export class SplashPage {
           } else if (status === AppSettings.INFO.USER_NEEDS_FRIEND_CODE) {
             onUserMissingFriendCode();
           } else {
-            nav.setRoot(SetupPage);
+            vm.nav.setRoot(SetupPage);
           }
         }).catch(error => {
-          nav.present(Alert.create({title: 'Error', subTitle: 'Unable to retrieve your user details. Check your internet connection and restart the app.'}));
+          vm.alertController.create({title: 'Error', subTitle: 'Unable to retrieve your user details. Check your internet connection and restart the app.'}).present();
         });
       } else {
-        nav.setRoot(LoginPage);
+        vm.nav.setRoot(LoginPage);
       }
     });
   };
@@ -70,7 +70,6 @@ export class SplashPage {
     var vm = this;
 
     var userData = vm.userData;
-    var nav = vm.nav;
 
     // Update user data service
     userData.setDisplayName(memberData.display_name);
@@ -85,16 +84,16 @@ export class SplashPage {
       // Return promise to set block list
       return vm.memberProvider.getTransformedBlockListObject();
     }, function (error) {
-      nav.present(Alert.create({title: 'Error', subTitle: 'Unable to retrieve location. Ensure location services are enabled and restart app.'}));
+      vm.alertController.create({title: 'Error', subTitle: 'Unable to retrieve location. Ensure location services are enabled and restart app.'}).present();
       return null;
     }).then(blockList => {
       // Set the block list
       userData.setBlockList(blockList);
 
-      // Navigate to the main tab view
-      nav.setRoot(TabsPage);
+      // vm.navigate to the main tab view
+      vm.nav.setRoot(TabsPage);
     }, function (error) {
-      nav.present(Alert.create({title: 'Error', subTitle: 'Unable to retrieve your user details. Check your internet connectivity and restart the app.'}));
+      vm.alertController.create({title: 'Error', subTitle: 'Unable to retrieve your user details. Check your internet connectivity and restart the app.'}).present();
     });
   };
 
@@ -104,7 +103,7 @@ export class SplashPage {
     vm.memberProvider.createFriendCode().then(() => {
       vm.checkUser();
     }).catch(error => {
-      vm.nav.present(Alert.create({title: 'Error', subTitle: 'Unable to retrieve your friend code. Check your internet connection and restart the app.'}));
+      vm.alertController.create({title: 'Error', subTitle: 'Unable to retrieve your friend code. Check your internet connection and restart the app.'}).present();
     });
   };
 }

@@ -1,16 +1,16 @@
-import {Component, ViewChild} from '@angular/core';
-import {NavController, Content, Alert, ActionSheet, Platform, NavParams, Loading} from 'ionic-angular';
-import {UserData} from '../../providers/user-data/user-data.provider';
-import {Helper} from '../../providers/helper/helper.provider';
-import {UUID} from 'angular2-uuid/index';
-import {Toast, Clipboard} from 'ionic-native';
-import {AppSettings} from '../../app-settings';
-import {TimestampPipe} from '../../pipes/timestamp.pipe';
-import {TimestampDirective} from '../../directives/timestamp.directive';
-import {FriendsPage} from '../friends/friends';
-import {FriendConversationProvider} from '../../providers/firebase/friend-conversation.provider';
-import {FriendsProvider} from '../../providers/firebase/friends.provider';
-import {NativeProvider} from '../../providers/native-provider/native-provider';
+import {Component, ViewChild} from "@angular/core";
+import {NavController, Content, Platform, NavParams, ActionSheetController, AlertController, LoadingController} from "ionic-angular";
+import {UserData} from "../../providers/user-data/user-data.provider";
+import {Helper} from "../../providers/helper/helper.provider";
+import {UUID} from "angular2-uuid/index";
+import {Toast, Clipboard} from "ionic-native";
+import {AppSettings} from "../../app-settings";
+import {TimestampPipe} from "../../pipes/timestamp.pipe";
+import {TimestampDirective} from "../../directives/timestamp.directive";
+import {FriendsPage} from "../friends/friends";
+import {FriendConversationProvider} from "../../providers/firebase/friend-conversation.provider";
+import {FriendsProvider} from "../../providers/firebase/friends.provider";
+import {NativeProvider} from "../../providers/native-provider/native-provider";
 
 @Component({
   templateUrl: 'build/pages/friend-conversation/friend-conversation.html',
@@ -23,6 +23,9 @@ export class FriendConversationPage {
   constructor(private nav: NavController,
               private params: NavParams,
               private userData: UserData,
+              private alertController: AlertController,
+              private actionSheetController: ActionSheetController,
+              private loadingController: LoadingController,
               private nativeProvider: NativeProvider,
               private friendsProvider: FriendsProvider,
               private friendConversationProvider: FriendConversationProvider,
@@ -94,8 +97,8 @@ export class FriendConversationPage {
 
   private loading;
   private showIonicLoading = () => {
-    this.loading = Loading.create({dismissOnPageChange: true});
-    this.nav.present(this.loading);
+    this.loading = this.loadingController.create({dismissOnPageChange: true});
+    this.loading.present();
   };
 
   private hideIonicLoading = () => {
@@ -166,7 +169,7 @@ export class FriendConversationPage {
             vm.isLoading = false;
           });
         } else {
-          vm.nav.present(Alert.create({title: 'Error', subTitle: 'Unable to retrieve messages. Check your internet connection and restart the app.', buttons: ['Dismiss']}));
+          vm.alertController.create({title: 'Error', subTitle: 'Unable to retrieve messages. Check your internet connection and restart the app.', buttons: ['Dismiss']}).present();
         }
       });
     });
@@ -176,7 +179,7 @@ export class FriendConversationPage {
     var vm = this;
 
     function showRemoveDialog() {
-      vm.nav.present(Alert.create({
+      vm.alertController.create({
         title: 'Remove friend?',
         message: 'You will need their friend code to add them again in the future.',
         buttons: [
@@ -200,10 +203,10 @@ export class FriendConversationPage {
             }
           }
         ]
-      }));
+      }).present();
     }
 
-    let actionSheet = ActionSheet.create({
+    let actionSheet = vm.actionSheetController.create({
       buttons: [
         {
           text: 'Remove Friend',
@@ -223,7 +226,7 @@ export class FriendConversationPage {
         }
       ]
     });
-    this.nav.present(actionSheet);
+    actionSheet.present();
   };
 
   onMessageClicked = (message) => {
@@ -268,7 +271,7 @@ export class FriendConversationPage {
         icon: (vm.platform.is('ios')) ? undefined : 'trash',
         handler: () => {
           if (typeof(message.key) === 'undefined' || message.key === null) {
-            vm.nav.present(Alert.create({title: 'Unable to delete', subTitle: 'The message cannot be deleted right now as it is still being sent. Try again later.', buttons: ['Dismiss']}));
+            vm.alertController.create({title: 'Unable to delete', subTitle: 'The message cannot be deleted right now as it is still being sent. Try again later.', buttons: ['Dismiss']}).present();
           } else {
             vm.friendConversationProvider.deleteMessage(vm.conversationId, message.key);
             var scopeMessages = vm.data.messages;
@@ -289,8 +292,8 @@ export class FriendConversationPage {
       role: 'cancel',
       icon: (vm.platform.is('ios')) ? undefined : 'close'
     });
-    let actionSheet = ActionSheet.create(actionSheetOpts);
-    vm.nav.present(actionSheet);
+    let actionSheet = vm.actionSheetController.create(actionSheetOpts);
+    actionSheet.present();
   };
 
   // endregion
@@ -392,7 +395,7 @@ export class FriendConversationPage {
       });
     };
 
-    vm.nav.present(Alert.create({
+    vm.alertController.create({
       title: 'Show Location',
       subTitle: 'Are you sure you want to share your location? Your precise location will be sent to all chat participants.',
       buttons: [
@@ -405,7 +408,7 @@ export class FriendConversationPage {
           handler: onConfirm
         }
       ]
-    }));
+    }).present();
   };
 
   // endregion

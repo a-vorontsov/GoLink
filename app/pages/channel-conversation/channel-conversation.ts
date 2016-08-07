@@ -1,16 +1,16 @@
-import {Component, ViewChild} from '@angular/core';
-import {Content, NavController, NavParams, Loading, Alert, ActionSheet, Platform} from 'ionic-angular';
-import {Toast, Clipboard} from 'ionic-native';
-import {TimestampDirective} from '../../directives/timestamp.directive';
-import {ChatInputDirective} from '../../directives/chat-input.directive';
-import {TimestampPipe} from '../../pipes/timestamp.pipe';
-import {ChannelConversationProvider} from '../../providers/firebase/channel-conversation.provider';
-import {UserData} from '../../providers/user-data/user-data.provider';
-import {Helper} from '../../providers/helper/helper.provider';
-import {NativeProvider} from '../../providers/native-provider/native-provider';
-import {UUID} from 'angular2-uuid/index';
-import {ChannelsPage} from '../channels/channels';
-import {ChannelsProvider} from '../../providers/firebase/channels.provider';
+import {Component, ViewChild} from "@angular/core";
+import {Content, NavController, NavParams, Loading, Platform, AlertController, ActionSheetController, LoadingController} from "ionic-angular";
+import {Toast, Clipboard} from "ionic-native";
+import {TimestampDirective} from "../../directives/timestamp.directive";
+import {ChatInputDirective} from "../../directives/chat-input.directive";
+import {TimestampPipe} from "../../pipes/timestamp.pipe";
+import {ChannelConversationProvider} from "../../providers/firebase/channel-conversation.provider";
+import {UserData} from "../../providers/user-data/user-data.provider";
+import {Helper} from "../../providers/helper/helper.provider";
+import {NativeProvider} from "../../providers/native-provider/native-provider";
+import {UUID} from "angular2-uuid/index";
+import {ChannelsPage} from "../channels/channels";
+import {ChannelsProvider} from "../../providers/firebase/channels.provider";
 
 @Component({
   templateUrl: 'build/pages/channel-conversation/channel-conversation.html',
@@ -23,6 +23,9 @@ export class ChannelConversationPage {
   constructor(private nav: NavController,
               private params: NavParams,
               private userData: UserData,
+              private alertController: AlertController,
+              private actionSheetController: ActionSheetController,
+              private loadingController: LoadingController,
               private nativeProvider: NativeProvider,
               private channelsProvider: ChannelsProvider,
               private channelConversationProvider: ChannelConversationProvider,
@@ -84,8 +87,8 @@ export class ChannelConversationPage {
 
   private loading: Loading;
   private showIonicLoading = () => {
-    this.loading = Loading.create({dismissOnPageChange: true});
-    this.nav.present(this.loading);
+    this.loading = this.loadingController.create({dismissOnPageChange: true});
+    this.loading.present();
   };
 
   private hideIonicLoading = () => {
@@ -96,22 +99,12 @@ export class ChannelConversationPage {
     }
   };
 
-  private sortScopeMessagesByTimestamp = () => {
-    var vm = this;
-    setTimeout(() => {
-      vm.data.messages.sort(function (x, y) {
-        return x.timestamp - y.timestamp;
-      });
-      vm.content.scrollToBottom(300);
-    });
-  };
-
   private getMessageType = (message) => {
     if (message.is_joined === true) {
       return 'joined';
-    } else if(message.is_joined === false) {
+    } else if (message.is_joined === false) {
       return 'left';
-    } else if(typeof(message.longitude) === 'undefined') {
+    } else if (typeof(message.longitude) === 'undefined') {
       return 'message';
     } else {
       return 'location';
@@ -175,7 +168,7 @@ export class ChannelConversationPage {
       vm.listenForNewMessages();
     }).catch(function (error) {
       setTimeout(() => {
-        vm.nav.present(Alert.create({title: 'Error', subTitle: 'Unable to retrieve messages. Check your internet connection and restart the app.', buttons: ['Dismiss']}));
+        vm.alertController.create({title: 'Error', subTitle: 'Unable to retrieve messages. Check your internet connection and restart the app.', buttons: ['Dismiss']}).present();
       });
     });
   }
@@ -222,7 +215,7 @@ export class ChannelConversationPage {
         icon: (vm.platform.is('ios')) ? undefined : 'trash',
         handler: () => {
           if (typeof(message.key) === 'undefined' || message.key === null) {
-            vm.nav.present(Alert.create({title: 'Unable to delete', subTitle: 'The message cannot be deleted right now as it is still being sent. Try again later.', buttons: ['Dismiss']}));
+            vm.alertController.create({title: 'Unable to delete', subTitle: 'The message cannot be deleted right now as it is still being sent. Try again later.', buttons: ['Dismiss']}).present();
           } else {
             vm.channelConversationProvider.deleteMessage(vm.channelId, message.key);
             var scopeMessages = vm.data.messages;
@@ -243,15 +236,15 @@ export class ChannelConversationPage {
       role: 'cancel',
       icon: (vm.platform.is('ios')) ? undefined : 'close'
     });
-    let actionSheet = ActionSheet.create(actionSheetOpts);
-    vm.nav.present(actionSheet);
+    let actionSheet = vm.actionSheetController.create(actionSheetOpts);
+    actionSheet.present();
   };
 
   showActionSheet = () => {
     var vm = this;
 
     function showRemoveDialog() {
-      vm.nav.present(Alert.create({
+      vm.alertController.create({
         title: 'Leave channel?',
         message: 'Are you sure you want to leave this channel?',
         buttons: [
@@ -275,10 +268,10 @@ export class ChannelConversationPage {
             }
           }
         ]
-      }));
+      }).present();
     }
 
-    let actionSheet = ActionSheet.create({
+    let actionSheet = vm.actionSheetController.create({
       buttons: [
         {
           text: 'Leave Channel',
@@ -298,7 +291,7 @@ export class ChannelConversationPage {
         }
       ]
     });
-    this.nav.present(actionSheet);
+    actionSheet.present();
   };
 
   // endregion
@@ -408,7 +401,7 @@ export class ChannelConversationPage {
       });
     };
 
-    vm.nav.present(Alert.create({
+    vm.alertController.create({
       title: 'Show Location',
       subTitle: 'Are you sure you want to share your location? Your precise location will be sent to all chat participants.',
       buttons: [
@@ -421,7 +414,7 @@ export class ChannelConversationPage {
           handler: onConfirm
         }
       ]
-    }));
+    }).present();
   };
 
   // endregion

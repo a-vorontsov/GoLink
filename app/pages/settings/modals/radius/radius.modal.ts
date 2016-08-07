@@ -1,7 +1,7 @@
-import {Component} from '@angular/core';
-import {ViewController, NavParams, Loading, NavController} from 'ionic-angular/index';
-import {Toast} from 'ionic-native';
-import {MemberProvider} from '../../../../providers/firebase/member.provider';
+import {Component} from "@angular/core";
+import {ViewController, NavParams, NavController, LoadingController} from "ionic-angular/index";
+import {Toast} from "ionic-native";
+import {MemberProvider} from "../../../../providers/firebase/member.provider";
 
 @Component({
   templateUrl: 'build/pages/settings/modals/radius/radius.modal.html',
@@ -13,6 +13,7 @@ export class RadiusModal {
 
   constructor(private viewCtrl: ViewController,
               private nav: NavController,
+              private loadingController: LoadingController,
               private params: NavParams,
               private memberProvider: MemberProvider) {
     this.radius = this.params.get('radius');
@@ -21,8 +22,8 @@ export class RadiusModal {
   private loading;
 
   private showLoading() {
-    this.loading = Loading.create({dismissOnPageChange: true});
-    this.nav.present(this.loading);
+    this.loading = this.loadingController.create({dismissOnPageChange: true});
+    this.loading.present();
   }
 
   update = () => {

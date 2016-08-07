@@ -1,9 +1,9 @@
-import {Component} from '@angular/core';
-import {NavController, Alert, Loading} from 'ionic-angular';
-import {RegisterPage} from '../register/register';
-import {ForgotPasswordPage} from '../forgot-password/forgot-password';
-import {SplashPage} from '../splash/splash';
-import {AuthProvider} from '../../providers/firebase/auth.provider';
+import {Component} from "@angular/core";
+import {NavController, AlertController, LoadingController} from "ionic-angular";
+import {RegisterPage} from "../register/register";
+import {ForgotPasswordPage} from "../forgot-password/forgot-password";
+import {SplashPage} from "../splash/splash";
+import {AuthProvider} from "../../providers/firebase/auth.provider";
 import FirebaseError = firebase.FirebaseError;
 
 @Component({
@@ -17,6 +17,8 @@ export class LoginPage {
   data: {email?: string, password?: string} = {email: '', password: ''};
 
   constructor(private nav: NavController,
+              private alertController: AlertController,
+              private loadingController: LoadingController,
               private authProvider: AuthProvider) {
     this.registerPage = RegisterPage;
     this.forgotPasswordPage = ForgotPasswordPage;
@@ -24,8 +26,8 @@ export class LoginPage {
 
   private loading;
   showIonicLoading = () => {
-    this.loading = Loading.create({'dismissOnPageChange': true});
-    this.nav.present(this.loading);
+    this.loading = this.loadingController.create({'dismissOnPageChange': true});
+    this.loading.present();
   };
 
   hideIonicLoading = () => {
@@ -38,13 +40,12 @@ export class LoginPage {
 
   login() {
     var vm = this;
-    var nav = vm.nav;
 
     var email = vm.data.email;
     var password = vm.data.password;
 
     if (typeof(email) === 'undefined' || (email.length < 1 || password.length < 1)) {
-      nav.present(Alert.create({title: 'Login failed', subTitle: 'The credentials you entered are invalid.', buttons: ['Dismiss']}));
+      vm.alertController.create({title: 'Login failed', subTitle: 'The credentials you entered are invalid.', buttons: ['Dismiss']}).present();
       return;
     }
 
@@ -53,17 +54,17 @@ export class LoginPage {
       vm.data.email = '';
       vm.data.password = '';
       vm.hideIonicLoading();
-      nav.setRoot(SplashPage);
+      vm.nav.setRoot(SplashPage);
 
     }).catch((error: FirebaseError) => {
       vm.hideIonicLoading();
       var errorCode = error.code;
       if (errorCode === 'auth/user-disabled') {
-        nav.present(Alert.create({title: 'Login failed', subTitle: 'Your account has been disabled. Contact support for more info.', buttons: ['Dismiss']}));
+        vm.alertController.create({title: 'Login failed', subTitle: 'Your account has been disabled. Contact support for more info.', buttons: ['Dismiss']}).present();
       } else if (errorCode === 'auth/network-request-failed') {
-        nav.present(Alert.create({title: 'Login failed', subTitle: 'Unable to connect to the server. Check your internet connection and try again.', buttons: ['Dismiss']}));
+        vm.alertController.create({title: 'Login failed', subTitle: 'Unable to connect to the server. Check your internet connection and try again.', buttons: ['Dismiss']}).present();
       } else {
-        nav.present(Alert.create({title: 'Login failed', subTitle: 'The credentials you entered are invalid.', buttons: ['Dismiss']}));
+        vm.alertController.create({title: 'Login failed', subTitle: 'The credentials you entered are invalid.', buttons: ['Dismiss']}).present();
       }
     });
   }

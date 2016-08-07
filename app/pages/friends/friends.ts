@@ -1,14 +1,14 @@
-import {Component} from '@angular/core';
-import {NavController, Alert, Loading} from 'ionic-angular';
-import {AppSettings} from '../../app-settings';
-import {UserData} from '../../providers/user-data/user-data.provider';
-import {Clipboard, Toast} from 'ionic-native';
-import {DomSanitizationService, SecurityContext} from '@angular/platform-browser';
-import {Helper} from '../../providers/helper/helper.provider';
-import {FriendCodePipe} from '../../pipes/friend-code.pipe';
-import {TimestampDirective} from '../../directives/timestamp.directive';
-import {FriendConversationPage} from '../friend-conversation/friend-conversation';
-import {FriendsProvider} from '../../providers/firebase/friends.provider';
+import {Component} from "@angular/core";
+import {NavController, AlertController, LoadingController} from "ionic-angular";
+import {AppSettings} from "../../app-settings";
+import {UserData} from "../../providers/user-data/user-data.provider";
+import {Clipboard, Toast} from "ionic-native";
+import {DomSanitizationService, SecurityContext} from "@angular/platform-browser";
+import {Helper} from "../../providers/helper/helper.provider";
+import {FriendCodePipe} from "../../pipes/friend-code.pipe";
+import {TimestampDirective} from "../../directives/timestamp.directive";
+import {FriendConversationPage} from "../friend-conversation/friend-conversation";
+import {FriendsProvider} from "../../providers/firebase/friends.provider";
 
 @Component({
   templateUrl: 'build/pages/friends/friends.html',
@@ -20,6 +20,8 @@ export class FriendsPage {
 
   constructor(private nav: NavController,
               private userData: UserData,
+              private alertController: AlertController,
+              private loadingController: LoadingController,
               private friendsProvider: FriendsProvider,
               private helper: Helper,
               private sanitizer: DomSanitizationService) {
@@ -37,8 +39,8 @@ export class FriendsPage {
    */
 
   private showIonicLoading = () => {
-    this.loading = Loading.create({dismissOnPageChange: true});
-    this.nav.present(this.loading);
+    this.loading = this.loadingController.create({dismissOnPageChange: true});
+    this.loading.present();
   };
 
   private hideIonicLoading = () => {
@@ -97,7 +99,7 @@ export class FriendsPage {
         vm.friendMemberObject = snapshot.val();
         vm.hideIonicLoading();
 
-        let addFriendPopup = Alert.create({
+        let addFriendPopup = vm.alertController.create({
           title: 'Add friend?',
           message: 'Do you want to add <b>' + vm.sanitizer.sanitize(SecurityContext.HTML, vm.friendMemberObject.display_name) + '</b> as a friend?',
           buttons: [
@@ -135,7 +137,7 @@ export class FriendsPage {
             }
           ]
         });
-        vm.nav.present(addFriendPopup);
+        addFriendPopup.present();
 
       }).catch(error => {
         vm.hideIonicLoading();
@@ -154,7 +156,7 @@ export class FriendsPage {
       });
     };
 
-    let enterFriendCodePopup = Alert.create({
+    let enterFriendCodePopup = vm.alertController.create({
       title: 'Enter friend code',
       message: 'Enter a 12-digit friend code without hyphens (-) below.',
       inputs: [{name: 'targetFriendCode', placeholder: ''}],
@@ -181,7 +183,7 @@ export class FriendsPage {
         }
       ]
     });
-    vm.nav.present(enterFriendCodePopup);
+    enterFriendCodePopup.present();
   };
 
   /*
@@ -244,7 +246,7 @@ export class FriendsPage {
         vm.isLoading = false;
       });
     }).catch(error => {
-      vm.nav.present(Alert.create({title: 'Error', subTitle: 'Unable to retrieve friends. Check your internet connection and restart the app.', buttons: ['Dismiss']}));
+      vm.alertController.create({title: 'Error', subTitle: 'Unable to retrieve friends. Check your internet connection and restart the app.', buttons: ['Dismiss']}).present();
     });
   };
 

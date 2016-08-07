@@ -1,7 +1,7 @@
-import {Component} from '@angular/core';
-import {NavController, Alert, Loading} from 'ionic-angular';
-import {Toast} from 'ionic-native/dist/index';
-import {AuthProvider} from '../../providers/firebase/auth.provider';
+import {Component} from "@angular/core";
+import {NavController, AlertController, LoadingController} from "ionic-angular";
+import {Toast} from "ionic-native/dist/index";
+import {AuthProvider} from "../../providers/firebase/auth.provider";
 
 @Component({
   templateUrl: 'build/pages/forgot-password/forgot-password.html',
@@ -12,14 +12,16 @@ export class ForgotPasswordPage {
   data;
 
   constructor(private nav: NavController,
+              private alertController: AlertController,
+              private loadingController: LoadingController,
               private authProvider: AuthProvider) {
     this.data = {email: ''};
   }
 
   private loading;
   private showLoading = () => {
-    this.loading = Loading.create({dismissOnPageChange: true});
-    this.nav.present(this.loading);
+    this.loading = this.loadingController.create({dismissOnPageChange: true});
+    this.loading.present();
   };
 
   private hideLoading = () => {
@@ -42,7 +44,7 @@ export class ForgotPasswordPage {
     vm.showLoading();
     vm.authProvider.sendPasswordResetEmail(emailAddress).then(function () {
       vm.hideLoading();
-      vm.nav.present(Alert.create({title: 'Email sent', subTitle: 'Check your email address for the password reset email and follow the instructions from there.', buttons: ['Dismiss']}));
+      vm.alertController.create({title: 'Email sent', subTitle: 'Check your email address for the password reset email and follow the instructions from there.', buttons: ['Dismiss']}).present();
       vm.data.email = '';
     }).catch(error => {
       vm.hideLoading();

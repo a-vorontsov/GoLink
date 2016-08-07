@@ -1,10 +1,10 @@
-import {Component} from '@angular/core';
-import {NavController, Alert, Loading} from 'ionic-angular';
-import {ChannelsProvider} from '../../providers/firebase/channels.provider';
-import {UserData} from '../../providers/user-data/user-data.provider';
-import {Toast} from 'ionic-native';
-import {TimestampDirective} from '../../directives/timestamp.directive';
-import {ChannelConversationPage} from '../channel-conversation/channel-conversation';
+import {Component} from "@angular/core";
+import {NavController, AlertController, LoadingController} from "ionic-angular";
+import {ChannelsProvider} from "../../providers/firebase/channels.provider";
+import {UserData} from "../../providers/user-data/user-data.provider";
+import {Toast} from "ionic-native";
+import {TimestampDirective} from "../../directives/timestamp.directive";
+import {ChannelConversationPage} from "../channel-conversation/channel-conversation";
 
 @Component({
   templateUrl: 'build/pages/channels/channels.html',
@@ -20,6 +20,8 @@ export class ChannelsPage {
 
   constructor(private nav: NavController,
               private userData: UserData,
+              private loadingController: LoadingController,
+              private alertController: AlertController,
               private channelsProvider: ChannelsProvider) {
   }
 
@@ -29,8 +31,8 @@ export class ChannelsPage {
   private loading;
 
   private showIonicLoading = () => {
-    this.loading = Loading.create({dismissOnPageChange: true});
-    this.nav.present(this.loading);
+    this.loading = this.loadingController.create({dismissOnPageChange: true});
+    this.loading.present();
   };
 
   private hideIonicLoading = () => {
@@ -59,7 +61,7 @@ export class ChannelsPage {
   showAddChannelPopup = () => {
     var vm = this;
 
-    let enterChannelCodePopup = Alert.create({
+    let enterChannelCodePopup = vm.alertController.create({
       title: 'Join/Create Channel',
       message: 'Enter a channel name up to 16 characters (can contain alphanumeric characters, hyphens and underscores).',
       inputs: [{name: 'targetChannelId', placeholder: ''}],
@@ -94,7 +96,7 @@ export class ChannelsPage {
         }
       ]
     });
-    vm.nav.present(enterChannelCodePopup);
+    enterChannelCodePopup.present();
   };
 
   /*
@@ -136,7 +138,7 @@ export class ChannelsPage {
       vm.userData.setIsChannelsStale(false);
       vm.isLoading = false;
     }).catch(error => {
-      vm.nav.present(Alert.create({title: 'Error', subTitle: 'Unable to retrieve channels. Check your internet connection and restart the app.', buttons: ['Dismiss']}));
+      vm.alertController.create({title: 'Error', subTitle: 'Unable to retrieve channels. Check your internet connection and restart the app.', buttons: ['Dismiss']}).present();
     });
   }
 
