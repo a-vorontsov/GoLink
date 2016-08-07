@@ -20,6 +20,15 @@ export class MyApp {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
       StatusBar.styleDefault();
+
+      // Initialize the Firebase SDK
+      var config = {
+        apiKey: "API_KEY_HERE",
+        authDomain: "AUTH_DOMAIN_HERE.firebaseapp.com",
+        databaseURL: "https://DATABASE_URL_HERE.firebaseio.com",
+        storageBucket: ""
+      };
+      firebase.initializeApp(config);
     });
   }
 }

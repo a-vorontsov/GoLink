@@ -41,12 +41,12 @@ export class ChannelsPage {
     }
   };
 
-  private sortScopeDataChannels = () => {
-    this.data.channels.sort(function (x, y) {
+  private sortChannelsList = (channels) => {
+    channels.sort(function (x, y) {
       return y.last_messaged - x.last_messaged;
     });
-  };
-
+  }
+    ;
   navigateConversation = (channelId) => {
     this.nav.push(ChannelConversationPage, {
       channelId: channelId
@@ -123,7 +123,7 @@ export class ChannelsPage {
                 } else {
                   tempChannels[i].last_messaged = (lastMessaged >= Date.now()) ? Date.now() - 1 : lastMessaged;
                 }
-                vm.sortScopeDataChannels();
+                vm.sortChannelsList(tempChannels);
               });
               break;
             }
@@ -141,7 +141,9 @@ export class ChannelsPage {
   }
 
   ionViewDidEnter() {
-    this.updateChannels();
+    if (this.data.channels.length === 0 || this.userData.getIsChannelsStale()) {
+      this.updateChannels();
+    }
   };
 
 }
