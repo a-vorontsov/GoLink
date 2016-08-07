@@ -1,8 +1,8 @@
 import {Component} from "@angular/core";
-import {NavController, AlertController, LoadingController} from "ionic-angular";
+import {NavController, AlertController, LoadingController, ToastController} from "ionic-angular";
 import {AppSettings} from "../../app-settings";
 import {UserData} from "../../providers/user-data/user-data.provider";
-import {Clipboard, Toast} from "ionic-native";
+import {Clipboard} from "ionic-native";
 import {DomSanitizationService, SecurityContext} from "@angular/platform-browser";
 import {Helper} from "../../providers/helper/helper.provider";
 import {FriendCodePipe} from "../../pipes/friend-code.pipe";
@@ -20,6 +20,7 @@ export class FriendsPage {
 
   constructor(private nav: NavController,
               private userData: UserData,
+              private toastController: ToastController,
               private alertController: AlertController,
               private loadingController: LoadingController,
               private friendsProvider: FriendsProvider,
@@ -66,9 +67,9 @@ export class FriendsPage {
     Clipboard
       .copy(vm.data.friendCode)
       .then(function () {
-        Toast.showShortBottom('Friend code copied to clipboard');
+        vm.toastController.create({message: 'Friend code copied to clipboard', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
       }, function () {
-        Toast.showShortBottom('Friend code not copied - unable to access clipboard');
+        vm.toastController.create({message: 'Friend code not copied - unable to access clipboard', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
       });
   };
 
@@ -124,7 +125,7 @@ export class FriendsPage {
                   });
                   this.loading.dismiss().then(() => {
                     addFriendPopup.dismiss().then(() => {
-                      Toast.showShortBottom('Success! <b>' + vm.sanitizer.sanitize(SecurityContext.HTML, vm.friendMemberObject.display_name) + '</b> has been added to your friends list.');
+                      vm.toastController.create({message: 'Success! <b>' + vm.sanitizer.sanitize(SecurityContext.HTML, vm.friendMemberObject.display_name) + '</b> has been added to your friends list.', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
                     });
                   });
                 }).catch(error => {
@@ -143,15 +144,15 @@ export class FriendsPage {
         vm.hideIonicLoading();
         if (error === AppSettings.ERROR.NONE) {
         } else if (error === AppSettings.ERROR.INET) {
-          Toast.showLongBottom('An error occurred. Check your internet connection and try again.');
+          vm.toastController.create({message: 'An error occurred. Check your internet connection and try again.', duration: 5000, position: 'bottom', dismissOnPageChange : true}).present();
         } else if (error === AppSettings.ERROR.DB_INTEGRITY) {
-          Toast.showLongBottom('Database integrity error - this shouldn\'t happen. Please email us with the friend code you entered ASAP!');
+          vm.toastController.create({message: 'Database integrity error - this shouldn\'t happen. Please email us with the friend code you entered ASAP!', duration: 5000, position: 'bottom', dismissOnPageChange : true}).present();
         } else if (error === AppSettings.ERROR.USER_NOT_FOUND) {
-          Toast.showLongBottom('User not found - The friend code you entered is not tied to a user.');
+          vm.toastController.create({message: 'User not found - The friend code you entered is not tied to a user.', duration: 5000, position: 'bottom', dismissOnPageChange : true}).present();
         } else if (error === AppSettings.ERROR.FRIEND_ALREADY_ADDED) {
-          Toast.showLongBottom('Friend already added - this trainer is already in your friends list.');
+          vm.toastController.create({message: 'Friend already added - this trainer is already in your friends list.', duration: 5000, position: 'bottom', dismissOnPageChange : true}).present();
         } else {
-          Toast.showLongBottom('An error occurred. Check your internet connection and try again.');
+          vm.toastController.create({message: 'An error occurred. Check your internet connection and try again.', duration: 5000, position: 'bottom', dismissOnPageChange : true}).present();
         }
       });
     };
@@ -168,9 +169,9 @@ export class FriendsPage {
             if (!data.targetFriendCode
               || data.targetFriendCode.length !== 12
               || !data.targetFriendCode.match(/^[0-9]+$/)) {
-              Toast.showShortBottom('Enter a valid 12-digit friend code');
+              vm.toastController.create({message: 'Enter a valid 12-digit friend code', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
             } else if (vm.userData.getFriendCode() === data.targetFriendCode) {
-              Toast.showShortBottom('You can\'t add yourself, you numpty.');
+              vm.toastController.create({message: 'You can\'t add yourself, you numpty.', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
             } else {
               // Code passes validation check
               enterFriendCodePopup.dismiss().then(() => {

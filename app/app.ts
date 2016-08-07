@@ -33,4 +33,10 @@ export class MyApp {
   }
 }
 
-ionicBootstrap(MyApp, [UserData, Helper]);
+ionicBootstrap(MyApp, [UserData, Helper], {
+  platforms: {
+    android: {
+      tabsPlacement: 'top'
+    }
+  }
+});

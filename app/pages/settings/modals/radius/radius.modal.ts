@@ -1,6 +1,5 @@
 import {Component} from "@angular/core";
-import {ViewController, NavParams, NavController, LoadingController} from "ionic-angular/index";
-import {Toast} from "ionic-native";
+import {ViewController, NavParams, NavController, LoadingController, ToastController} from "ionic-angular/index";
 import {MemberProvider} from "../../../../providers/firebase/member.provider";
 
 @Component({
@@ -13,6 +12,7 @@ export class RadiusModal {
 
   constructor(private viewCtrl: ViewController,
               private nav: NavController,
+              private toastController: ToastController,
               private loadingController: LoadingController,
               private params: NavParams,
               private memberProvider: MemberProvider) {
@@ -29,7 +29,7 @@ export class RadiusModal {
   update = () => {
     var vm = this;
     if (vm.radius > 30 || vm.radius < 1) {
-      Toast.showShortBottom('The radius must be within 1km and 30km');
+      vm.toastController.create({message: 'The radius must be within 1km and 30km', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
       return;
     }
 
@@ -38,13 +38,13 @@ export class RadiusModal {
       if (vm.loading) {
         vm.loading.dismiss();
       }
-      Toast.showLongBottom('Your radius has successfully been updated.');
+      vm.toastController.create({message: 'Your radius has successfully been updated.', duration: 5000, position: 'bottom', dismissOnPageChange : true}).present();
       vm.dismiss();
     }).catch(error => {
       if (vm.loading) {
         vm.loading.dismiss();
       }
-      Toast.showShortBottom('Save failed. Check your internet connection and try again later.');
+      vm.toastController.create({message: 'Save failed. Check your internet connection and try again later.', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
     });
   };
 

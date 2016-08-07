@@ -1,6 +1,5 @@
 import {Component} from "@angular/core";
-import {NavController, AlertController, LoadingController} from "ionic-angular";
-import {Toast} from "ionic-native/dist/index";
+import {NavController, AlertController, LoadingController, ToastController} from "ionic-angular";
 import {AuthProvider} from "../../providers/firebase/auth.provider";
 
 @Component({
@@ -12,6 +11,7 @@ export class ForgotPasswordPage {
   data;
 
   constructor(private nav: NavController,
+              private toastController: ToastController,
               private alertController: AlertController,
               private loadingController: LoadingController,
               private authProvider: AuthProvider) {
@@ -37,7 +37,7 @@ export class ForgotPasswordPage {
     var emailAddress = vm.data.email;
 
     if (typeof(emailAddress) === 'undefined' || emailAddress.length < 1) {
-      Toast.showShortBottom('The email you entered is invalid.');
+      vm.toastController.create({message: 'The email you entered is invalid.', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
       return;
     }
 
@@ -50,11 +50,11 @@ export class ForgotPasswordPage {
       vm.hideLoading();
       var errorCode = error['code'];
       if (errorCode === 'auth/invalid-email' || errorCode === 'auth/user-not-found') {
-        Toast.showShortBottom('The email you entered is not tied to a user.');
+        vm.toastController.create({message: 'The email you entered is not tied to a user.', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
       } else if (errorCode === 'auth/network-request-failed') {
-        Toast.showShortBottom('Unable to connect to the server. Check your internet connection and try again.');
+        vm.toastController.create({message: 'Unable to connect to the server. Check your internet connection and try again.', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
       } else {
-        Toast.showShortBottom('Password reset failed. Check your internet connection and try again.');
+        vm.toastController.create({message: 'Password reset failed. Check your internet connection and try again.', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
       }
     });
   };

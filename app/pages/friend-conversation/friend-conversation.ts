@@ -1,9 +1,9 @@
 import {Component, ViewChild} from "@angular/core";
-import {NavController, Content, Platform, NavParams, ActionSheetController, AlertController, LoadingController} from "ionic-angular";
+import {NavController, Content, Platform, NavParams, ActionSheetController, AlertController, LoadingController, ToastController} from "ionic-angular";
 import {UserData} from "../../providers/user-data/user-data.provider";
 import {Helper} from "../../providers/helper/helper.provider";
 import {UUID} from "angular2-uuid/index";
-import {Toast, Clipboard} from "ionic-native";
+import {Clipboard} from "ionic-native";
 import {AppSettings} from "../../app-settings";
 import {TimestampPipe} from "../../pipes/timestamp.pipe";
 import {TimestampDirective} from "../../directives/timestamp.directive";
@@ -23,6 +23,7 @@ export class FriendConversationPage {
   constructor(private nav: NavController,
               private params: NavParams,
               private userData: UserData,
+              private toastController: ToastController,
               private alertController: AlertController,
               private actionSheetController: ActionSheetController,
               private loadingController: LoadingController,
@@ -194,11 +195,11 @@ export class FriendConversationPage {
               vm.friendsProvider.removeFriendFromFriendsList(vm.friendId).then(() => {
                 vm.hideIonicLoading();
                 vm.userData.setIsFriendListStale(true);
-                Toast.showShortBottom('The trainer has been removed from your friends list.');
+                vm.toastController.create({message: 'The trainer has been removed from your friends list.', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
                 vm.nav.setRoot(FriendsPage);
               }).catch(error => {
                 vm.hideIonicLoading();
-                Toast.showLongBottom('Unable to remove friend - Check your internet connection and try again later.');
+                vm.toastController.create({message: 'Unable to remove friend - Check your internet connection and try again later.', duration: 5000, position: 'bottom', dismissOnPageChange : true}).present();
               });
             }
           }
@@ -242,9 +243,9 @@ export class FriendConversationPage {
           Clipboard
             .copy(message.message)
             .then(() => {
-              Toast.showShortBottom('Message copied to clipboard');
+              vm.toastController.create({message: 'Message copied to clipboard', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
             }, () => {
-              Toast.showShortBottom('Message not copied - unable to access clipboard');
+              vm.toastController.create({message: 'Message not copied - unable to access clipboard', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
             });
         }
       });
@@ -256,9 +257,9 @@ export class FriendConversationPage {
           Clipboard
             .copy(message.latitude.toString() + ',' + message.longitude.toString())
             .then(() => {
-              Toast.showShortBottom('Coordinates copied to clipboard');
+              vm.toastController.create({message: 'Coordinates copied to clipboard', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
             }, () => {
-              Toast.showShortBottom('Coordinates not copied - unable to access clipboard');
+              vm.toastController.create({message: 'Coordinates not copied - unable to access clipboard', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
             });
         }
       });
@@ -348,7 +349,7 @@ export class FriendConversationPage {
 
     var message = vm.data.message;
     if (message.length < 1 || message.length > 1000) {
-      Toast.showShortBottom('Your message must be between 1 and 1000 characters long.');
+      vm.toastController.create({message: 'Your message must be between 1 and 1000 characters long.', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
       return;
     }
 
@@ -391,7 +392,7 @@ export class FriendConversationPage {
         vm.sendConversationMessageWithData(data);
 
       }, function (error) {
-        Toast.showShortBottom('Error: Unable to retrieve your location. Your message was not sent. Ensure location retrieval is enabled and try again.');
+        vm.toastController.create({message: 'Error: Unable to retrieve your location. Your message was not sent. Ensure location retrieval is enabled and try again.', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
       });
     };
 

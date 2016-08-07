@@ -1,5 +1,5 @@
 import {Component} from "@angular/core";
-import {NavController, ModalController, AlertController, LoadingController} from "ionic-angular";
+import {NavController, ModalController, AlertController, LoadingController, App, ToastController} from "ionic-angular";
 import {UserData} from "../../providers/user-data/user-data.provider";
 import {SplashPage} from "../splash/splash";
 import {Toast} from "ionic-native";
@@ -17,6 +17,8 @@ export class SettingsPage {
   data: any;
 
   constructor(private nav: NavController,
+              private app: App,
+              private toastController: ToastController,
               private alertController: AlertController,
               private modalController: ModalController,
               private loadingController: LoadingController,
@@ -58,7 +60,7 @@ export class SettingsPage {
   signOut = () => {
     var vm = this;
     vm.authProvider.signOut().then(function () {
-      vm.nav.setRoot(SplashPage);
+      vm.app.getRootNav().setRoot(SplashPage);
     }).catch(function (error) {
       vm.alertController.create({title: 'Error', subTitle: 'Unable to sign out. Try again later or clear app data/reinstall the app.', buttons: ['Dismiss']}).present();
     });
@@ -76,7 +78,7 @@ export class SettingsPage {
         Toast.showShortBottom(('Your display name has successfully been updated.'));
       }).catch(error => {
         vm.hideIonicLoading();
-        Toast.showShortBottom('Error - Save failed. Check your internet connection and try again later.');
+        vm.toastController.create({message: 'Error - Save failed. Check your internet connection and try again later.', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
       });
     };
 
@@ -99,13 +101,13 @@ export class SettingsPage {
           handler: data => {
             var displayName = data.displayName;
             if (displayName.length < 1) {
-              Toast.showLongBottom('Enter a display name.');
+              vm.toastController.create({message: 'Enter a display name.', duration: 5000, position: 'bottom', dismissOnPageChange : true}).present();
               return false;
             } else if (displayName.length > 16) {
-              Toast.showLongBottom('Your display name cannot be greater than 16 characters.');
+              vm.toastController.create({message: 'Your display name cannot be greater than 16 characters.', duration: 5000, position: 'bottom', dismissOnPageChange : true}).present();
               return false;
             } else if (displayName === vm.data.displayName) {
-              Toast.showLongBottom('Your new display name cannot be the same as your current one.');
+              vm.toastController.create({message: 'Your new display name cannot be the same as your current one.', duration: 5000, position: 'bottom', dismissOnPageChange : true}).present();
               return false;
             } else {
               updateDisplayName(displayName);
@@ -124,11 +126,11 @@ export class SettingsPage {
       vm.showIonicLoading();
       vm.memberProvider.updateTeam(team).then(() => {
         vm.data.team = team;
-        Toast.showShortBottom('Your team name has successfully been updated.');
+        vm.toastController.create({message: 'Your team name has successfully been updated.', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
         vm.hideIonicLoading();
       }).catch(error => {
         vm.hideIonicLoading();
-        Toast.showShortBottom('Error - Save failed. Check your internet connection and try again later.');
+        vm.toastController.create({message: 'Error - Save failed. Check your internet connection and try again later.', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
       });
     };
 
@@ -176,7 +178,7 @@ export class SettingsPage {
   showUpdateBlockListPopup = () => {
     var vm = this;
     if (vm.data.blockedUsers.length === 0) {
-      Toast.showShortBottom('There are no users in your block list.');
+      vm.toastController.create({message: 'There are no users in your block list.', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
     } else {
       let blockListModal = vm.modalController.create(BlockListModal, {blockList: vm.data.blockedUsers});
       blockListModal.onDidDismiss(() => {

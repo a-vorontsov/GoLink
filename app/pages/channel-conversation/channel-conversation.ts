@@ -1,6 +1,6 @@
 import {Component, ViewChild} from "@angular/core";
-import {Content, NavController, NavParams, Loading, Platform, AlertController, ActionSheetController, LoadingController} from "ionic-angular";
-import {Toast, Clipboard} from "ionic-native";
+import {Content, NavController, NavParams, Loading, Platform, AlertController, ActionSheetController, LoadingController, ToastController} from "ionic-angular";
+import {Clipboard} from "ionic-native";
 import {TimestampDirective} from "../../directives/timestamp.directive";
 import {ChatInputDirective} from "../../directives/chat-input.directive";
 import {TimestampPipe} from "../../pipes/timestamp.pipe";
@@ -24,6 +24,7 @@ export class ChannelConversationPage {
               private params: NavParams,
               private userData: UserData,
               private alertController: AlertController,
+              private toastController: ToastController,
               private actionSheetController: ActionSheetController,
               private loadingController: LoadingController,
               private nativeProvider: NativeProvider,
@@ -186,9 +187,9 @@ export class ChannelConversationPage {
           Clipboard
             .copy(message.message)
             .then(() => {
-              Toast.showShortBottom('Message copied to clipboard');
+              vm.toastController.create({message: 'Message copied to clipboard', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
             }, () => {
-              Toast.showShortBottom('Message not copied - unable to access clipboard');
+              vm.toastController.create({message: 'Message not copied - unable to access clipboard', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
             });
         }
       });
@@ -200,9 +201,9 @@ export class ChannelConversationPage {
           Clipboard
             .copy(message.latitude.toString() + ',' + message.longitude.toString())
             .then(() => {
-              Toast.showShortBottom('Coordinates copied to clipboard');
+              vm.toastController.create({message: 'Coordinates copied to clipboard', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
             }, () => {
-              Toast.showShortBottom('Coordinates not copied - unable to access clipboard');
+              vm.toastController.create({message: 'Coordinates not copied - unable to access clipboard', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
             });
         }
       });
@@ -259,11 +260,11 @@ export class ChannelConversationPage {
               vm.channelsProvider.leaveChannel(vm.channelId).then(() => {
                 vm.hideIonicLoading();
                 vm.userData.setIsChannelsStale(true);
-                Toast.showShortBottom('You have left the channel.');
+                vm.toastController.create({message: 'You have left the channel.', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
                 vm.nav.setRoot(ChannelsPage);
               }).catch(error => {
                 vm.hideIonicLoading();
-                Toast.showLongBottom('Unable to leave channel - Check your internet connection and try again later.');
+                vm.toastController.create({message: 'Unable to leave channel - Check your internet connection and try again later.', duration: 5000, position: 'bottom', dismissOnPageChange : true}).present();
               });
             }
           }
@@ -346,7 +347,7 @@ export class ChannelConversationPage {
 
     var message = vm.data.message;
     if (message.length < 1 || message.length > 1000) {
-      Toast.showShortBottom('Your message must be between 1 and 1000 characters long.');
+      vm.toastController.create({message: 'Your message must be between 1 and 1000 characters long.', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
       return;
     }
 
@@ -397,7 +398,7 @@ export class ChannelConversationPage {
         vm.sendConversationMessageWithData(data);
 
       }, function (error) {
-        Toast.showShortBottom('Error: Unable to retrieve your location. Your message was not sent. Ensure location retrieval is enabled and try again.');
+        vm.toastController.create({message: 'Error: Unable to retrieve your location. Your message was not sent. Ensure location retrieval is enabled and try again.', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
       });
     };
 

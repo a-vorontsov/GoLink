@@ -1,6 +1,5 @@
 import {Component} from "@angular/core";
-import {ViewController, NavParams, NavController, LoadingController} from "ionic-angular/index";
-import {Toast} from "ionic-native";
+import {ViewController, NavParams, NavController, LoadingController, ToastController} from "ionic-angular/index";
 import {MemberProvider} from "../../../../providers/firebase/member.provider";
 
 @Component({
@@ -16,6 +15,7 @@ export class BlockListModal {
   constructor(private viewCtrl: ViewController,
               private loadingController: LoadingController,
               private nav: NavController,
+              private toastController: ToastController,
               private params: NavParams,
               private memberProvider: MemberProvider) {
     this.oldBlockList = this.params.get('blockList');
@@ -43,14 +43,14 @@ export class BlockListModal {
       if (vm.loading) {
         vm.loading.dismiss();
       }
-      Toast.showLongBottom('Your block list has successfully been updated.');
+      vm.toastController.create({message: 'Your block list has successfully been updated.', duration: 5000, position: 'bottom', dismissOnPageChange : true}).present();
       vm.dismiss();
     }).catch(error => {
       vm.removedKeys = [];
       if (vm.loading) {
         vm.loading.dismiss();
       }
-      Toast.showShortBottom('Save failed. Check your internet connection and try again later.');
+      vm.toastController.create({message: 'Save failed. Check your internet connection and try again later.', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
     });
   };
 

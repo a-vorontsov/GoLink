@@ -1,5 +1,5 @@
 import {Component} from "@angular/core";
-import {NavController, AlertController, LoadingController} from "ionic-angular";
+import {NavController, AlertController, LoadingController, ToastController} from "ionic-angular";
 import {RegisterPage} from "../register/register";
 import {ForgotPasswordPage} from "../forgot-password/forgot-password";
 import {SplashPage} from "../splash/splash";
@@ -18,6 +18,7 @@ export class LoginPage {
 
   constructor(private nav: NavController,
               private alertController: AlertController,
+              private toastController: ToastController,
               private loadingController: LoadingController,
               private authProvider: AuthProvider) {
     this.registerPage = RegisterPage;
@@ -32,9 +33,7 @@ export class LoginPage {
 
   hideIonicLoading = () => {
     if (this.loading) {
-      setTimeout(() => {
-        this.loading.dismiss();
-      }, 300);
+      this.loading.dismiss();
     }
   };
 

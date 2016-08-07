@@ -1,5 +1,5 @@
 import {Component} from "@angular/core";
-import {NavController, AlertController, LoadingController} from "ionic-angular";
+import {NavController, AlertController, LoadingController, ToastController} from "ionic-angular";
 import {ChannelsProvider} from "../../providers/firebase/channels.provider";
 import {UserData} from "../../providers/user-data/user-data.provider";
 import {Toast} from "ionic-native";
@@ -20,6 +20,7 @@ export class ChannelsPage {
 
   constructor(private nav: NavController,
               private userData: UserData,
+              private toastController: ToastController,
               private loadingController: LoadingController,
               private alertController: AlertController,
               private channelsProvider: ChannelsProvider) {
@@ -74,7 +75,7 @@ export class ChannelsPage {
             if (!targetChannelId
               || targetChannelId.length < 1
               || targetChannelId.length > 16) {
-              Toast.showShortBottom('Enter a channel name up to 16 characters');
+              vm.toastController.create({message: 'Enter a channel name up to 16 characters', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
             } else if (!targetChannelId.match(/^[a-zA-Z0-9-_]+$/)) {
               Toast.showShortBottom('Your channel name may only contain alphanumeric characters, hyphens and underscores.')
             } else {
@@ -88,7 +89,7 @@ export class ChannelsPage {
                 vm.navigateConversation(targetChannelId);
               }).catch(() => {
                 vm.hideIonicLoading();
-                Toast.showLongBottom('An error occurred. Check your internet connection and try again.');
+                vm.toastController.create({message: 'An error occurred. Check your internet connection and try again.', duration: 5000, position: 'bottom', dismissOnPageChange : true}).present();
               });
             }
             return false;

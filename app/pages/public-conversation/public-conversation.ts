@@ -1,7 +1,7 @@
 import {Component, ViewChild} from "@angular/core";
-import {NavController, Platform, Content, Loading, LoadingController, ActionSheetController, AlertController} from "ionic-angular";
+import {NavController, Platform, Content, Loading, LoadingController, ActionSheetController, AlertController, ToastController} from "ionic-angular";
 import {UserData} from "../../providers/user-data/user-data.provider";
-import {Toast, Clipboard} from "ionic-native";
+import {Clipboard} from "ionic-native";
 import {DistancePipe} from "../../pipes/distance.pipe";
 import {TimestampPipe} from "../../pipes/timestamp.pipe";
 import {TimestampDirective} from "../../directives/timestamp.directive";
@@ -22,6 +22,7 @@ export class PublicConversationPage {
 
   constructor(private nav: NavController,
               private alertController: AlertController,
+              private toastController: ToastController,
               private actionSheetController: ActionSheetController,
               private loadingController: LoadingController,
               private platform: Platform,
@@ -130,10 +131,10 @@ export class PublicConversationPage {
             }
           }
           vm.hideIonicLoading();
-          Toast.showLongBottom('The user has been blocked. You can unblock them in the Settings page.');
+          vm.toastController.create({message: 'The user has been blocked. You can unblock them in the Settings page.', duration: 5000, position: 'bottom', dismissOnPageChange : true}).present();
         }).catch(error => {
           vm.hideIonicLoading();
-          Toast.showLongBottom('The user could not be blocked. Check your internet connection and try again.');
+          vm.toastController.create({message: 'The user could not be blocked. Check your internet connection and try again.', duration: 5000, position: 'bottom', dismissOnPageChange : true}).present();
           return;
         });
       };
@@ -174,15 +175,15 @@ export class PublicConversationPage {
             text: 'Submit',
             handler: data => {
               if (data.reason.length < 1 || data.reason.length > 300) {
-                Toast.showShortBottom('Your reason must be between 1 and 300 characters long.');
+                vm.toastController.create({message: 'Your reason must be between 1 and 300 characters long.', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
                 return false;
               }
 
               vm.reportProvider.addReport('public_message', message['key'], data.reason).then(() => {
-                Toast.showShortBottom('Your report has successfully been submitted.');
+                vm.toastController.create({message: 'Your report has successfully been submitted.', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
                 return true;
               }).catch(error => {
-                Toast.showShortBottom('Your report could not be submitted. Check your internet connection and try again.');
+                vm.toastController.create({message: 'Your report could not be submitted. Check your internet connection and try again.', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
                 return false;
               });
             }
@@ -201,9 +202,9 @@ export class PublicConversationPage {
           Clipboard
             .copy(message.message)
             .then(() => {
-              Toast.showShortBottom('Message copied to clipboard');
+              vm.toastController.create({message: 'Message copied to clipboard', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
             }, () => {
-              Toast.showShortBottom('Message not copied - unable to access clipboard');
+              vm.toastController.create({message: 'Message not copied - unable to access clipboard', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
             });
         }
       });
@@ -215,9 +216,9 @@ export class PublicConversationPage {
           Clipboard
             .copy(message.latitude.toString() + ',' + message.longitude.toString())
             .then(() => {
-              Toast.showShortBottom('Coordinates copied to clipboard');
+              vm.toastController.create({message: 'Coordinates copied to clipboard', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
             }, () => {
-              Toast.showShortBottom('Coordinates not copied - unable to access clipboard');
+              vm.toastController.create({message: 'Coordinates not copied - unable to access clipboard', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
             });
         }
       });
@@ -412,7 +413,7 @@ export class PublicConversationPage {
     var message = vm.data.message;
 
     if (message.length < 1 || message.length > 1000) {
-      Toast.showShortBottom('Your message must be between 1 and 1000 characters long.');
+      vm.toastController.create({message: 'Your message must be between 1 and 1000 characters long.', duration: 3000, position: 'bottom', dismissOnPageChange : true}).present();
       return;
     }
 
