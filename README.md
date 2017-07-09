@@ -1,5 +1,8 @@
 # GoLink
 
+## Configuration
+The configuration variables are stored under `app/app.ts`. On a new installation, replace the configuration variables first. Be sure not to commit them.
+
 ## Installation
 1. Run `sudo npm install -g cordova && sudo npm install -g ionic` if you have not done so previously
 2. Run `sudo npm install` to install all the `node_modules` dependencies (this may take some time)
